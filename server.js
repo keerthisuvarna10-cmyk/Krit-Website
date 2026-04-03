@@ -5,9 +5,11 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'Kritniv';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Kritniv';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production' || !!process.env.RAILWAY_ENVIRONMENT;
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || (IS_PRODUCTION ? '' : 'Kritniv');
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || (IS_PRODUCTION ? '' : 'Kritniv');
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+const ACCESS_CONFIGURED = Boolean(ADMIN_USERNAME && ADMIN_PASSWORD);
 
 app.set('trust proxy', 1);
 app.use(express.urlencoded({ extended: false }));
@@ -29,6 +31,11 @@ function renderLogin(errorText = '') {
   const errorBlock = errorText
     ? `<div style="margin-bottom:18px;padding:12px 14px;border-radius:14px;background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.28);color:#ffb4b4;font-size:.92rem;line-height:1.6">${errorText}</div>`
     : '';
+  const hintText = ACCESS_CONFIGURED
+    ? (IS_PRODUCTION
+        ? 'Access credentials are configured through Railway environment variables.'
+        : `Current local access: <strong>${ADMIN_USERNAME}</strong> / <strong>${ADMIN_PASSWORD}</strong>. Change these with environment variables before going live.`)
+    : 'Access is not configured yet. Set ADMIN_USERNAME and ADMIN_PASSWORD in Railway before deploying this site publicly.';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -97,7 +104,7 @@ function renderLogin(errorText = '') {
           </div>
           <button type="submit">Open Website</button>
         </form>
-        <div class="hint">Current default access for launch setup: <strong>${ADMIN_USERNAME}</strong> / <strong>${ADMIN_PASSWORD}</strong>. Change these with Railway environment variables later.</div>
+        <div class="hint">${hintText}</div>
       </div>
     </div>
   </div>
@@ -122,6 +129,9 @@ app.get('/', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
+  if (!ACCESS_CONFIGURED) {
+    return res.status(503).send(renderLogin('Access credentials are not configured yet. Please add ADMIN_USERNAME and ADMIN_PASSWORD before logging in.'));
+  }
   const username = String(req.body.username || '').trim();
   const password = String(req.body.password || '');
   if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
