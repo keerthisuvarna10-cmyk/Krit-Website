@@ -1,0 +1,14 @@
+﻿{
+  "name": "krit-website-live",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Login-protected KRIT website for Railway deployment",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-session": "^1.18.1"
+  }
+}

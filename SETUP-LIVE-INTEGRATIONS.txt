@@ -1,0 +1,44 @@
+﻿KRIT Website Live Integration Notes
+
+Main file:
+C:\Users\Keerthi\Desktop\KRIT Website Latest\KRIT_website_final (53).html
+
+Assets:
+C:\Users\Keerthi\Desktop\KRIT Website Latest\assets\krit-mobile.css
+C:\Users\Keerthi\Desktop\KRIT Website Latest\assets\krit-commerce.css
+C:\Users\Keerthi\Desktop\KRIT Website Latest\assets\krit-ui.js
+C:\Users\Keerthi\Desktop\KRIT Website Latest\assets\krit-commerce.js
+
+Official KRIT communication details:
+- Email: hello@kritsleep.in
+- Mobile: 9611211121
+- ERP base URL: https://krit-erp-production.up.railway.app/
+
+To enable live Firebase Google login and customer storage:
+Fill window.KRIT_ECOMMERCE.firebase inside the HTML near the end of the file.
+Required fields:
+- apiKey
+- authDomain
+- projectId
+- storageBucket
+- messagingSenderId
+- appId
+- measurementId (optional)
+
+To enable Meta / Facebook Pixel:
+Fill window.KRIT_ECOMMERCE.facebookPixelId in the same config block.
+
+Current working features already in place:
+- GA4 event tracking hooks
+- premium account create/login UI
+- Google login scaffolding
+- customer profile local storage fallback
+- Firestore customer save hook
+- mobile hamburger drawer
+- product full-view gallery with arrows and quick actions
+- product share buttons for native share, Facebook, Instagram, and copy link
+- app-like checkout enhancements
+- website to ERP order webhook sync using /api/webhook/order
+
+Important note:
+The ERP order webhook currently uses the configured webhook secret in the site config. If you change the ERP secret in Railway, update erpWebhookSecret in the website config too.
