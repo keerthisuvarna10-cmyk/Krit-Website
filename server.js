@@ -10,6 +10,8 @@ const ADMIN_USERNAME = process.env.ADMIN_USERNAME || (IS_PRODUCTION ? '' : 'Krit
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || (IS_PRODUCTION ? '' : 'Kritniv');
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 const ACCESS_CONFIGURED = Boolean(ADMIN_USERNAME && ADMIN_PASSWORD);
+const ERP_BASE_URL = String(process.env.ERP_BASE_URL || '').replace(/\/$/, '');
+const ERP_WEBHOOK_SECRET = process.env.ERP_WEBHOOK_SECRET || '';
 
 app.set('trust proxy', 1);
 app.use(express.urlencoded({ extended: false }));
@@ -123,6 +125,35 @@ function sendProtectedPage(pageName){
   };
 }
 
+async function postToErp(endpoint, payload) {
+  if (!ERP_BASE_URL || !ERP_WEBHOOK_SECRET) {
+    return { ok: false, status: 503, body: { error: 'ERP integration is not configured.' } };
+  }
+
+  try {
+    const response = await fetch(`${ERP_BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-webhook-secret': ERP_WEBHOOK_SECRET
+      },
+      body: JSON.stringify(payload || {})
+    });
+
+    const text = await response.text();
+    let body = {};
+    try {
+      body = text ? JSON.parse(text) : {};
+    } catch (_error) {
+      body = { raw: text };
+    }
+
+    return { ok: response.ok, status: response.status, body };
+  } catch (error) {
+    return { ok: false, status: 502, body: { error: error.message || 'ERP request failed.' } };
+  }
+}
+
 app.get('/', (req, res) => {
   if (req.session && req.session.authenticated) return res.redirect('/index.html');
   res.status(200).send(renderLogin());
@@ -151,6 +182,16 @@ app.post('/logout', (req, res) => {
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', app: 'KRIT Website', protected: true, pages: ['index','product','account','checkout'] });
+});
+
+app.post('/api/erp/customer', requireAuth, async (req, res) => {
+  const result = await postToErp('/api/webhook/customer', req.body);
+  res.status(result.status).json(result.body);
+});
+
+app.post('/api/erp/order', requireAuth, async (req, res) => {
+  const result = await postToErp('/api/webhook/order', req.body);
+  res.status(result.status).json(result.body);
 });
 
 app.use('/assets', requireAuth, express.static(path.join(__dirname, 'assets')));

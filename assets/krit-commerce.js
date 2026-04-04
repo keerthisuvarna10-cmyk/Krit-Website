@@ -106,14 +106,11 @@
   }
 
   async function syncCustomerToERP(profile, source){
-    if(!profile || (!profile.email && !profile.phone) || !CONFIG.erpBaseUrl) return false;
+    if(!profile || (!profile.email && !profile.phone)) return false;
     try {
-      var response = await fetch(String(CONFIG.erpBaseUrl).replace(/\/$/, '') + '/api/webhook/customer', {
+      var response = await fetch('/api/erp/customer', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-webhook-secret': CONFIG.erpWebhookSecret || 'krit-webhook-secret'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: profile.name || 'KRIT Customer',
           phone: profile.phone || '',
@@ -818,7 +815,7 @@
   }
 
   async function syncOrderToERP(order){
-    if(!order || !CONFIG.erpBaseUrl || order.erpSyncState === 'synced' || order.erpSyncState === 'syncing') return;
+    if(!order || order.erpSyncState === 'synced' || order.erpSyncState === 'syncing') return;
     order.erpSyncState = 'syncing';
     try {
       var payload = {
@@ -844,12 +841,9 @@
           };
         })
       };
-      var response = await fetch(String(CONFIG.erpBaseUrl).replace(/\/$/, '') + '/api/webhook/order', {
+      var response = await fetch('/api/erp/order', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-webhook-secret': CONFIG.erpWebhookSecret || 'krit-webhook-secret'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       order.erpSyncState = response.ok ? 'synced' : 'failed';
