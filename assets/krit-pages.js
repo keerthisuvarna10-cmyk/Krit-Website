@@ -64,11 +64,13 @@
 
   function rewritePrimaryNav(){
     setHref('.nl', pageMap.index);
-    setHref('.nls a[href="#buy"]', pageMap.product);
+    setHref('.nls a[href="#home"]', pageMap.index + '#home');
+    setHref('.nls a[href="#buy"]', pageMap.index + '#buy');
     setHref('.nls a[href="#about"]', pageMap.index + '#about');
     setHref('.nls a[href="#testi"]', pageMap.index + '#testi');
     setHref('.nls a[href="#blog"]', pageMap.index + '#blog');
-    setHref('#drw a[href="#buy"]', pageMap.product);
+    setHref('#drw a[href="#home"]', pageMap.index + '#home');
+    setHref('#drw a[href="#buy"]', pageMap.index + '#buy');
     setHref('#drw a[href="#about"]', pageMap.index + '#about');
     setHref('#drw a[href="#our-story"]', pageMap.index + '#our-story');
     setHref('#drw a[href="#testi"]', pageMap.index + '#testi');
@@ -76,7 +78,7 @@
   }
 
   function rewriteFooterLinks(){
-    setHref('footer a[href="#buy"]', pageMap.product);
+    setHref('footer a[href="#buy"]', pageMap.index + '#buy');
     setHref('footer a[href="#about"]', pageMap.index + '#about');
     setHref('footer a[href="#testi"]', pageMap.index + '#testi');
     setHref('footer a[href="#blog"]', pageMap.index + '#blog');
@@ -111,7 +113,7 @@
       };
     });
     qs('a[href="#buy"].nav-shop-btn').forEach(function(btn){
-      btn.setAttribute('href', pageMap.product);
+      btn.setAttribute('href', pageMap.index + '#buy');
     });
   }
 
