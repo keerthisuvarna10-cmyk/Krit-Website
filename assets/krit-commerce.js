@@ -1231,6 +1231,7 @@
   async function syncOrderToERP(order){
     if(!order || order.erpSyncState === 'synced' || order.erpSyncState === 'syncing') return;
     order.erpSyncState = 'syncing';
+    order.erpSyncMessage = 'Syncing to KRIT ERP...';
     try {
       var payload = {
         id: order.id,
@@ -1260,16 +1261,47 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+      var responseText = '';
+      var responseBody = null;
+      try {
+        responseText = await response.text();
+        responseBody = responseText ? JSON.parse(responseText) : null;
+      } catch(_parseError) {
+        responseBody = responseText || null;
+      }
       order.erpSyncState = response.ok ? 'synced' : 'failed';
       order.erpSyncAt = new Date().toISOString();
+      order.erpSyncMessage = response.ok
+        ? 'Order synced to KRIT ERP.'
+        : ((responseBody && responseBody.error) || ('ERP sync failed with status ' + response.status + '.'));
       localStorage.setItem('krit_orders', JSON.stringify(window._kritOrders || []));
       if(response.ok){
         if(window.kritToast) window.kritToast('Order synced to KRIT ERP');
+      } else {
+        console.error('KRIT ERP order sync failed', {
+          orderId: order.id,
+          status: response.status,
+          body: responseBody
+        });
+        if(!order.erpSyncRetried){
+          order.erpSyncRetried = true;
+          setTimeout(function(){ syncOrderToERP(order); }, 2500);
+        } else if(window.kritToast){
+          window.kritToast('Order saved, but ERP sync failed. Please check Railway settings.');
+        }
       }
     } catch(error) {
       order.erpSyncState = 'failed';
       order.erpSyncAt = new Date().toISOString();
+      order.erpSyncMessage = error && error.message ? error.message : 'ERP request failed.';
       localStorage.setItem('krit_orders', JSON.stringify(window._kritOrders || []));
+      console.error('KRIT ERP order sync error', { orderId: order.id, error: error });
+      if(!order.erpSyncRetried){
+        order.erpSyncRetried = true;
+        setTimeout(function(){ syncOrderToERP(order); }, 2500);
+      } else if(window.kritToast){
+        window.kritToast('Order saved, but ERP sync failed. Please check Railway settings.');
+      }
     }
   }
 
