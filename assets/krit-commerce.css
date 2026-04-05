@@ -50,6 +50,10 @@
 #auth-email-btn.krit-btn{margin-top:4px;height:54px;border-radius:14px}
 #krit-google-btn.krit-btn{height:54px;border-radius:14px;margin-bottom:0}
 .krit-google-mark{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#fff;color:#1a1a1a;font-size:.9rem;font-weight:800;box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.krit-auth-otp-wrap{display:grid;gap:12px;padding:14px;border-radius:16px;background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.18)}
+.krit-auth-otp-title{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:#7EE39D;font-weight:800}
+.krit-auth-otp-copy{font-size:.84rem;line-height:1.7;color:#B8C7E0}
+.krit-auth-otp-verify{display:grid;gap:10px}
 .krit-auth-inline-note{font-size:.82rem;color:#8FA7CE;line-height:1.7;margin-top:-4px}
 .krit-auth-account-card{padding:18px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
 .krit-auth-account-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px}

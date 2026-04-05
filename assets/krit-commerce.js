@@ -19,6 +19,9 @@
   var lightboxThumbsEl = null;
   var authObserverBound = false;
   var visitLogPromise = null;
+  var phoneConfirmationResult = null;
+  var phoneRecaptchaVerifier = null;
+  var pendingCheckoutItems = null;
 
   function loadScript(src){
     return new Promise(function(resolve, reject){
@@ -179,6 +182,105 @@
     });
   }
 
+  function continuePendingCheckout(){
+    if(!pendingCheckoutItems || !Array.isArray(pendingCheckoutItems) || !pendingCheckoutItems.length) return;
+    if(typeof window.__kritOpenCheckoutOriginal === 'function'){
+      var items = pendingCheckoutItems.slice();
+      pendingCheckoutItems = null;
+      setTimeout(function(){ window.__kritOpenCheckoutOriginal(items); }, 150);
+    }
+  }
+
+  async function ensurePhoneRecaptcha(fb){
+    if(phoneRecaptchaVerifier) return phoneRecaptchaVerifier;
+    var holder = document.getElementById('krit-phone-recaptcha');
+    if(!holder){
+      holder = document.createElement('div');
+      holder.id = 'krit-phone-recaptcha';
+      holder.style.position = 'absolute';
+      holder.style.left = '-9999px';
+      holder.style.width = '1px';
+      holder.style.height = '1px';
+      document.body.appendChild(holder);
+    }
+    phoneRecaptchaVerifier = new fb.auth.RecaptchaVerifier('krit-phone-recaptcha', {
+      size: 'invisible'
+    });
+    try { await phoneRecaptchaVerifier.render(); } catch(e){}
+    return phoneRecaptchaVerifier;
+  }
+
+  async function sendOtpLogin(){
+    clearAuthMessage();
+    var phoneEl = document.getElementById('auth-otp-phone');
+    var phone = phoneEl ? phoneEl.value.replace(/\D/g,'').trim() : '';
+    if(typeof window.kritValidPhone === 'function' && !window.kritValidPhone(phone)){
+      authMessage('Please enter a valid 10-digit mobile number for OTP login.', 'err');
+      return;
+    }
+    var fb = await ensureFirebase();
+    if(!fb || !fb.auth){
+      authMessage('Phone OTP login is not available right now. Please use Google or email instead.', 'err');
+      return;
+    }
+    try {
+      authMessage('Sending OTP to your mobile...', 'info');
+      var verifier = await ensurePhoneRecaptcha(fb);
+      phoneConfirmationResult = await fb.auth().signInWithPhoneNumber('+91' + phone, verifier);
+      var wrap = document.getElementById('krit-otp-verify-wrap');
+      var codeEl = document.getElementById('krit-otp-code');
+      if(wrap) wrap.style.display = 'grid';
+      if(codeEl) codeEl.focus();
+      track('login', { method: 'phone_otp_requested' });
+      authMessage('OTP sent successfully. Enter the code to continue.', 'ok');
+    } catch(error) {
+      phoneConfirmationResult = null;
+      authMessage('OTP could not be sent right now. Please try again in a moment.', 'err');
+    }
+  }
+
+  async function verifyOtpLogin(){
+    clearAuthMessage();
+    var codeEl = document.getElementById('krit-otp-code');
+    var phoneEl = document.getElementById('auth-otp-phone');
+    var nameEl = document.getElementById('auth-name');
+    var code = codeEl ? codeEl.value.replace(/\D/g,'').trim() : '';
+    var phone = phoneEl ? phoneEl.value.replace(/\D/g,'').trim() : '';
+    if(!phoneConfirmationResult){
+      authMessage('Please request an OTP first.', 'err');
+      return;
+    }
+    if(code.length < 6){
+      authMessage('Please enter the 6-digit OTP.', 'err');
+      return;
+    }
+    try {
+      var result = await phoneConfirmationResult.confirm(code);
+      var user = result.user || {};
+      var stored = null;
+      try { stored = JSON.parse(localStorage.getItem('krit_account_profile') || 'null'); } catch(e) { stored = null; }
+      var profile = {
+        uid: user.uid || '',
+        name: (nameEl && nameEl.value.trim()) || (stored && stored.name) || 'KRIT Customer',
+        email: (stored && stored.phone === phone && stored.email) || '',
+        phone: phone,
+        avatar: user.photoURL || '',
+        provider: 'phone',
+        createdAt: (stored && stored.phone === phone && stored.createdAt) || new Date().toISOString()
+      };
+      if(typeof window.kritPersistAccount === 'function') window.kritPersistAccount(profile);
+      await saveCustomerProfile(profile, 'phone-otp');
+      updateAuthUI();
+      track('login', { method: 'phone_otp' });
+      authMessage('Phone verified successfully.', 'ok');
+      if(window.kritToast) window.kritToast('Mobile login complete');
+      if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
+      continuePendingCheckout();
+    } catch(error) {
+      authMessage('The OTP was invalid or expired. Please request a new code.', 'err');
+    }
+  }
+
   async function syncCustomerToERP(profile, source){
     if(!profile || (!profile.email && !profile.phone)) return false;
     try {
@@ -205,11 +307,13 @@
   }
 
   async function saveCustomerProfile(profile, source){
-    if(!profile || !profile.email) return false;
+    if(!profile || (!profile.email && !profile.phone)) return false;
     localStorage.setItem('krit_customer_last_source', source || 'website');
     var cached = [];
     try { cached = JSON.parse(localStorage.getItem('krit_customer_profiles') || '[]'); } catch(e) { cached = []; }
-    var existingIndex = cached.findIndex(function(item){ return item.email === profile.email || (item.phone && profile.phone && item.phone === profile.phone); });
+    var existingIndex = cached.findIndex(function(item){
+      return (!!profile.email && item.email === profile.email) || (!!profile.phone && item.phone && item.phone === profile.phone);
+    });
     var merged = Object.assign({}, existingIndex >= 0 ? cached[existingIndex] : {}, profile, { source: source || 'website', updatedAt: new Date().toISOString() });
     if(existingIndex >= 0) cached[existingIndex] = merged; else cached.unshift(merged);
     localStorage.setItem('krit_customer_profiles', JSON.stringify(cached.slice(0,50)));
@@ -299,6 +403,46 @@
       form.insertAdjacentElement('afterbegin', googleBtn);
     }
 
+    if(form && !document.getElementById('krit-otp-login-wrap')){
+      var otpWrap = document.createElement('div');
+      otpWrap.id = 'krit-otp-login-wrap';
+      otpWrap.className = 'krit-auth-otp-wrap';
+      otpWrap.innerHTML = [
+        '<div class="krit-auth-otp-title">Mobile OTP login</div>',
+        '<div class="krit-auth-otp-copy">Use just your mobile number to sign in and continue checkout.</div>',
+        '<div class="krit-field"><label class="krit-label" for="auth-otp-phone">Mobile number</label><input class="krit-input" id="auth-otp-phone" type="tel" inputmode="numeric" maxlength="10" placeholder="Enter your 10-digit mobile number" autocomplete="tel-national"></div>',
+        '<button type="button" id="krit-send-otp-btn" class="krit-btn krit-btn-otp">Send OTP</button>',
+        '<div id="krit-otp-verify-wrap" style="display:none" class="krit-auth-otp-verify">',
+          '<div class="krit-field"><label class="krit-label" for="krit-otp-code">OTP code</label><input class="krit-input" id="krit-otp-code" type="text" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit OTP" autocomplete="one-time-code"></div>',
+          '<button type="button" id="krit-verify-otp-btn" class="krit-btn krit-btn-primary">Verify OTP</button>',
+        '</div>'
+      ].join('');
+
+      var dividerOtp = document.createElement('div');
+      dividerOtp.className = 'krit-or';
+      dividerOtp.innerHTML = '<span>or login with OTP</span>';
+
+      var dividerEmail = document.createElement('div');
+      dividerEmail.className = 'krit-or';
+      dividerEmail.innerHTML = '<span>or continue with email</span>';
+
+      var firstChild = form.firstChild;
+      if(firstChild){
+        form.insertBefore(dividerOtp, firstChild);
+        form.insertBefore(otpWrap, dividerOtp.nextSibling);
+        form.insertBefore(dividerEmail, otpWrap.nextSibling);
+      } else {
+        form.appendChild(dividerOtp);
+        form.appendChild(otpWrap);
+        form.appendChild(dividerEmail);
+      }
+
+      var otpBtn = otpWrap.querySelector('#krit-send-otp-btn');
+      var verifyBtn = otpWrap.querySelector('#krit-verify-otp-btn');
+      if(otpBtn) otpBtn.onclick = function(){ window.kritSendOtpLogin && window.kritSendOtpLogin(); };
+      if(verifyBtn) verifyBtn.onclick = function(){ window.kritVerifyOtpLogin && window.kritVerifyOtpLogin(); };
+    }
+
     if(form && !form.querySelector('.krit-auth-inline-note')){
       var note = document.createElement('div');
       note.className = 'krit-auth-inline-note';
@@ -339,11 +483,11 @@
     var emailNode = document.getElementById('auth-account-email');
     var phoneNode = document.getElementById('auth-account-phone');
     if(!formWrap || !accountWrap || !welcome) return;
-    if(window._kritAccount && window._kritAccount.email){
+    if(window._kritAccount && (window._kritAccount.email || window._kritAccount.phone)){
       formWrap.style.display = 'none';
       accountWrap.style.display = 'block';
       if(nameNode) nameNode.textContent = window._kritAccount.name || 'KRIT Customer';
-      if(emailNode) emailNode.textContent = window._kritAccount.email;
+      if(emailNode) emailNode.textContent = window._kritAccount.email || 'Mobile verified account';
       if(phoneNode) phoneNode.textContent = window._kritAccount.phone ? '+91 ' + window._kritAccount.phone : 'Add your phone during checkout';
       welcome.querySelector('.krit-auth-title').textContent = 'Your KRIT account';
       welcome.querySelector('.krit-auth-sub').textContent = 'Saved details, wishlist continuity, and order visibility in one place.';
@@ -413,7 +557,10 @@
       updateAuthUI();
       track('login', { method: 'google' });
       authMessage('Google account connected successfully.', 'ok');
-      setTimeout(function(){ if(typeof window.closeAuthModal === 'function') window.closeAuthModal(); }, 600);
+      setTimeout(function(){
+        if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
+        continuePendingCheckout();
+      }, 600);
     } catch(error) {
       authMessage('Google login could not be completed. You can still continue with email and password.', 'err');
     }
@@ -463,6 +610,7 @@
         logVisit();
         if(window.kritToast) window.kritToast('Welcome back to KRIT');
         if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
+        continuePendingCheckout();
       } catch(error) {
         authMessage('Login failed. Please check your email and password, or create an account first.', 'err');
       }
@@ -490,6 +638,7 @@
       logVisit();
       if(window.kritToast) window.kritToast('Your KRIT account has been created');
       if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
+      continuePendingCheckout();
     } catch(error) {
       authMessage('Account creation failed. If this email already exists, please log in instead.', 'err');
     }
@@ -680,6 +829,8 @@
     window.switchAuthTab = switchAuthTab;
     window.kritSubmitAuth = submitAuth;
     window.kritContinueWithGoogle = continueWithGoogle;
+    window.kritSendOtpLogin = sendOtpLogin;
+    window.kritVerifyOtpLogin = verifyOtpLogin;
     window.kritLogout = async function(){
       try {
         var fb = await ensureFirebase();
@@ -711,6 +862,7 @@
       overlay.classList.add('open');
       overlay.style.display = 'flex';
       document.body.style.overflow = 'hidden';
+      authMessage('Create an account, continue with Google, or use mobile OTP to unlock checkout.', 'info');
     };
     window.closeAuthModal = function(){
       var overlay = document.getElementById('krit-auth-overlay');
@@ -1006,7 +1158,14 @@
   function patchCheckoutOpen(){
     if(typeof window.kritOpenCheckout === 'function' && !window.kritOpenCheckout.__kritEnhanced){
       var original = window.kritOpenCheckout;
+      window.__kritOpenCheckoutOriginal = original;
       window.kritOpenCheckout = function(){
+        if(!window._kritAccount || (!window._kritAccount.email && !window._kritAccount.phone)){
+          pendingCheckoutItems = Array.isArray(arguments[0]) ? arguments[0] : (Array.isArray(window._kritCart) ? window._kritCart : []);
+          if(typeof window.openAuthModal === 'function') window.openAuthModal();
+          if(window.kritToast) window.kritToast('Create an account or use mobile OTP before checkout');
+          return;
+        }
         var result = original.apply(this, arguments);
         setTimeout(enhanceCheckoutOverlay, 30);
         setTimeout(enhanceCheckoutOverlay, 180);
