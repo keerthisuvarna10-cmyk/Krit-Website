@@ -387,6 +387,167 @@
     return firebaseSaved || erpSaved;
   }
 
+  function getStoredOrders(){
+    if(Array.isArray(window._kritOrders)) return window._kritOrders;
+    try {
+      return JSON.parse(localStorage.getItem('krit_orders') || '[]') || [];
+    } catch(e){
+      return [];
+    }
+  }
+
+  function getCustomerOrderMeta(order){
+    if(window.kritOrderStatusMeta) return window.kritOrderStatusMeta(order && order.status);
+    var status = (order && order.status) || 'placed';
+    var lookup = {
+      placed: { label: 'Order placed', tone: 'new' },
+      confirmed: { label: 'Confirmed', tone: 'confirmed' },
+      processing: { label: 'Processing', tone: 'confirmed' },
+      packed: { label: 'Packed', tone: 'shipped' },
+      shipped: { label: 'Shipped', tone: 'shipped' },
+      delivered: { label: 'Delivered', tone: 'delivered' },
+      cancelled: { label: 'Cancelled', tone: 'cancelled' },
+      payment_pending: { label: 'Payment pending', tone: 'pending' }
+    };
+    return lookup[status] || { label: status, tone: 'new' };
+  }
+
+  function getCustomerOrders(account){
+    var orders = getStoredOrders();
+    if(!account || (!account.email && !account.phone)) return [];
+    var email = (account.email || '').toLowerCase();
+    var phone = String(account.phone || '').replace(/\D/g, '');
+    return orders.filter(function(order){
+      var customer = order && order.customer ? order.customer : {};
+      var orderEmail = String(customer.email || '').toLowerCase();
+      var orderPhone = String(customer.phone || '').replace(/\D/g, '');
+      return (!!email && orderEmail === email) || (!!phone && orderPhone === phone);
+    }).sort(function(a, b){
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    });
+  }
+
+  function getRecentAddress(accountOrders){
+    var orderWithAddress = (accountOrders || []).find(function(order){
+      return order && order.customer && (order.customer.address || order.customer.city || order.customer.pincode);
+    });
+    if(!orderWithAddress || !orderWithAddress.customer) return 'Add your delivery address during checkout.';
+    return [
+      orderWithAddress.customer.address,
+      orderWithAddress.customer.city,
+      orderWithAddress.customer.pincode
+    ].filter(Boolean).join(', ');
+  }
+
+  function openAccountOrderTracker(orderId){
+    if(!orderId) return;
+    if(typeof window.openTrackModal === 'function'){
+      window.openTrackModal();
+      setTimeout(function(){
+        var input = document.getElementById('track-awb');
+        if(input) input.value = orderId;
+        if(typeof window.doTrack === 'function') window.doTrack();
+      }, 120);
+    }
+  }
+
+  function renderCustomerOrders(account){
+    var orders = getCustomerOrders(account);
+    var list = document.getElementById('krit-account-orders-list');
+    var countNode = document.getElementById('krit-account-order-count');
+    var pendingNode = document.getElementById('krit-account-pending-count');
+    var spentNode = document.getElementById('krit-account-total-spent');
+    var addressNode = document.getElementById('krit-account-address');
+    if(countNode) countNode.textContent = String(orders.length);
+    if(pendingNode){
+      pendingNode.textContent = String(orders.filter(function(order){
+        return ['payment_pending', 'placed', 'confirmed', 'processing', 'packed', 'shipped'].indexOf(order.status) >= 0;
+      }).length);
+    }
+    if(spentNode){
+      var totalSpent = orders.reduce(function(sum, order){
+        return sum + Number(order.total || 0);
+      }, 0);
+      spentNode.textContent = totalSpent ? ('Rs ' + totalSpent.toLocaleString('en-IN')) : 'Rs 0';
+    }
+    if(addressNode) addressNode.textContent = getRecentAddress(orders);
+    if(!list) return;
+    if(!orders.length){
+      list.innerHTML = [
+        '<div class="krit-account-empty">',
+          '<div class="krit-account-empty-title">No orders yet</div>',
+          '<div class="krit-account-empty-copy">Once you place an order, payment status, shipment progress, and updates will appear here automatically.</div>',
+        '</div>'
+      ].join('');
+      return;
+    }
+    list.innerHTML = orders.map(function(order){
+      var meta = getCustomerOrderMeta(order);
+      var firstItem = order.items && order.items[0] ? order.items[0] : null;
+      var paymentText = order.paymentLabel || order.paymentMode || 'Website';
+      var paymentState = order.paymentState === 'paid' ? 'Paid' : (order.paymentState === 'pending' ? 'Pending' : (order.paymentState || 'Pending'));
+      var dateText = order.createdLabel || (order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : 'Recently');
+      return [
+        '<article class="krit-account-order-card">',
+          '<div class="krit-account-order-top">',
+            '<div>',
+              '<div class="krit-account-order-id">' + order.id + '</div>',
+              '<div class="krit-account-order-date">' + dateText + '</div>',
+            '</div>',
+            '<span class="krit-account-order-chip ' + meta.tone + '">' + meta.label + '</span>',
+          '</div>',
+          '<div class="krit-account-order-main">',
+            '<div class="krit-account-order-item">',
+              '<div class="krit-account-order-name">' + (firstItem ? firstItem.name : 'KRIT Order') + '</div>',
+              '<div class="krit-account-order-sub">' + (firstItem ? ((firstItem.qty || 1) + ' item' + ((firstItem.qty || 1) > 1 ? 's' : '')) : 'Order details saved') + '</div>',
+            '</div>',
+            '<div class="krit-account-order-money">' + ('Rs ' + Number(order.total || 0).toLocaleString('en-IN')) + '</div>',
+          '</div>',
+          '<div class="krit-account-order-grid">',
+            '<div class="krit-account-order-meta"><span>Payment</span><strong>' + paymentText + '</strong><em>' + paymentState + '</em></div>',
+            '<div class="krit-account-order-meta"><span>Tracking</span><strong>' + (order.trackingNumber || 'Will appear after processing') + '</strong><em>' + ((order.courier || '').trim() || 'Courier will be assigned soon') + '</em></div>',
+            '<div class="krit-account-order-meta"><span>Deliver to</span><strong>' + ((order.customer && order.customer.city) || 'Saved address') + '</strong><em>' + (((order.customer && order.customer.pincode) || '') ? ('PIN ' + order.customer.pincode) : 'Address available in checkout record') + '</em></div>',
+          '</div>',
+          '<div class="krit-account-order-actions">',
+            '<button type="button" class="krit-btn krit-btn-primary" onclick="openAccountOrderTracker(\'' + String(order.id).replace(/'/g, "\\'") + '\')">Track order</button>',
+            '<button type="button" class="krit-btn krit-btn-secondary" onclick="openAccountOrderTracker(\'' + String(order.id).replace(/'/g, "\\'") + '\')">View details</button>',
+          '</div>',
+        '</article>'
+      ].join('');
+    }).join('');
+  }
+
+  function switchAccountPanel(panel){
+    var target = panel || 'orders';
+    var tabs = document.querySelectorAll('[data-krit-account-tab]');
+    var panels = document.querySelectorAll('[data-krit-account-panel]');
+    tabs.forEach(function(tab){
+      var active = tab.getAttribute('data-krit-account-tab') === target;
+      tab.classList.toggle('active', active);
+    });
+    panels.forEach(function(node){
+      node.style.display = node.getAttribute('data-krit-account-panel') === target ? 'block' : 'none';
+    });
+  }
+
+  function renderAccountDashboard(){
+    var account = window._kritAccount;
+    var nameNode = document.getElementById('auth-account-name');
+    var emailNode = document.getElementById('auth-account-email');
+    var phoneNode = document.getElementById('auth-account-phone');
+    var providerNode = document.getElementById('krit-account-provider');
+    var greetingNode = document.getElementById('krit-account-greeting');
+    var subtitleNode = document.getElementById('krit-account-subtitle');
+    if(nameNode) nameNode.textContent = (account && account.name) || 'KRIT Customer';
+    if(emailNode) emailNode.textContent = (account && account.email) || 'Email will appear here';
+    if(phoneNode) phoneNode.textContent = (account && account.phone) ? ('+91 ' + account.phone) : 'Add your phone during checkout';
+    if(providerNode) providerNode.textContent = account && account.provider ? String(account.provider).replace(/_/g, ' ') : 'customer account';
+    if(greetingNode) greetingNode.textContent = 'Hello, ' + (((account && account.name) || 'KRIT Customer').split(' ')[0]);
+    if(subtitleNode) subtitleNode.textContent = 'Track all your orders, payment states, delivery progress, and saved customer details in one place.';
+    renderCustomerOrders(account);
+    switchAccountPanel('orders');
+  }
+
   function premiumizeAuthMarkup(){
     var overlay = document.getElementById('krit-auth-overlay');
     var card = overlay && overlay.querySelector('.krit-auth-card');
@@ -492,14 +653,61 @@
     if(!accountWrap.querySelector('.krit-auth-account-card')){
       accountWrap.innerHTML = [
         '<div class="krit-auth-account-card">',
-          '<div class="krit-auth-title" id="auth-account-name">KRIT Customer</div>',
-          '<div class="krit-auth-sub">Your details are ready for faster checkout and order updates.</div>',
-          '<div class="krit-auth-account-grid">',
-            '<div class="krit-auth-account-meta"><div class="label">Email</div><div class="value" id="auth-account-email">hello@kritsleep.in</div></div>',
-            '<div class="krit-auth-account-meta"><div class="label">Mobile</div><div class="value" id="auth-account-phone">Add your phone in checkout</div></div>',
+          '<div class="krit-account-shell">',
+            '<aside class="krit-account-sidebar">',
+              '<div class="krit-account-profile-head">',
+                '<div class="krit-account-avatar">K</div>',
+                '<div>',
+                  '<div class="krit-account-greeting" id="krit-account-greeting">Hello, KRIT</div>',
+                  '<div class="krit-auth-title" id="auth-account-name">KRIT Customer</div>',
+                  '<div class="krit-account-provider" id="krit-account-provider">customer account</div>',
+                '</div>',
+              '</div>',
+              '<div class="krit-auth-account-grid">',
+                '<div class="krit-auth-account-meta"><div class="label">Email</div><div class="value" id="auth-account-email">hello@kritsleep.in</div></div>',
+                '<div class="krit-auth-account-meta"><div class="label">Mobile</div><div class="value" id="auth-account-phone">Add your phone in checkout</div></div>',
+              '</div>',
+              '<div class="krit-account-quickstats">',
+                '<div class="krit-account-stat"><span>Orders</span><strong id="krit-account-order-count">0</strong></div>',
+                '<div class="krit-account-stat"><span>Open</span><strong id="krit-account-pending-count">0</strong></div>',
+                '<div class="krit-account-stat"><span>Spend</span><strong id="krit-account-total-spent">Rs 0</strong></div>',
+              '</div>',
+              '<div class="krit-account-nav">',
+                '<button type="button" class="krit-account-nav-btn active" data-krit-account-tab="orders" onclick="switchAccountPanel(\'orders\')">My orders</button>',
+                '<button type="button" class="krit-account-nav-btn" data-krit-account-tab="profile" onclick="switchAccountPanel(\'profile\')">Profile</button>',
+                '<button type="button" class="krit-account-nav-btn" data-krit-account-tab="support" onclick="switchAccountPanel(\'support\')">Addresses & payments</button>',
+              '</div>',
+              '<button class="kd-logout" type="button" onclick="kritLogout()">Logout</button>',
+            '</aside>',
+            '<div class="krit-account-content">',
+              '<section class="krit-account-panel" data-krit-account-panel="orders">',
+                '<div class="krit-account-panel-head">',
+                  '<div>',
+                    '<div class="krit-auth-title">My orders</div>',
+                    '<div class="krit-auth-sub" id="krit-account-subtitle">Track all your orders, payment states, delivery progress, and saved customer details in one place.</div>',
+                  '</div>',
+                '</div>',
+                '<div id="krit-account-orders-list" class="krit-account-orders-list"></div>',
+              '</section>',
+              '<section class="krit-account-panel" data-krit-account-panel="profile" style="display:none">',
+                '<div class="krit-auth-title">Profile details</div>',
+                '<div class="krit-account-profile-grid">',
+                  '<div class="krit-auth-account-meta"><div class="label">Full name</div><div class="value" id="krit-profile-name">KRIT Customer</div></div>',
+                  '<div class="krit-auth-account-meta"><div class="label">Login provider</div><div class="value" id="krit-profile-provider">customer account</div></div>',
+                  '<div class="krit-auth-account-meta"><div class="label">Email address</div><div class="value" id="krit-profile-email">hello@kritsleep.in</div></div>',
+                  '<div class="krit-auth-account-meta"><div class="label">Mobile number</div><div class="value" id="krit-profile-phone">Add your phone in checkout</div></div>',
+                '</div>',
+              '</section>',
+              '<section class="krit-account-panel" data-krit-account-panel="support" style="display:none">',
+                '<div class="krit-auth-title">Addresses & payments</div>',
+                '<div class="krit-account-support-grid">',
+                  '<div class="krit-auth-account-meta"><div class="label">Latest delivery address</div><div class="value" id="krit-account-address">Add your delivery address during checkout.</div></div>',
+                  '<div class="krit-auth-account-meta"><div class="label">Payment methods</div><div class="value">UPI, cards, netbanking, and COD are available during checkout. Saved wallets can be added next.</div></div>',
+                  '<div class="krit-auth-account-meta"><div class="label">Support</div><div class="value">Need help with a shipment or payment? Reach KRIT support for quick order assistance.</div></div>',
+                '</div>',
+              '</section>',
+            '</div>',
           '</div>',
-          '<div class="krit-auth-helper">This customer account is synced through Firebase Auth and stored for faster checkout, order updates, and CRM follow-up.</div>',
-          '<button class="kd-logout" type="button" onclick="kritLogout()">Logout</button>',
         '</div>'
       ].join('');
     }
@@ -595,6 +803,10 @@
     var nameNode = document.getElementById('auth-account-name');
     var emailNode = document.getElementById('auth-account-email');
     var phoneNode = document.getElementById('auth-account-phone');
+    var profileNameNode = document.getElementById('krit-profile-name');
+    var profileEmailNode = document.getElementById('krit-profile-email');
+    var profilePhoneNode = document.getElementById('krit-profile-phone');
+    var profileProviderNode = document.getElementById('krit-profile-provider');
     if(!formWrap || !accountWrap || !welcome) return;
     if(window._kritAccount && (window._kritAccount.email || window._kritAccount.phone)){
       formWrap.style.display = 'none';
@@ -602,8 +814,13 @@
       if(nameNode) nameNode.textContent = window._kritAccount.name || 'KRIT Customer';
       if(emailNode) emailNode.textContent = window._kritAccount.email || 'Mobile verified account';
       if(phoneNode) phoneNode.textContent = window._kritAccount.phone ? '+91 ' + window._kritAccount.phone : 'Add your phone during checkout';
+      if(profileNameNode) profileNameNode.textContent = window._kritAccount.name || 'KRIT Customer';
+      if(profileEmailNode) profileEmailNode.textContent = window._kritAccount.email || 'Mobile verified account';
+      if(profilePhoneNode) profilePhoneNode.textContent = window._kritAccount.phone ? '+91 ' + window._kritAccount.phone : 'Add your phone during checkout';
+      if(profileProviderNode) profileProviderNode.textContent = window._kritAccount.provider ? String(window._kritAccount.provider).replace(/_/g, ' ') : 'customer account';
       welcome.querySelector('.krit-auth-title').textContent = 'Your KRIT account';
       welcome.querySelector('.krit-auth-sub').textContent = 'Saved details, wishlist continuity, and order visibility in one place.';
+      renderAccountDashboard();
     } else {
       formWrap.style.display = 'block';
       accountWrap.style.display = 'none';
@@ -960,6 +1177,8 @@
     window.kritContinueWithGoogle = continueWithGoogle;
     window.kritSendOtpLogin = sendOtpLogin;
     window.kritVerifyOtpLogin = verifyOtpLogin;
+    window.switchAccountPanel = switchAccountPanel;
+    window.openAccountOrderTracker = openAccountOrderTracker;
     window.kritLogout = async function(){
       try {
         var fb = await ensureFirebase();
@@ -1276,7 +1495,7 @@
         : ((responseBody && responseBody.error) || ('ERP sync failed with status ' + response.status + '.'));
       localStorage.setItem('krit_orders', JSON.stringify(window._kritOrders || []));
       if(response.ok){
-        if(window.kritToast) window.kritToast('Order synced to KRIT ERP');
+        renderAccountDashboard();
       } else {
         console.error('KRIT ERP order sync failed', {
           orderId: order.id,
@@ -1286,8 +1505,6 @@
         if(!order.erpSyncRetried){
           order.erpSyncRetried = true;
           setTimeout(function(){ syncOrderToERP(order); }, 2500);
-        } else if(window.kritToast){
-          window.kritToast('Order saved, but ERP sync failed. Please check Railway settings.');
         }
       }
     } catch(error) {
@@ -1299,8 +1516,6 @@
       if(!order.erpSyncRetried){
         order.erpSyncRetried = true;
         setTimeout(function(){ syncOrderToERP(order); }, 2500);
-      } else if(window.kritToast){
-        window.kritToast('Order saved, but ERP sync failed. Please check Railway settings.');
       }
     }
   }

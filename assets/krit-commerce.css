@@ -77,6 +77,49 @@
 .krit-auth-account-meta .label{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:#8CA0C4;margin-bottom:4px}
 .krit-auth-account-meta .value{font-size:.96rem;color:#F0F4FF;word-break:break-word}
 .krit-auth-helper{margin-top:16px;font-size:.84rem;color:#AFC0DE;line-height:1.7}
+.krit-account-shell{display:grid;grid-template-columns:minmax(240px,.74fr) minmax(0,1.26fr);gap:18px}
+.krit-account-sidebar{display:grid;gap:14px;align-content:start}
+.krit-account-profile-head{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
+.krit-account-avatar{width:54px;height:54px;border-radius:18px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2F5DA8,#6C8FE0);color:#fff;font-weight:800;font-size:1.1rem;box-shadow:0 16px 34px rgba(47,93,168,.24)}
+.krit-account-greeting{font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:#8FA7CE;margin-bottom:3px}
+.krit-account-provider{font-size:.78rem;color:#AFC0DE;text-transform:capitalize}
+.krit-account-quickstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.krit-account-stat{padding:12px 10px;border-radius:14px;background:rgba(6,14,28,.72);border:1px solid rgba(47,93,168,.12);display:grid;gap:4px}
+.krit-account-stat span{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:#8CA0C4}
+.krit-account-stat strong{font-size:1rem;color:#F5F8FF}
+.krit-account-nav{display:grid;gap:8px}
+.krit-account-nav-btn{padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#D8E3F8;text-align:left;font-size:.84rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.krit-account-nav-btn.active,.krit-account-nav-btn:hover{background:rgba(47,93,168,.18);border-color:rgba(47,93,168,.32);color:#fff}
+.krit-account-content{display:grid;gap:14px;align-content:start;min-width:0}
+.krit-account-panel{display:block}
+.krit-account-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
+.krit-account-orders-list{display:grid;gap:12px}
+.krit-account-order-card{padding:16px;border-radius:18px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);display:grid;gap:14px}
+.krit-account-order-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.krit-account-order-id{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#8FA7CE;font-weight:800}
+.krit-account-order-date{font-size:.82rem;color:#9FB1D1;margin-top:6px}
+.krit-account-order-chip{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border:1px solid rgba(255,255,255,.1)}
+.krit-account-order-chip.new,.krit-account-order-chip.pending{color:#F9D548;border-color:rgba(249,213,72,.28);background:rgba(249,213,72,.08)}
+.krit-account-order-chip.confirmed,.krit-account-order-chip.shipped{color:#8DB8FF;border-color:rgba(47,93,168,.3);background:rgba(47,93,168,.12)}
+.krit-account-order-chip.delivered{color:#7EE39D;border-color:rgba(37,211,102,.28);background:rgba(37,211,102,.08)}
+.krit-account-order-chip.cancelled{color:#FF8E8E;border-color:rgba(255,124,124,.26);background:rgba(255,124,124,.08)}
+.krit-account-order-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start}
+.krit-account-order-name{font-size:1rem;color:#F5F8FF;font-weight:700;line-height:1.45}
+.krit-account-order-sub{font-size:.84rem;color:#AFC0DE;margin-top:4px}
+.krit-account-order-money{font-size:1.12rem;color:#F5F8FF;font-weight:800;white-space:nowrap}
+.krit-account-order-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.krit-account-order-meta{padding:12px 14px;border-radius:14px;background:rgba(6,14,28,.58);border:1px solid rgba(47,93,168,.12);display:grid;gap:4px}
+.krit-account-order-meta span{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:#8CA0C4}
+.krit-account-order-meta strong{font-size:.92rem;color:#F4F7FF;line-height:1.45}
+.krit-account-order-meta em{font-size:.8rem;color:#AFC0DE;font-style:normal;line-height:1.45}
+.krit-account-order-actions{display:flex;flex-wrap:wrap;gap:10px}
+.krit-account-order-actions .krit-btn{width:auto;min-width:140px}
+.krit-btn-secondary{padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#E4ECFB;font-size:.78rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.krit-btn-secondary:hover{background:rgba(255,255,255,.08)}
+.krit-account-profile-grid,.krit-account-support-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.krit-account-empty{padding:24px 20px;border-radius:18px;background:rgba(255,255,255,.035);border:1px dashed rgba(255,255,255,.12)}
+.krit-account-empty-title{font-size:1.04rem;font-weight:700;color:#F5F8FF;margin-bottom:6px}
+.krit-account-empty-copy{font-size:.88rem;line-height:1.7;color:#AFC0DE}
 #krit-detail-share{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0 18px}
 .krit-share-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 10px;border-radius:12px;border:1px solid rgba(47,93,168,.18);background:rgba(47,93,168,.08);color:#DDE7F8;font-size:.72rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .krit-share-btn:hover{transform:translateY(-1px);border-color:rgba(249,213,72,.35);color:#fff}
@@ -103,6 +146,8 @@
   .krit-auth-benefit:last-child{grid-column:auto}
   #krit-auth-form{grid-template-columns:1fr}
   .krit-auth-otp-wrap{grid-template-columns:1fr}
+  .krit-account-shell{grid-template-columns:1fr}
+  .krit-account-profile-grid,.krit-account-support-grid,.krit-account-order-grid{grid-template-columns:1fr}
 }
 @media (max-height:940px){
   .krit-auth-card.krit-auth-premium{
@@ -163,6 +208,12 @@
   #krit-lightbox-thumbs button{width:66px;height:66px;border-radius:12px}
   #krit-lightbox-actions{width:calc(100vw - 24px);bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
   #krit-lightbox-actions button{min-width:0;width:100%}
+  .krit-account-quickstats{grid-template-columns:1fr}
+  .krit-account-order-main{grid-template-columns:1fr}
+  .krit-account-order-top{flex-direction:column;align-items:flex-start}
+  .krit-account-order-actions{display:grid;grid-template-columns:1fr}
+  .krit-account-order-actions .krit-btn,
+  .krit-account-order-actions .krit-btn-secondary{width:100%}
 }
 
 /* Mobile hamburger + app-like checkout */
