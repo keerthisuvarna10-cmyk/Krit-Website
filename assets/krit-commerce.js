@@ -512,6 +512,80 @@
     card.appendChild(close);
     card.appendChild(side);
     card.appendChild(main);
+    ensureAuthFormEnhancements();
+  }
+
+  function ensureAuthFormEnhancements(){
+    var form = document.getElementById('krit-auth-form');
+    if(!form) return;
+
+    var submitBtn = document.getElementById('auth-email-btn');
+    if(submitBtn){
+      submitBtn.className = 'krit-btn krit-btn-primary';
+    }
+
+    if(!document.getElementById('krit-google-btn')){
+      var googleBtn = document.createElement('button');
+      googleBtn.type = 'button';
+      googleBtn.id = 'krit-google-btn';
+      googleBtn.className = 'krit-btn krit-btn-google';
+      googleBtn.innerHTML = '<span class="krit-google-mark">G</span> Continue with Google';
+      googleBtn.onclick = function(){ window.kritContinueWithGoogle && window.kritContinueWithGoogle(); };
+
+      var googleDivider = document.createElement('div');
+      googleDivider.className = 'krit-or';
+      googleDivider.innerHTML = '<span>or continue with email</span>';
+
+      form.insertAdjacentElement('afterbegin', googleDivider);
+      form.insertAdjacentElement('afterbegin', googleBtn);
+    }
+
+    if(!document.getElementById('krit-otp-login-wrap')){
+      var otpWrap = document.createElement('div');
+      otpWrap.id = 'krit-otp-login-wrap';
+      otpWrap.className = 'krit-auth-otp-wrap';
+      otpWrap.innerHTML = [
+        '<div class="krit-auth-otp-title">Mobile OTP login</div>',
+        '<div class="krit-auth-otp-copy">Use just your mobile number to sign in and continue checkout.</div>',
+        '<div class="krit-field"><label class="krit-label" for="auth-otp-phone">Mobile number</label><input class="krit-input" id="auth-otp-phone" type="tel" inputmode="numeric" maxlength="10" placeholder="Enter your 10-digit mobile number" autocomplete="tel-national"></div>',
+        '<button type="button" id="krit-send-otp-btn" class="krit-btn krit-btn-otp">Send OTP</button>',
+        '<div id="krit-otp-verify-wrap" style="display:none" class="krit-auth-otp-verify">',
+          '<div class="krit-field"><label class="krit-label" for="krit-otp-code">OTP code</label><input class="krit-input" id="krit-otp-code" type="text" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit OTP" autocomplete="one-time-code"></div>',
+          '<button type="button" id="krit-verify-otp-btn" class="krit-btn krit-btn-primary">Verify OTP</button>',
+        '</div>'
+      ].join('');
+
+      var dividerOtp = document.createElement('div');
+      dividerOtp.className = 'krit-or';
+      dividerOtp.innerHTML = '<span>or login with OTP</span>';
+
+      var dividerEmail = document.createElement('div');
+      dividerEmail.className = 'krit-or';
+      dividerEmail.innerHTML = '<span>or continue with email</span>';
+
+      var firstChild = form.firstChild;
+      if(firstChild){
+        form.insertBefore(dividerOtp, firstChild);
+        form.insertBefore(otpWrap, dividerOtp.nextSibling);
+        form.insertBefore(dividerEmail, otpWrap.nextSibling);
+      } else {
+        form.appendChild(dividerOtp);
+        form.appendChild(otpWrap);
+        form.appendChild(dividerEmail);
+      }
+
+      var otpBtn = otpWrap.querySelector('#krit-send-otp-btn');
+      var verifyBtn = otpWrap.querySelector('#krit-verify-otp-btn');
+      if(otpBtn) otpBtn.onclick = function(){ window.kritSendOtpLogin && window.kritSendOtpLogin(); };
+      if(verifyBtn) verifyBtn.onclick = function(){ window.kritVerifyOtpLogin && window.kritVerifyOtpLogin(); };
+    }
+
+    if(!form.querySelector('.krit-auth-inline-note')){
+      var note = document.createElement('div');
+      note.className = 'krit-auth-inline-note';
+      note.textContent = 'Use Google for one-tap sign-in, use mobile OTP, or create an email account with a secure password.';
+      form.appendChild(note);
+    }
   }
 
   function updateAuthUI(){
@@ -647,11 +721,21 @@
         updateAuthUI();
         track('login', { method: 'email' });
         logVisit();
-        if(window.kritToast) window.kritToast('Welcome back to KRIT');
-        if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
-        continuePendingCheckout();
-      } catch(error) {
-        authMessage('Login failed. Please check your email and password, or create an account first.', 'err');
+      if(window.kritToast) window.kritToast('Welcome back to KRIT');
+      if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
+      continuePendingCheckout();
+    } catch(error) {
+      if(error && error.code === 'auth/user-not-found'){
+        authMessage('No account exists with this email yet. Please create an account first.', 'err');
+      } else if(error && error.code === 'auth/wrong-password'){
+        authMessage('The password is incorrect. Please try again.', 'err');
+      } else if(error && error.code === 'auth/invalid-credential'){
+        authMessage('The email or password is incorrect. Please try again.', 'err');
+      } else if(error && error.code === 'auth/too-many-requests'){
+        authMessage('Too many login attempts were made. Please wait a moment and try again.', 'err');
+      } else {
+        authMessage(firebaseAuthErrorMessage(error, 'email'), 'err');
+      }
       }
       return;
     }
@@ -679,7 +763,13 @@
       if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
       continuePendingCheckout();
     } catch(error) {
-      authMessage('Account creation failed. If this email already exists, please log in instead.', 'err');
+      if(error && error.code === 'auth/email-already-in-use'){
+        authMessage('This email already has an account. Please log in instead.', 'err');
+      } else if(error && error.code === 'auth/weak-password'){
+        authMessage('Please use a stronger password with at least 6 characters.', 'err');
+      } else {
+        authMessage(firebaseAuthErrorMessage(error, 'email'), 'err');
+      }
     }
   }
 
@@ -890,6 +980,7 @@
       var emailEl = document.getElementById('auth-email');
       var phoneEl = document.getElementById('auth-phone');
       var passwordEl = document.getElementById('auth-password');
+      ensureAuthFormEnhancements();
       if(!window._kritAccount){
         switchAuthTab(window._kritAuthTab || 'login');
         if(nameEl) nameEl.value = '';
