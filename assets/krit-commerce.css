@@ -26,7 +26,9 @@
   background:linear-gradient(180deg,rgba(255,255,255,.04),transparent 42%);
   pointer-events:none;
 }
-.krit-auth-main{padding:14px 18px 14px;position:relative;overflow:auto}
+.krit-auth-main{padding:14px 18px 14px;position:relative;overflow:auto;display:flex;flex-direction:column;min-height:0}
+.krit-auth-main > *{min-width:0}
+#krit-auth-account{min-height:0;flex:1 1 auto}
 .krit-auth-card .krit-auth-close{z-index:8;pointer-events:auto}
 .krit-auth-side .krit-auth-logo{text-align:left;margin-bottom:10px}
 .krit-auth-side .krit-auth-logo img{height:66px}
@@ -71,14 +73,14 @@
 .krit-auth-otp-copy,
 .krit-auth-otp-verify{grid-column:1 / -1}
 .krit-auth-otp-wrap .krit-btn{height:40px;min-width:130px;align-self:end}
-.krit-auth-account-card{padding:18px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.krit-auth-account-card{padding:18px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);height:100%;min-height:0;overflow:hidden}
 .krit-auth-account-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px}
 .krit-auth-account-meta{padding:12px 14px;border-radius:12px;background:rgba(6,14,28,.72);border:1px solid rgba(47,93,168,.12)}
 .krit-auth-account-meta .label{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:#8CA0C4;margin-bottom:4px}
 .krit-auth-account-meta .value{font-size:.96rem;color:#F0F4FF;word-break:break-word}
 .krit-auth-helper{margin-top:16px;font-size:.84rem;color:#AFC0DE;line-height:1.7}
-.krit-account-shell{display:grid;grid-template-columns:minmax(240px,.74fr) minmax(0,1.26fr);gap:18px}
-.krit-account-sidebar{display:grid;gap:14px;align-content:start}
+.krit-account-shell{display:grid;grid-template-columns:minmax(240px,.74fr) minmax(0,1.26fr);gap:18px;height:100%;min-height:0}
+.krit-account-sidebar{display:grid;gap:14px;align-content:start;min-height:0}
 .krit-account-profile-head{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
 .krit-account-avatar{width:54px;height:54px;border-radius:18px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2F5DA8,#6C8FE0);color:#fff;font-weight:800;font-size:1.1rem;box-shadow:0 16px 34px rgba(47,93,168,.24)}
 .krit-account-greeting{font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:#8FA7CE;margin-bottom:3px}
@@ -90,8 +92,8 @@
 .krit-account-nav{display:grid;gap:8px}
 .krit-account-nav-btn{padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#D8E3F8;text-align:left;font-size:.84rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .krit-account-nav-btn.active,.krit-account-nav-btn:hover{background:rgba(47,93,168,.18);border-color:rgba(47,93,168,.32);color:#fff}
-.krit-account-content{display:grid;gap:14px;align-content:start;min-width:0}
-.krit-account-panel{display:block}
+.krit-account-content{display:grid;gap:14px;align-content:start;min-width:0;min-height:0;overflow:auto;padding-right:6px}
+.krit-account-panel{display:block;min-height:0}
 .krit-account-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px}
 .krit-account-orders-list{display:grid;gap:12px}
 .krit-account-order-card{padding:16px;border-radius:18px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);display:grid;gap:14px}
