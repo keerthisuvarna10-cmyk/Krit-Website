@@ -114,6 +114,15 @@
     return String(value || fallback || 'guest').replace(/[^a-zA-Z0-9_-]/g, '_');
   }
 
+  function escapeHtml(value){
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function getVisitSessionId(){
     try {
       var existing = sessionStorage.getItem('krit_visit_session_id');
@@ -523,14 +532,146 @@
 
   function openAccountOrderTracker(orderId){
     if(!orderId) return;
-    if(typeof window.openTrackModal === 'function'){
-      window.openTrackModal();
-      setTimeout(function(){
-        var input = document.getElementById('track-awb');
-        if(input) input.value = orderId;
-        if(typeof window.doTrack === 'function') window.doTrack();
-      }, 120);
+    var orders = Array.isArray(window._kritAccountOrders) ? window._kritAccountOrders : [];
+    var order = orders.find(function(entry){
+      return entry && String(entry.id) === String(orderId);
+    });
+    if(!order){
+      if(window.kritToast) window.kritToast('Order details are still loading. Please try again in a moment.');
+      return;
     }
+    openAccountOrderDetails(order);
+  }
+
+  function buildOrderTrackingTimeline(order){
+    var timeline = Array.isArray(order.timeline) && order.timeline.length ? order.timeline.slice() : [];
+    if(!timeline.length){
+      timeline = [
+        {
+          status: 'placed',
+          note: 'Order received on the KRIT website.',
+          time: order.createdAt || order.createdLabel || 'Recently'
+        }
+      ];
+      if(order.status && order.status !== 'placed'){
+        timeline.push({
+          status: order.status,
+          note: 'Latest order status updated in KRIT OMS.',
+          time: order.updatedAt || order.createdAt || order.createdLabel || 'Recently'
+        });
+      }
+    }
+    return timeline;
+  }
+
+  function closeAccountOrderDetails(){
+    var existing = document.getElementById('krit-account-order-overlay');
+    if(!existing) return;
+    if(existing._kritEscHandler){
+      document.removeEventListener('keydown', existing._kritEscHandler);
+    }
+    existing.remove();
+    var authOverlay = document.getElementById('krit-auth-overlay');
+    if(!(authOverlay && authOverlay.classList.contains('open'))){
+      document.body.style.overflow = '';
+    }
+  }
+
+  function openAccountOrderShipment(orderId){
+    var orders = Array.isArray(window._kritAccountOrders) ? window._kritAccountOrders : [];
+    var order = orders.find(function(entry){
+      return entry && String(entry.id) === String(orderId);
+    });
+    if(!order){
+      if(window.kritToast) window.kritToast('Tracking details are not ready yet.');
+      return;
+    }
+    if(order.trackingUrl){
+      window.open(order.trackingUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if(order.trackingNumber){
+      if(window.kritToast) window.kritToast('Tracking number: ' + order.trackingNumber);
+      return;
+    }
+    if(window.kritToast) window.kritToast('Tracking will appear after your order is shipped.');
+  }
+
+  function openAccountOrderDetails(order){
+    if(!order) return;
+    closeAccountOrderDetails();
+    var firstItem = order.items && order.items[0] ? order.items[0] : null;
+    var statusMeta = getCustomerOrderMeta(order);
+    var timeline = buildOrderTrackingTimeline(order);
+    var overlay = document.createElement('div');
+    overlay.id = 'krit-account-order-overlay';
+    overlay.className = 'krit-account-order-overlay';
+    overlay.onclick = function(event){
+      if(event.target === overlay) closeAccountOrderDetails();
+    };
+
+    var timelineMarkup = timeline.map(function(step){
+      var stepMeta = getCustomerOrderMeta({ status: step.status || 'placed', paymentState: order.paymentState });
+      return [
+        '<div class="krit-account-order-step ' + (stepMeta.tone === statusMeta.tone ? 'active' : '') + '">',
+          '<span class="krit-account-order-step-dot"></span>',
+          '<div>',
+            '<div class="krit-account-order-step-title">' + escapeHtml(stepMeta.label) + '</div>',
+            '<div class="krit-account-order-step-note">' + escapeHtml(step.note || 'Status updated in KRIT') + '</div>',
+          '</div>',
+          '<div class="krit-account-order-step-time">' + escapeHtml(step.time || 'Recently') + '</div>',
+        '</div>'
+      ].join('');
+    }).join('');
+
+    overlay.innerHTML = [
+      '<div class="krit-account-order-dialog">',
+        '<div class="krit-account-order-dialog-head">',
+          '<div>',
+            '<div class="krit-account-order-id">' + escapeHtml(order.id) + '</div>',
+            '<h3 class="krit-account-order-dialog-title">Track your KRIT order</h3>',
+            '<p class="krit-account-order-dialog-copy">See payment state, shipment progress, delivery destination, and every update for this order in one place.</p>',
+          '</div>',
+          '<button type="button" class="krit-account-order-dialog-close" aria-label="Close order details">&times;</button>',
+        '</div>',
+        '<div class="krit-account-order-dialog-body">',
+          '<div class="krit-account-order-dialog-grid">',
+            '<div class="krit-account-order-dialog-card">',
+              '<h4>Order summary</h4>',
+              '<strong>' + escapeHtml(firstItem ? firstItem.name : 'KRIT Order') + '</strong>',
+              '<p>' + escapeHtml((firstItem ? ((firstItem.qty || 1) + ' item' + ((firstItem.qty || 1) > 1 ? 's' : '')) : 'Order saved') + ' • ' + (order.createdLabel || (order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : 'Recently')) + '') + '</p>',
+              '<p>Total payable: <strong>' + escapeHtml('Rs ' + Number(order.total || 0).toLocaleString('en-IN')) + '</strong></p>',
+              '<p>Payment mode: <strong>' + escapeHtml(order.paymentLabel || order.paymentMode || 'Website') + '</strong> • ' + escapeHtml(order.paymentState === 'paid' ? 'Paid' : (order.paymentState || 'Pending')) + '</p>',
+            '</div>',
+            '<div class="krit-account-order-dialog-card">',
+              '<h4>Delivery and tracking</h4>',
+              '<strong>' + escapeHtml((order.customer && order.customer.city) || 'Saved delivery address') + '</strong>',
+              '<p>' + escapeHtml(((order.customer && order.customer.address) || 'Address available in your checkout record')) + '</p>',
+              '<p>' + escapeHtml(((order.customer && order.customer.pincode) ? ('PIN ' + order.customer.pincode) : 'Pincode will appear here')) + '</p>',
+              '<p>Tracking: <strong>' + escapeHtml(order.trackingNumber || 'Will appear after shipping') + '</strong></p>',
+              '<p>Courier: <strong>' + escapeHtml(order.courier || 'Courier will be assigned after shipment') + '</strong></p>',
+            '</div>',
+          '</div>',
+          '<div class="krit-account-order-dialog-card">',
+            '<h4>Order timeline</h4>',
+            '<div class="krit-account-order-timeline">' + timelineMarkup + '</div>',
+          '</div>',
+          '<div class="krit-account-order-dialog-actions">',
+            '<button type="button" class="krit-btn krit-btn-primary" onclick="kritCloseAccountOrderDetails()">Done</button>',
+            '<button type="button" class="krit-btn krit-btn-secondary" onclick="openAccountOrderShipment(\'' + String(order.id).replace(/'/g, "\\'") + '\')">Shipment details</button>',
+          '</div>',
+        '</div>',
+      '</div>'
+    ].join('');
+
+    var closeBtn = overlay.querySelector('.krit-account-order-dialog-close');
+    if(closeBtn) closeBtn.onclick = closeAccountOrderDetails;
+    overlay._kritEscHandler = function(event){
+      if(event.key === 'Escape') closeAccountOrderDetails();
+    };
+    document.addEventListener('keydown', overlay._kritEscHandler);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
   }
 
   async function renderCustomerOrders(account){
@@ -911,6 +1052,7 @@
     var formWrap = document.getElementById('krit-auth-form-wrap');
     var accountWrap = document.getElementById('krit-auth-account');
     var welcome = document.getElementById('auth-welcome');
+    var authCard = document.querySelector('.krit-auth-card.krit-auth-premium');
     var nameNode = document.getElementById('auth-account-name');
     var emailNode = document.getElementById('auth-account-email');
     var phoneNode = document.getElementById('auth-account-phone');
@@ -922,6 +1064,8 @@
     if(window._kritAccount && (window._kritAccount.email || window._kritAccount.phone)){
       formWrap.style.display = 'none';
       accountWrap.style.display = 'block';
+      if(authCard) authCard.classList.add('krit-account-mode');
+      accountWrap.scrollTop = 0;
       if(nameNode) nameNode.textContent = window._kritAccount.name || 'KRIT Customer';
       if(emailNode) emailNode.textContent = window._kritAccount.email || 'Mobile verified account';
       if(phoneNode) phoneNode.textContent = window._kritAccount.phone ? '+91 ' + window._kritAccount.phone : 'Add your phone during checkout';
@@ -935,6 +1079,7 @@
     } else {
       formWrap.style.display = 'block';
       accountWrap.style.display = 'none';
+      if(authCard) authCard.classList.remove('krit-account-mode');
       window.switchAuthTab && window.switchAuthTab(window._kritAuthTab || 'login');
     }
   }
@@ -1290,6 +1435,8 @@
     window.kritVerifyOtpLogin = verifyOtpLogin;
     window.switchAccountPanel = switchAccountPanel;
     window.openAccountOrderTracker = openAccountOrderTracker;
+    window.openAccountOrderShipment = openAccountOrderShipment;
+    window.kritCloseAccountOrderDetails = closeAccountOrderDetails;
     window.kritLogout = async function(){
       try {
         var fb = await ensureFirebase();
