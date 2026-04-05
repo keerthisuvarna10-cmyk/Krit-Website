@@ -1,21 +1,23 @@
 ﻿/* KRIT ecommerce auth + gallery enhancements */
 .krit-auth-card.krit-auth-premium{
-  max-width:980px;
-  width:min(980px,calc(100vw - 32px));
+  max-width:1140px;
+  width:min(1140px,calc(100vw - 28px));
+  max-height:min(92vh,760px);
   padding:0;
   display:grid;
-  grid-template-columns:minmax(300px,0.92fr) minmax(380px,1.08fr);
+  grid-template-columns:minmax(320px,.88fr) minmax(0,1.12fr);
   overflow:hidden;
   background:linear-gradient(180deg,#081321 0%,#09182b 100%);
 }
 .krit-auth-side{
   position:relative;
-  padding:38px 34px;
+  padding:28px 30px;
   background:
     radial-gradient(circle at top left, rgba(249,213,72,.18), transparent 34%),
     radial-gradient(circle at bottom right, rgba(43,125,233,.18), transparent 32%),
     linear-gradient(180deg,#0c1930 0%,#08111f 100%);
   border-right:1px solid rgba(255,255,255,.06);
+  overflow:auto;
 }
 .krit-auth-side::after{
   content:'';
@@ -24,30 +26,30 @@
   background:linear-gradient(180deg,rgba(255,255,255,.04),transparent 42%);
   pointer-events:none;
 }
-.krit-auth-main{padding:34px 34px 30px;position:relative}
+.krit-auth-main{padding:24px 28px 22px;position:relative;overflow:auto}
 .krit-auth-card .krit-auth-close{z-index:8;pointer-events:auto}
-.krit-auth-side .krit-auth-logo{text-align:left;margin-bottom:20px}
-.krit-auth-side .krit-auth-logo img{height:44px}
+.krit-auth-side .krit-auth-logo{text-align:left;margin-bottom:18px}
+.krit-auth-side .krit-auth-logo img{height:62px}
 .krit-auth-side #auth-welcome{text-align:left;position:relative;z-index:1}
 .krit-auth-side .krit-auth-title{
   font-family:'Playfair Display',serif;
-  font-size:2.1rem;
-  line-height:1.08;
+  font-size:2rem;
+  line-height:1.04;
   font-weight:700;
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
-.krit-auth-side .krit-auth-sub{font-size:1rem;line-height:1.8;color:#B8C7E0;margin-bottom:22px;text-align:left}
-.krit-auth-benefits{display:grid;gap:10px;margin-top:18px;position:relative;z-index:1}
-.krit-auth-benefit{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#E6EEF9;font-size:.9rem;line-height:1.6}
+.krit-auth-side .krit-auth-sub{font-size:.95rem;line-height:1.7;color:#B8C7E0;margin-bottom:18px;text-align:left}
+.krit-auth-benefits{display:grid;gap:8px;margin-top:14px;position:relative;z-index:1}
+.krit-auth-benefit{padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#E6EEF9;font-size:.84rem;line-height:1.55}
 .krit-auth-benefit strong{display:block;color:#F9D548;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px}
-.krit-auth-main .krit-tabs{margin-bottom:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.krit-auth-main .krit-tabs{margin-bottom:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
 .krit-auth-main .krit-tab{font-size:.78rem;letter-spacing:.14em}
-#krit-auth-form{display:grid;gap:14px}
+#krit-auth-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-content:start}
 #auth-name-wrap{margin:0!important}
 .krit-field{display:grid;gap:8px}
 .krit-label{margin-bottom:0!important}
-.krit-input{height:56px;border-radius:14px;font-size:1rem;padding:0 16px;background:rgba(255,255,255,.045);border-color:rgba(132,160,214,.2)}
-#auth-email-btn.krit-btn{margin-top:4px;height:54px;border-radius:14px}
+.krit-input{height:52px;border-radius:14px;font-size:.96rem;padding:0 15px;background:rgba(255,255,255,.045);border-color:rgba(132,160,214,.2)}
+#auth-email-btn.krit-btn{margin-top:2px;height:52px;border-radius:14px}
 #krit-google-btn.krit-btn{height:54px;border-radius:14px;margin-bottom:0}
 .krit-google-mark{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#fff;color:#1a1a1a;font-size:.9rem;font-weight:800;box-shadow:0 4px 10px rgba(0,0,0,.12)}
 .krit-auth-otp-wrap{display:grid;gap:12px;padding:14px;border-radius:16px;background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.18)}
@@ -55,6 +57,17 @@
 .krit-auth-otp-copy{font-size:.84rem;line-height:1.7;color:#B8C7E0}
 .krit-auth-otp-verify{display:grid;gap:10px}
 .krit-auth-inline-note{font-size:.82rem;color:#8FA7CE;line-height:1.7;margin-top:-4px}
+.krit-msg,
+#krit-google-btn,
+.krit-or,
+#krit-otp-login-wrap,
+#auth-email-btn,
+.krit-auth-inline-note{
+  grid-column:1 / -1;
+}
+.krit-or{margin:0}
+#krit-google-btn.krit-btn{height:50px}
+.krit-auth-otp-wrap .krit-btn{height:50px}
 .krit-auth-account-card{padding:18px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
 .krit-auth-account-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px}
 .krit-auth-account-meta{padding:12px 14px;border-radius:12px;background:rgba(6,14,28,.72);border:1px solid rgba(47,93,168,.12)}
@@ -80,9 +93,10 @@
 #krit-lightbox-share{background:rgba(255,255,255,.08);color:#F0F4FF}
 #krit-image-lightbox-caption{max-width:min(90vw,420px);text-align:center}
 @media (max-width:980px){
-  .krit-auth-card.krit-auth-premium{grid-template-columns:1fr}
+  .krit-auth-card.krit-auth-premium{grid-template-columns:1fr;max-height:none}
   .krit-auth-side{padding:28px 24px 22px;border-right:none;border-bottom:1px solid rgba(255,255,255,.06)}
   .krit-auth-main{padding:24px}
+  #krit-auth-form{grid-template-columns:1fr}
 }
 @media (max-width:768px){
   #krit-detail-share{grid-template-columns:repeat(2,minmax(0,1fr))}
