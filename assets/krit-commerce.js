@@ -594,7 +594,8 @@
       if(window.kritToast) window.kritToast('Tracking number: ' + order.trackingNumber);
       return;
     }
-    if(window.kritToast) window.kritToast('Tracking will appear after your order is shipped.');
+    openAccountOrderDetails(order);
+    if(window.kritToast) window.kritToast('Tracking details will appear after your order is shipped.');
   }
 
   function openAccountOrderDetails(order){
@@ -612,8 +613,9 @@
 
     var timelineMarkup = timeline.map(function(step){
       var stepMeta = getCustomerOrderMeta({ status: step.status || 'placed', paymentState: order.paymentState });
+      var toneClass = String(stepMeta.tone || 'new').replace(/[^a-z_]/g, '_');
       return [
-        '<div class="krit-account-order-step ' + (stepMeta.tone === statusMeta.tone ? 'active' : '') + '">',
+        '<div class="krit-account-order-step status-' + toneClass + ' ' + (stepMeta.tone === statusMeta.tone ? 'active' : '') + '">',
           '<span class="krit-account-order-step-dot"></span>',
           '<div>',
             '<div class="krit-account-order-step-title">' + escapeHtml(stepMeta.label) + '</div>',
@@ -636,14 +638,14 @@
         '</div>',
         '<div class="krit-account-order-dialog-body">',
           '<div class="krit-account-order-dialog-grid">',
-            '<div class="krit-account-order-dialog-card">',
+            '<div class="krit-account-order-dialog-card summary">',
               '<h4>Order summary</h4>',
               '<strong>' + escapeHtml(firstItem ? firstItem.name : 'KRIT Order') + '</strong>',
               '<p>' + escapeHtml((firstItem ? ((firstItem.qty || 1) + ' item' + ((firstItem.qty || 1) > 1 ? 's' : '')) : 'Order saved') + ' • ' + (order.createdLabel || (order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : 'Recently')) + '') + '</p>',
               '<p>Total payable: <strong>' + escapeHtml('Rs ' + Number(order.total || 0).toLocaleString('en-IN')) + '</strong></p>',
               '<p>Payment mode: <strong>' + escapeHtml(order.paymentLabel || order.paymentMode || 'Website') + '</strong> • ' + escapeHtml(order.paymentState === 'paid' ? 'Paid' : (order.paymentState || 'Pending')) + '</p>',
             '</div>',
-            '<div class="krit-account-order-dialog-card">',
+            '<div class="krit-account-order-dialog-card delivery">',
               '<h4>Delivery and tracking</h4>',
               '<strong>' + escapeHtml((order.customer && order.customer.city) || 'Saved delivery address') + '</strong>',
               '<p>' + escapeHtml(((order.customer && order.customer.address) || 'Address available in your checkout record')) + '</p>',
@@ -652,7 +654,7 @@
               '<p>Courier: <strong>' + escapeHtml(order.courier || 'Courier will be assigned after shipment') + '</strong></p>',
             '</div>',
           '</div>',
-          '<div class="krit-account-order-dialog-card">',
+          '<div class="krit-account-order-dialog-card timeline">',
             '<h4>Order timeline</h4>',
             '<div class="krit-account-order-timeline">' + timelineMarkup + '</div>',
           '</div>',
@@ -762,7 +764,7 @@
           '</div>',
           '<div class="krit-account-order-actions">',
             '<button type="button" class="krit-btn krit-btn-primary" onclick="openAccountOrderTracker(\'' + String(order.id).replace(/'/g, "\\'") + '\')">Track order</button>',
-            '<button type="button" class="krit-btn krit-btn-secondary" onclick="openAccountOrderTracker(\'' + String(order.id).replace(/'/g, "\\'") + '\')">View details</button>',
+            '<button type="button" class="krit-btn krit-btn-secondary" onclick="openAccountOrderShipment(\'' + String(order.id).replace(/'/g, "\\'") + '\')">Shipment details</button>',
           '</div>',
         '</article>'
       ].join('');

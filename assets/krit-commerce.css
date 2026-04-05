@@ -112,8 +112,8 @@
 .krit-account-content{display:grid;gap:24px;align-content:start;min-width:0;min-height:0;overflow:visible;padding-right:0;padding-bottom:28px}
 .krit-account-panel{display:block;min-height:0}
 .krit-account-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:14px}
-.krit-account-orders-list{display:grid;gap:18px}
-.krit-account-order-card{padding:24px;border-radius:20px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);display:grid;gap:18px}
+.krit-account-orders-list{display:grid;gap:24px;padding-bottom:20px}
+.krit-account-order-card{padding:28px;border-radius:22px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);display:grid;gap:22px}
 .krit-account-order-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
 .krit-account-order-id{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#8FA7CE;font-weight:800}
 .krit-account-order-date{font-size:.82rem;color:#9FB1D1;margin-top:6px}
@@ -126,14 +126,14 @@
 .krit-account-order-name{font-size:1rem;color:#F5F8FF;font-weight:700;line-height:1.45}
 .krit-account-order-sub{font-size:.84rem;color:#AFC0DE;margin-top:4px}
 .krit-account-order-money{font-size:1.12rem;color:#F5F8FF;font-weight:800;white-space:nowrap}
-.krit-account-order-statusline{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
-.krit-account-order-statuscopy{font-size:.88rem;line-height:1.65;color:#C8D6EC}
-.krit-account-order-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.krit-account-order-meta{padding:16px 18px;border-radius:16px;background:rgba(6,14,28,.58);border:1px solid rgba(47,93,168,.12);display:grid;gap:8px}
+.krit-account-order-statusline{padding:16px 18px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+.krit-account-order-statuscopy{font-size:.93rem;line-height:1.75;color:#C8D6EC}
+.krit-account-order-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.krit-account-order-meta{padding:18px 20px;border-radius:18px;background:rgba(6,14,28,.58);border:1px solid rgba(47,93,168,.12);display:grid;gap:10px}
 .krit-account-order-meta span{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:#8CA0C4}
 .krit-account-order-meta strong{font-size:.92rem;color:#F4F7FF;line-height:1.45}
 .krit-account-order-meta em{font-size:.8rem;color:#AFC0DE;font-style:normal;line-height:1.45}
-.krit-account-order-actions{display:flex;flex-wrap:wrap;gap:14px;padding-top:8px}
+.krit-account-order-actions{display:flex;flex-wrap:wrap;gap:14px;padding-top:10px}
 .krit-account-order-actions .krit-btn{width:auto;min-width:140px}
 .krit-account-order-overlay{
   position:fixed;
@@ -147,13 +147,15 @@
   padding:22px;
 }
 .krit-account-order-dialog{
-  width:min(980px,100%);
+  width:min(1080px,100%);
   max-height:min(94vh,860px);
-  overflow:auto;
+  overflow:hidden;
   border-radius:24px;
   background:linear-gradient(180deg,#091525 0%,#08111f 100%);
   border:1px solid rgba(255,255,255,.08);
   box-shadow:0 30px 80px rgba(0,0,0,.42);
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
 }
 .krit-account-order-dialog-head{
   position:sticky;
@@ -182,21 +184,35 @@
 }
 .krit-account-order-dialog-body{
   display:grid;
-  gap:18px;
-  padding:24px 26px 28px;
+  gap:22px;
+  padding:26px 28px 30px;
+  overflow:auto;
+  min-height:0;
 }
 .krit-account-order-dialog-grid{
   display:grid;
   grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
-  gap:18px;
+  gap:22px;
 }
 .krit-account-order-dialog-card{
-  padding:18px;
-  border-radius:18px;
+  padding:22px;
+  border-radius:20px;
   background:rgba(255,255,255,.035);
   border:1px solid rgba(255,255,255,.06);
   display:grid;
-  gap:12px;
+  gap:14px;
+}
+.krit-account-order-dialog-card.summary{
+  background:linear-gradient(180deg,rgba(38,84,156,.16),rgba(12,23,40,.84));
+  border-color:rgba(90,145,234,.22);
+}
+.krit-account-order-dialog-card.delivery{
+  background:linear-gradient(180deg,rgba(9,72,70,.22),rgba(10,24,34,.84));
+  border-color:rgba(76,202,176,.18);
+}
+.krit-account-order-dialog-card.timeline{
+  background:linear-gradient(180deg,rgba(48,36,86,.22),rgba(10,21,36,.86));
+  border-color:rgba(156,123,255,.16);
 }
 .krit-account-order-dialog-card h4{
   margin:0;
@@ -218,14 +234,14 @@
 }
 .krit-account-order-timeline{
   display:grid;
-  gap:12px;
+  gap:14px;
 }
 .krit-account-order-step{
   display:grid;
   grid-template-columns:auto 1fr auto;
-  gap:12px;
+  gap:14px;
   align-items:start;
-  padding:14px 16px;
+  padding:16px 18px;
   border-radius:16px;
   background:rgba(6,14,28,.6);
   border:1px solid rgba(47,93,168,.12);
@@ -238,6 +254,62 @@
   background:#4A5E86;
 }
 .krit-account-order-step.active .krit-account-order-step-dot{background:#7EE39D}
+.krit-account-order-step.status-new,
+.krit-account-order-step.status-placed{
+  border-color:rgba(109,134,184,.2);
+  background:rgba(15,28,49,.86);
+}
+.krit-account-order-step.status-new .krit-account-order-step-dot,
+.krit-account-order-step.status-placed .krit-account-order-step-dot{
+  background:#7D96C9;
+  box-shadow:0 0 0 6px rgba(125,150,201,.12);
+}
+.krit-account-order-step.status-pending,
+.krit-account-order-step.status-payment_pending{
+  border-color:rgba(249,213,72,.2);
+  background:rgba(45,36,9,.48);
+}
+.krit-account-order-step.status-pending .krit-account-order-step-dot,
+.krit-account-order-step.status-payment_pending .krit-account-order-step-dot{
+  background:#F9D548;
+  box-shadow:0 0 0 6px rgba(249,213,72,.12);
+}
+.krit-account-order-step.status-confirmed,
+.krit-account-order-step.status-processing{
+  border-color:rgba(90,145,234,.24);
+  background:rgba(19,35,61,.78);
+}
+.krit-account-order-step.status-confirmed .krit-account-order-step-dot,
+.krit-account-order-step.status-processing .krit-account-order-step-dot{
+  background:#61A2FF;
+  box-shadow:0 0 0 6px rgba(97,162,255,.12);
+}
+.krit-account-order-step.status-packed,
+.krit-account-order-step.status-shipped{
+  border-color:rgba(123,98,247,.24);
+  background:rgba(33,24,64,.8);
+}
+.krit-account-order-step.status-packed .krit-account-order-step-dot,
+.krit-account-order-step.status-shipped .krit-account-order-step-dot{
+  background:#A78BFA;
+  box-shadow:0 0 0 6px rgba(167,139,250,.12);
+}
+.krit-account-order-step.status-delivered{
+  border-color:rgba(67,203,119,.24);
+  background:rgba(16,41,26,.8);
+}
+.krit-account-order-step.status-delivered .krit-account-order-step-dot{
+  background:#43CB77;
+  box-shadow:0 0 0 6px rgba(67,203,119,.12);
+}
+.krit-account-order-step.status-cancelled{
+  border-color:rgba(255,124,124,.24);
+  background:rgba(49,21,28,.8);
+}
+.krit-account-order-step.status-cancelled .krit-account-order-step-dot{
+  background:#FF7C7C;
+  box-shadow:0 0 0 6px rgba(255,124,124,.12);
+}
 .krit-account-order-step-title{
   font-size:.92rem;
   font-weight:700;
@@ -277,8 +349,8 @@
 .krit-account-empty-title{font-size:1.04rem;font-weight:700;color:#F5F8FF;margin-bottom:6px}
 .krit-account-empty-copy{font-size:.88rem;line-height:1.7;color:#AFC0DE}
 .krit-auth-card.krit-auth-premium.krit-account-mode{
-  max-width:1360px;
-  width:min(1360px,calc(100vw - 26px));
+  max-width:1440px;
+  width:min(1440px,calc(100vw - 24px));
   max-height:min(96vh,920px);
   grid-template-columns:minmax(290px,.58fr) minmax(0,1.42fr);
 }
@@ -289,7 +361,8 @@
   padding:22px 24px 18px;
 }
 .krit-auth-card.krit-auth-premium.krit-account-mode #krit-auth-account{
-  padding:4px 14px 16px 0;
+  padding:8px 18px 20px 0;
+  overflow:auto;
 }
 #krit-detail-share{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0 18px}
 .krit-share-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 10px;border-radius:12px;border:1px solid rgba(47,93,168,.18);background:rgba(47,93,168,.08);color:#DDE7F8;font-size:.72rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;cursor:pointer;transition:all .2s}
@@ -320,6 +393,8 @@
   .krit-account-shell{grid-template-columns:1fr}
   .krit-account-profile-grid,.krit-account-support-grid,.krit-account-order-grid{grid-template-columns:1fr}
   .krit-account-order-dialog-grid{grid-template-columns:1fr}
+  .krit-account-order-dialog{width:min(100%,960px)}
+  .krit-account-order-dialog-body{padding:20px}
 }
 @media (max-height:940px){
   .krit-auth-card.krit-auth-premium{
@@ -341,7 +416,7 @@
   #krit-google-btn.krit-btn,
   .krit-auth-otp-wrap .krit-btn{height:40px}
   .krit-auth-card.krit-auth-premium.krit-account-mode{
-    max-height:min(95vh,840px);
+    max-height:min(95vh,860px);
     grid-template-columns:minmax(255px,.6fr) minmax(0,1.4fr);
   }
   .krit-auth-card.krit-auth-premium.krit-account-mode .krit-auth-side{
@@ -352,6 +427,9 @@
   }
   .krit-auth-card.krit-auth-premium.krit-account-mode .krit-auth-side .krit-auth-logo img{
     height:68px;
+  }
+  .krit-auth-card.krit-auth-premium.krit-account-mode #krit-auth-account{
+    padding-bottom:26px;
   }
 }
 @media (max-height:860px){
