@@ -29,6 +29,13 @@ app.use(session({
   }
 }));
 
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
 function renderLogin(errorText = '') {
   const errorBlock = errorText
     ? `<div style="margin-bottom:18px;padding:12px 14px;border-radius:14px;background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.28);color:#ffb4b4;font-size:.92rem;line-height:1.6">${errorText}</div>`
@@ -119,6 +126,15 @@ function requireAuth(req, res, next) {
   return res.redirect('/');
 }
 
+function isPublicPath(req) {
+  return (
+    req.path === '/' ||
+    req.path === '/login' ||
+    req.path === '/logout' ||
+    req.path === '/health'
+  );
+}
+
 function sendProtectedPage(pageName){
   return function(_req, res){
     res.sendFile(path.join(__dirname, pageName));
@@ -182,6 +198,11 @@ app.post('/logout', (req, res) => {
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', app: 'KRIT Website', protected: true, pages: ['index','product','account','checkout'] });
+});
+
+app.use((req, res, next) => {
+  if (isPublicPath(req)) return next();
+  return requireAuth(req, res, next);
 });
 
 app.post('/api/erp/customer', requireAuth, async (req, res) => {
