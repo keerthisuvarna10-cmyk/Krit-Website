@@ -107,6 +107,8 @@
 .krit-account-order-name{font-size:1rem;color:#F5F8FF;font-weight:700;line-height:1.45}
 .krit-account-order-sub{font-size:.84rem;color:#AFC0DE;margin-top:4px}
 .krit-account-order-money{font-size:1.12rem;color:#F5F8FF;font-weight:800;white-space:nowrap}
+.krit-account-order-statusline{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+.krit-account-order-statuscopy{font-size:.88rem;line-height:1.65;color:#C8D6EC}
 .krit-account-order-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .krit-account-order-meta{padding:12px 14px;border-radius:14px;background:rgba(6,14,28,.58);border:1px solid rgba(47,93,168,.12);display:grid;gap:4px}
 .krit-account-order-meta span{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:#8CA0C4}

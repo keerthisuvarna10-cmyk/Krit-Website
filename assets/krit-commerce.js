@@ -400,6 +400,7 @@
     if(window.kritOrderStatusMeta) return window.kritOrderStatusMeta(order && order.status);
     var status = (order && order.status) || 'placed';
     var lookup = {
+      new: { label: 'Order placed', tone: 'new' },
       placed: { label: 'Order placed', tone: 'new' },
       confirmed: { label: 'Confirmed', tone: 'confirmed' },
       processing: { label: 'Processing', tone: 'confirmed' },
@@ -412,8 +413,8 @@
     return lookup[status] || { label: status, tone: 'new' };
   }
 
-  function getCustomerOrders(account){
-    var orders = getStoredOrders();
+  function getCustomerOrders(account, sourceOrders){
+    var orders = sourceOrders || getStoredOrders();
     if(!account || (!account.email && !account.phone)) return [];
     var email = (account.email || '').toLowerCase();
     var phone = String(account.phone || '').replace(/\D/g, '');
@@ -423,6 +424,87 @@
       var orderPhone = String(customer.phone || '').replace(/\D/g, '');
       return (!!email && orderEmail === email) || (!!phone && orderPhone === phone);
     }).sort(function(a, b){
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    });
+  }
+
+  function normalizeErpOrder(order){
+    if(!order) return null;
+    var paymentMode = String(order.payment_mode || '').trim() || 'Website';
+    var paymentStatus = String(order.payment_status || '').trim().toLowerCase() || 'pending';
+    var status = String(order.status || '').trim().toLowerCase() || 'new';
+    var createdAt = order.created_at ? String(order.created_at).replace(' ', 'T') : (order.date || new Date().toISOString());
+    return {
+      id: order.id,
+      status: status,
+      total: Number(order.total || 0),
+      subtotal: Number(order.subtotal || 0),
+      tax: Number(order.tax || 0),
+      discount: Number(order.discount || 0),
+      shippingCharge: Number(order.shipping_charge || 0),
+      createdAt: createdAt,
+      createdLabel: createdAt ? new Date(createdAt).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : (order.date || 'Recently'),
+      paymentMode: paymentMode,
+      paymentLabel: paymentMode,
+      paymentState: paymentStatus === 'paid' ? 'paid' : 'pending',
+      trackingNumber: order.awb || '',
+      courier: order.courier || '',
+      trackingUrl: order.tracking_url || '',
+      items: Array.isArray(order.items) ? order.items.map(function(item){
+        return {
+          id: item.product_id || item.sku || '',
+          sku: item.sku || '',
+          name: item.description || 'KRIT Pillow',
+          qty: Number(item.qty || 1),
+          price: Number(item.rate || 0),
+          amount: Number(item.amount || 0)
+        };
+      }) : [],
+      customer: {
+        name: order.customer_name || 'KRIT Customer',
+        phone: order.customer_phone || '',
+        email: order.customer_email || '',
+        address: order.customer_address || '',
+        city: order.customer_city || '',
+        pincode: order.customer_pincode || ''
+      },
+      erpSource: true
+    };
+  }
+
+  async function fetchCustomerOrdersFromERP(account){
+    if(!account || (!account.email && !account.phone)) return [];
+    var response = await fetch('/api/erp/customer-orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: account.email || '',
+        phone: account.phone || ''
+      })
+    });
+    var text = await response.text();
+    var body = {};
+    try {
+      body = text ? JSON.parse(text) : {};
+    } catch(_error) {
+      body = { raw: text };
+    }
+    if(!response.ok){
+      throw new Error((body && body.error) || ('ERP orders request failed with status ' + response.status));
+    }
+    return Array.isArray(body.orders) ? body.orders.map(normalizeErpOrder).filter(Boolean) : [];
+  }
+
+  function mergeCustomerOrders(account, erpOrders){
+    var map = {};
+    getCustomerOrders(account).forEach(function(order){
+      if(order && order.id) map[order.id] = order;
+    });
+    (erpOrders || []).forEach(function(order){
+      if(!order || !order.id) return;
+      map[order.id] = Object.assign({}, map[order.id] || {}, order);
+    });
+    return Object.keys(map).map(function(id){ return map[id]; }).sort(function(a, b){
       return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
     });
   }
@@ -451,17 +533,34 @@
     }
   }
 
-  function renderCustomerOrders(account){
-    var orders = getCustomerOrders(account);
+  async function renderCustomerOrders(account){
     var list = document.getElementById('krit-account-orders-list');
     var countNode = document.getElementById('krit-account-order-count');
     var pendingNode = document.getElementById('krit-account-pending-count');
     var spentNode = document.getElementById('krit-account-total-spent');
     var addressNode = document.getElementById('krit-account-address');
+    if(list){
+      list.innerHTML = [
+        '<div class="krit-account-empty">',
+          '<div class="krit-account-empty-title">Loading your orders</div>',
+          '<div class="krit-account-empty-copy">We are pulling your latest payment, shipping, and delivery status from KRIT.</div>',
+        '</div>'
+      ].join('');
+    }
+    var orders = [];
+    try {
+      var erpOrders = await fetchCustomerOrdersFromERP(account);
+      orders = mergeCustomerOrders(account, erpOrders);
+      window._kritAccountOrders = orders;
+    } catch(error) {
+      console.error('KRIT customer orders fetch failed', error);
+      orders = mergeCustomerOrders(account, []);
+      window._kritAccountOrders = orders;
+    }
     if(countNode) countNode.textContent = String(orders.length);
     if(pendingNode){
       pendingNode.textContent = String(orders.filter(function(order){
-        return ['payment_pending', 'placed', 'confirmed', 'processing', 'packed', 'shipped'].indexOf(order.status) >= 0;
+        return ['payment_pending', 'new', 'placed', 'confirmed', 'processing', 'packed', 'shipped'].indexOf(order.status) >= 0;
       }).length);
     }
     if(spentNode){
@@ -487,6 +586,17 @@
       var paymentText = order.paymentLabel || order.paymentMode || 'Website';
       var paymentState = order.paymentState === 'paid' ? 'Paid' : (order.paymentState === 'pending' ? 'Pending' : (order.paymentState || 'Pending'));
       var dateText = order.createdLabel || (order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : 'Recently');
+      var statusCopy = {
+        new: 'We have received your order and the KRIT team will confirm it shortly.',
+        placed: 'We have received your order and the KRIT team will confirm it shortly.',
+        confirmed: 'Your order is confirmed and being prepared for dispatch.',
+        processing: 'Your order is being prepared in KRIT OMS.',
+        packed: 'Your order is packed and ready for courier pickup.',
+        shipped: 'Your shipment is on the move. Tracking details are available below.',
+        delivered: 'Your order has been delivered successfully.',
+        cancelled: 'This order has been cancelled.',
+        payment_pending: 'Payment is pending. We will confirm the next step shortly.'
+      };
       return [
         '<article class="krit-account-order-card">',
           '<div class="krit-account-order-top">',
@@ -503,9 +613,10 @@
             '</div>',
             '<div class="krit-account-order-money">' + ('Rs ' + Number(order.total || 0).toLocaleString('en-IN')) + '</div>',
           '</div>',
+          '<div class="krit-account-order-statusline"><div class="krit-account-order-statuscopy">' + (statusCopy[order.status] || 'Your latest order status is visible here.') + '</div></div>',
           '<div class="krit-account-order-grid">',
             '<div class="krit-account-order-meta"><span>Payment</span><strong>' + paymentText + '</strong><em>' + paymentState + '</em></div>',
-            '<div class="krit-account-order-meta"><span>Tracking</span><strong>' + (order.trackingNumber || 'Will appear after processing') + '</strong><em>' + ((order.courier || '').trim() || 'Courier will be assigned soon') + '</em></div>',
+            '<div class="krit-account-order-meta"><span>Tracking</span><strong>' + (order.trackingNumber || 'Will appear after shipping') + '</strong><em>' + ((order.courier || '').trim() || 'Courier will be assigned after shipment') + '</em></div>',
             '<div class="krit-account-order-meta"><span>Deliver to</span><strong>' + ((order.customer && order.customer.city) || 'Saved address') + '</strong><em>' + (((order.customer && order.customer.pincode) || '') ? ('PIN ' + order.customer.pincode) : 'Address available in checkout record') + '</em></div>',
           '</div>',
           '<div class="krit-account-order-actions">',
@@ -530,7 +641,7 @@
     });
   }
 
-  function renderAccountDashboard(){
+  async function renderAccountDashboard(){
     var account = window._kritAccount;
     var nameNode = document.getElementById('auth-account-name');
     var emailNode = document.getElementById('auth-account-email');
@@ -544,7 +655,7 @@
     if(providerNode) providerNode.textContent = account && account.provider ? String(account.provider).replace(/_/g, ' ') : 'customer account';
     if(greetingNode) greetingNode.textContent = 'Hello, ' + (((account && account.name) || 'KRIT Customer').split(' ')[0]);
     if(subtitleNode) subtitleNode.textContent = 'Track all your orders, payment states, delivery progress, and saved customer details in one place.';
-    renderCustomerOrders(account);
+    await renderCustomerOrders(account);
     switchAccountPanel('orders');
   }
 

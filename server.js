@@ -215,6 +215,11 @@ app.post('/api/erp/order', requireAuth, async (req, res) => {
   res.status(result.status).json(result.body);
 });
 
+app.post('/api/erp/customer-orders', requireAuth, async (req, res) => {
+  const result = await postToErp('/api/webhook/customer-orders', req.body);
+  res.status(result.status).json(result.body);
+});
+
 app.post('/api/erp/visit', requireAuth, async (req, res) => {
   const result = await postToErp('/api/webhook/visit', req.body);
   res.status(result.status).json(result.body);
