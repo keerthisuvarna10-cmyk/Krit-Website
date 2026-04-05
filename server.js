@@ -194,6 +194,11 @@ app.post('/api/erp/order', requireAuth, async (req, res) => {
   res.status(result.status).json(result.body);
 });
 
+app.post('/api/erp/visit', requireAuth, async (req, res) => {
+  const result = await postToErp('/api/webhook/visit', req.body);
+  res.status(result.status).json(result.body);
+});
+
 app.use('/assets', requireAuth, express.static(path.join(__dirname, 'assets')));
 app.get('/site', requireAuth, (_req, res) => res.redirect('/index.html'));
 app.get('/index.html', requireAuth, sendProtectedPage('index.html'));

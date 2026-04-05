@@ -17,6 +17,8 @@
 
   var firebaseReadyPromise = null;
   var lightboxThumbsEl = null;
+  var authObserverBound = false;
+  var visitLogPromise = null;
 
   function loadScript(src){
     return new Promise(function(resolve, reject){
@@ -105,6 +107,78 @@
     return firebaseReadyPromise;
   }
 
+  function makeSafeKey(value, fallback){
+    return String(value || fallback || 'guest').replace(/[^a-zA-Z0-9_-]/g, '_');
+  }
+
+  function getVisitSessionId(){
+    try {
+      var existing = sessionStorage.getItem('krit_visit_session_id');
+      if(existing) return existing;
+      var fresh = 'visit_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+      sessionStorage.setItem('krit_visit_session_id', fresh);
+      return fresh;
+    } catch(e){
+      return 'visit_' + Date.now();
+    }
+  }
+
+  async function logVisit(){
+    if(visitLogPromise) return visitLogPromise;
+    visitLogPromise = (async function(){
+      var fb = await ensureFirebase();
+      if(!fb || !fb.firestore) return false;
+      var pageKey = location.pathname.replace(/[^a-zA-Z0-9]/g, '_') || 'home';
+      var sessionId = getVisitSessionId();
+      var onceKey = 'krit_visit_logged_' + pageKey + '_' + sessionId;
+      try {
+        if(sessionStorage.getItem(onceKey)) return true;
+      } catch(e){}
+      try {
+        await fb.firestore().collection('visits').add({
+          sessionId: sessionId,
+          path: location.pathname || '/',
+          href: location.href,
+          title: document.title || 'KRIT',
+          referrer: document.referrer || '',
+          userAgent: navigator.userAgent || '',
+          accountEmail: (window._kritAccount && window._kritAccount.email) || '',
+          accountUid: (window._kritAccount && window._kritAccount.uid) || '',
+          createdAt: fb.firestore.FieldValue.serverTimestamp()
+        });
+        try { sessionStorage.setItem(onceKey, '1'); } catch(e){}
+        return true;
+      } catch(e){
+        return false;
+      }
+    })();
+    return visitLogPromise;
+  }
+
+  async function bindFirebaseAuthState(){
+    if(authObserverBound) return;
+    var fb = await ensureFirebase();
+    if(!fb || !fb.auth) return;
+    authObserverBound = true;
+    fb.auth().onAuthStateChanged(async function(user){
+      if(!user) return;
+      var fallbackProfile = window._kritAccount || {};
+      var profile = {
+        uid: user.uid || '',
+        name: user.displayName || fallbackProfile.name || 'KRIT Customer',
+        email: (user.email || fallbackProfile.email || '').toLowerCase(),
+        phone: fallbackProfile.phone || (user.phoneNumber ? String(user.phoneNumber).replace(/^\+91/, '') : ''),
+        avatar: user.photoURL || fallbackProfile.avatar || '',
+        provider: (user.providerData && user.providerData[0] && user.providerData[0].providerId) || fallbackProfile.provider || 'firebase',
+        createdAt: fallbackProfile.createdAt || new Date().toISOString()
+      };
+      if(typeof window.kritPersistAccount === 'function') window.kritPersistAccount(profile);
+      await saveCustomerProfile(profile, 'firebase-auth-state');
+      updateAuthUI();
+      logVisit();
+    });
+  }
+
   async function syncCustomerToERP(profile, source){
     if(!profile || (!profile.email && !profile.phone)) return false;
     try {
@@ -144,14 +218,16 @@
     var fb = await ensureFirebase();
     if(fb && fb.firestore){
       try {
-        var key = (profile.phone || profile.email || 'guest').replace(/[^a-zA-Z0-9_-]/g, '_');
+        var key = makeSafeKey(profile.uid || profile.phone || profile.email, 'guest');
         await fb.firestore().collection('customers').doc(key).set({
+          uid: profile.uid || '',
           name: profile.name || '',
           email: profile.email || '',
           phone: profile.phone || '',
           avatar: profile.avatar || '',
           source: source || 'website',
           provider: profile.provider || 'email',
+          lastLoginAt: fb.firestore.FieldValue.serverTimestamp(),
           updatedAt: fb.firestore.FieldValue.serverTimestamp(),
           createdAt: profile.createdAt || fb.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
@@ -190,7 +266,7 @@
     benefits.innerHTML = [
       '<div class="krit-auth-benefit"><strong>Faster checkout</strong>Save your delivery details and move through checkout in a few taps.</div>',
       '<div class="krit-auth-benefit"><strong>Order visibility</strong>Keep your purchases, payments, and tracking in one clean KRIT account.</div>',
-      '<div class="krit-auth-benefit"><strong>Growth ready</strong>Your account can connect to Google login and Firebase the moment your project keys are added.</div>'
+      '<div class="krit-auth-benefit"><strong>Google and email login</strong>Use Google or your email and password, then sync the customer profile into KRIT.</div>'
     ].join('');
 
     side.appendChild(logo);
@@ -226,7 +302,7 @@
     if(form && !form.querySelector('.krit-auth-inline-note')){
       var note = document.createElement('div');
       note.className = 'krit-auth-inline-note';
-      note.textContent = 'Use email + mobile for checkout-ready access, or continue with Google and add your phone later.';
+      note.textContent = 'Use Google for one-tap sign-in, or create an email account with a secure password and add your mobile for checkout.';
       form.appendChild(note);
     }
 
@@ -239,7 +315,7 @@
             '<div class="krit-auth-account-meta"><div class="label">Email</div><div class="value" id="auth-account-email">hello@kritsleep.in</div></div>',
             '<div class="krit-auth-account-meta"><div class="label">Mobile</div><div class="value" id="auth-account-phone">Add your phone in checkout</div></div>',
           '</div>',
-          '<div class="krit-auth-helper">Google sign-in and customer storage can sync into Firebase automatically once your live project credentials are added.</div>',
+          '<div class="krit-auth-helper">This customer account is synced through Firebase Auth and stored for faster checkout, order updates, and CRM follow-up.</div>',
           '<button class="kd-logout" type="button" onclick="kritLogout()">Logout</button>',
         '</div>'
       ].join('');
@@ -284,6 +360,10 @@
     var tabLogin = document.getElementById('tab-login');
     var tabSignup = document.getElementById('tab-signup');
     var nameWrap = document.getElementById('auth-name-wrap');
+    var phoneWrap = document.getElementById('auth-phone-wrap');
+    var passwordWrap = document.getElementById('auth-password-wrap');
+    var phoneInput = document.getElementById('auth-phone');
+    var passwordInput = document.getElementById('auth-password');
     var actionBtn = document.getElementById('auth-email-btn');
     var welcome = document.getElementById('auth-welcome');
     if(tabLogin) tabLogin.classList.toggle('active', isLogin);
@@ -291,13 +371,17 @@
     if(tabLogin){ tabLogin.style.background = isLogin ? '#2F5DA8' : 'transparent'; tabLogin.style.color = isLogin ? '#fff' : 'rgba(255,255,255,.55)'; }
     if(tabSignup){ tabSignup.style.background = !isLogin ? '#2F5DA8' : 'transparent'; tabSignup.style.color = !isLogin ? '#fff' : 'rgba(255,255,255,.55)'; }
     if(nameWrap) nameWrap.style.display = isLogin ? 'none' : 'block';
+    if(phoneWrap) phoneWrap.style.display = isLogin ? 'none' : 'grid';
+    if(passwordWrap) passwordWrap.style.display = 'grid';
+    if(phoneInput) phoneInput.required = !isLogin;
+    if(passwordInput) passwordInput.required = true;
     if(actionBtn){
       actionBtn.textContent = isLogin ? 'Login with Email' : 'Create Account';
       actionBtn.className = 'krit-btn krit-btn-primary';
     }
     if(welcome){
       welcome.querySelector('.krit-auth-title').textContent = isLogin ? 'Welcome back to KRIT' : 'Create your KRIT account';
-      welcome.querySelector('.krit-auth-sub').textContent = isLogin ? 'Continue with your saved email and mobile number, or use Google if it is connected.' : 'Create a customer profile for faster checkout, saved wishlists, and order tracking.';
+      welcome.querySelector('.krit-auth-sub').textContent = isLogin ? 'Continue with your email and password, or use Google if it is connected.' : 'Create a customer profile for faster checkout, saved wishlists, and order tracking.';
     }
     clearAuthMessage();
   }
@@ -307,7 +391,7 @@
     authMessage('Connecting your Google account...', 'info');
     var fb = await ensureFirebase();
     if(!fb || !fb.auth){
-      authMessage('Google login will go live once your Firebase project keys are added. Email signup still works right now.', 'err');
+      authMessage('Google login is not available right now. Please continue with email instead.', 'err');
       return;
     }
     try {
@@ -320,6 +404,7 @@
         email: user.email || '',
         phone: user.phoneNumber ? String(user.phoneNumber).replace(/^\+91/, '') : '',
         avatar: user.photoURL || '',
+        uid: user.uid || '',
         provider: 'google',
         createdAt: new Date().toISOString()
       };
@@ -330,7 +415,7 @@
       authMessage('Google account connected successfully.', 'ok');
       setTimeout(function(){ if(typeof window.closeAuthModal === 'function') window.closeAuthModal(); }, 600);
     } catch(error) {
-      authMessage('Google login could not be completed. You can still continue with email right now.', 'err');
+      authMessage('Google login could not be completed. You can still continue with email and password.', 'err');
     }
   }
 
@@ -339,45 +424,75 @@
     var nameEl = document.getElementById('auth-name');
     var emailEl = document.getElementById('auth-email');
     var phoneEl = document.getElementById('auth-phone');
+    var passwordEl = document.getElementById('auth-password');
     var name = nameEl ? nameEl.value.trim() : '';
     var email = emailEl ? emailEl.value.trim().toLowerCase() : '';
     var phone = phoneEl ? phoneEl.value.replace(/\D/g,'').trim() : '';
+    var password = passwordEl ? passwordEl.value : '';
     if(window._kritAuthTab === 'signup' && name.length < 2){ authMessage('Please enter your full name.', 'err'); return; }
     if(typeof window.kritValidEmail === 'function' && !window.kritValidEmail(email)){ authMessage('Please enter a valid email address.', 'err'); return; }
     if(phone && typeof window.kritValidPhone === 'function' && !window.kritValidPhone(phone)){ authMessage('Please enter a valid 10-digit mobile number.', 'err'); return; }
     if(window._kritAuthTab === 'signup' && !phone){ authMessage('Please enter a mobile number so we can save your customer profile correctly.', 'err'); return; }
+    if(password.length < 6){ authMessage('Please enter a password with at least 6 characters.', 'err'); return; }
 
-    var stored = null;
-    try { stored = JSON.parse(localStorage.getItem('krit_account_profile') || 'null'); } catch(e) { stored = null; }
-
-    if(window._kritAuthTab === 'login'){
-      if(!stored){ authMessage('No saved account found yet. Please create an account first.', 'err'); window.switchAuthTab('signup'); return; }
-      if(stored.email !== email || (stored.phone && phone && stored.phone !== phone)){
-        authMessage('The email or mobile number does not match your saved KRIT account.', 'err');
-        return;
-      }
-      window._kritAccount = stored;
-      await saveCustomerProfile(window._kritAccount, 'email-login');
-      updateAuthUI();
-      track('login', { method: 'email' });
-      if(window.kritToast) window.kritToast('Welcome back to KRIT');
-      if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
+    var fb = await ensureFirebase();
+    if(!fb || !fb.auth){
+      authMessage('Live account login is not available yet. Please refresh and try again.', 'err');
       return;
     }
 
-    var profile = {
-      name: name,
-      email: email,
-      phone: phone,
-      provider: 'email',
-      createdAt: new Date().toISOString()
-    };
-    if(typeof window.kritPersistAccount === 'function') window.kritPersistAccount(profile);
-    await saveCustomerProfile(profile, 'email-signup');
-    updateAuthUI();
-    track('sign_up', { method: 'email' });
-    if(window.kritToast) window.kritToast('Your KRIT account has been created');
-    if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
+    if(window._kritAuthTab === 'login'){
+      try {
+        var loginResult = await fb.auth().signInWithEmailAndPassword(email, password);
+        var loginUser = loginResult.user || {};
+        var stored = null;
+        try { stored = JSON.parse(localStorage.getItem('krit_account_profile') || 'null'); } catch(e) { stored = null; }
+        var loginProfile = {
+          uid: loginUser.uid || '',
+          name: (stored && stored.name) || (loginUser.displayName || 'KRIT Customer'),
+          email: email,
+          phone: (stored && stored.phone) || phone || '',
+          avatar: loginUser.photoURL || '',
+          provider: 'email',
+          createdAt: (stored && stored.createdAt) || new Date().toISOString()
+        };
+        if(typeof window.kritPersistAccount === 'function') window.kritPersistAccount(loginProfile);
+        await saveCustomerProfile(loginProfile, 'email-login');
+        updateAuthUI();
+        track('login', { method: 'email' });
+        logVisit();
+        if(window.kritToast) window.kritToast('Welcome back to KRIT');
+        if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
+      } catch(error) {
+        authMessage('Login failed. Please check your email and password, or create an account first.', 'err');
+      }
+      return;
+    }
+
+    try {
+      var signupResult = await fb.auth().createUserWithEmailAndPassword(email, password);
+      var signupUser = signupResult.user || {};
+      if(signupUser.updateProfile){
+        try { await signupUser.updateProfile({ displayName: name }); } catch(e){}
+      }
+      var profile = {
+        uid: signupUser.uid || '',
+        name: name,
+        email: email,
+        phone: phone,
+        provider: 'email',
+        createdAt: new Date().toISOString()
+      };
+      if(typeof window.kritPersistAccount === 'function') window.kritPersistAccount(profile);
+      await saveCustomerProfile(profile, 'email-signup');
+      updateAuthUI();
+      track('sign_up', { method: 'email' });
+      logVisit();
+      if(window.kritToast) window.kritToast('Your KRIT account has been created');
+      if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
+    } catch(error) {
+      authMessage('Account creation failed. If this email already exists, please log in instead.', 'err');
+    }
   }
 
   function ensureDetailShare(){
@@ -565,17 +680,32 @@
     window.switchAuthTab = switchAuthTab;
     window.kritSubmitAuth = submitAuth;
     window.kritContinueWithGoogle = continueWithGoogle;
+    window.kritLogout = async function(){
+      try {
+        var fb = await ensureFirebase();
+        if(fb && fb.auth && fb.auth().currentUser){
+          await fb.auth().signOut();
+        }
+      } catch(e){}
+      localStorage.removeItem('krit_account_profile');
+      window._kritAccount = null;
+      updateAuthUI();
+      if(window.kritToast) window.kritToast('Logged out');
+      if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
+    };
     window.openAuthModal = function(){
       var overlay = document.getElementById('krit-auth-overlay');
       if(!overlay) return;
       var nameEl = document.getElementById('auth-name');
       var emailEl = document.getElementById('auth-email');
       var phoneEl = document.getElementById('auth-phone');
+      var passwordEl = document.getElementById('auth-password');
       if(!window._kritAccount){
         switchAuthTab(window._kritAuthTab || 'login');
         if(nameEl) nameEl.value = '';
         if(emailEl) emailEl.value = '';
         if(phoneEl) phoneEl.value = '';
+        if(passwordEl) passwordEl.value = '';
       }
       updateAuthUI();
       overlay.classList.add('open');
@@ -642,14 +772,14 @@
     if(dataStorageTitle){
       var text = dataStorageTitle.parentElement.querySelector('.im-text');
       if(text){
-        text.textContent = 'Customer accounts and order records can be stored securely in Firebase / Google Cloud once your live project configuration is connected. Until then, this local build saves data in your browser for preview and testing.';
+        text.textContent = 'Customer accounts, website visits, and order records are stored securely in Firebase / Google Cloud and can sync into KRIT ERP for follow-up, support, and order operations.';
       }
     }
     var cookiesTitle = Array.from(document.querySelectorAll('.im-section-title')).find(function(el){ return el.textContent.trim() === 'Cookies'; });
     if(cookiesTitle){
       var ctext = cookiesTitle.parentElement.querySelector('.im-text');
       if(ctext){
-        ctext.textContent = 'This website uses Google Analytics for traffic insights and can use Firebase Auth / Firestore for customer accounts after live configuration. Meta Pixel can also be enabled from the ecommerce config when you start paid social campaigns.';
+        ctext.textContent = 'This website uses Google Analytics for traffic insights and Firebase Auth / Firestore for customer accounts and visit tracking. Meta Pixel can also be enabled from the ecommerce config when you start paid social campaigns.';
       }
     }
   }
@@ -665,6 +795,8 @@
     ensureLightboxEnhancements();
     refinePrivacyCopy();
     bootFacebookPixel();
+    bindFirebaseAuthState();
+    logVisit();
   }
 
   if(document.readyState === 'loading'){

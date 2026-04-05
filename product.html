@@ -3386,7 +3386,8 @@ document.addEventListener('DOMContentLoaded', function(){
       <form id="krit-auth-form" onsubmit="event.preventDefault();kritSubmitAuth()">
         <div id="auth-name-wrap" style="display:none"><label class="krit-label" for="auth-name">Full name</label><input class="krit-input" id="auth-name" type="text" placeholder="Enter your full name" autocomplete="name"></div>
         <div class="krit-field"><label class="krit-label" for="auth-email">Email address</label><input class="krit-input" id="auth-email" type="email" placeholder="Enter your email address" autocomplete="email" required></div>
-        <div class="krit-field"><label class="krit-label" for="auth-phone">Mobile number</label><input class="krit-input" id="auth-phone" type="tel" inputmode="numeric" maxlength="10" placeholder="Enter your 10-digit mobile number" autocomplete="tel-national" required></div>
+        <div class="krit-field" id="auth-phone-wrap" style="display:none"><label class="krit-label" for="auth-phone">Mobile number</label><input class="krit-input" id="auth-phone" type="tel" inputmode="numeric" maxlength="10" placeholder="Enter your 10-digit mobile number" autocomplete="tel-national"></div>
+        <div class="krit-field" id="auth-password-wrap"><label class="krit-label" for="auth-password">Password</label><input class="krit-input" id="auth-password" type="password" placeholder="Enter your password" autocomplete="current-password" required></div>
         <button id="auth-email-btn" type="submit">Login with Email</button>
       </form>
     </div>
@@ -4200,18 +4201,16 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
   instagramUrl: "https://www.instagram.com/kritsleep",
   supportEmail: "hello@kritsleep.in",
   supportPhone: "9611211121",
-  erpBaseUrl: "https://krit-erp-production.up.railway.app",
-  erpWebhookSecret: "krit-webhook-secret",
   facebookPageUrl: "",
   facebookPixelId: "",
   firebase: {
-    apiKey: "",
-    authDomain: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: "",
-    measurementId: ""
+    apiKey: "AIzaSyDHDCv4zEmSAiO6vr8pz733aON7cTeYg8I",
+    authDomain: "krit-7fa79.firebaseapp.com",
+    projectId: "krit-7fa79",
+    storageBucket: "krit-7fa79.firebasestorage.app",
+    messagingSenderId: "122215309182",
+    appId: "1:122215309182:web:41ba4fe6081193d5aa5d2f",
+    measurementId: "G-GNLGKSJTTJ"
   }
 };
 </script>
