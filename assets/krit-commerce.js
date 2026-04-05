@@ -210,6 +210,45 @@
     return phoneRecaptchaVerifier;
   }
 
+  function firebaseAuthErrorMessage(error, flow){
+    var code = (error && error.code) || '';
+    var host = window.location && window.location.hostname ? window.location.hostname : 'this domain';
+    if(code === 'auth/unauthorized-domain'){
+      return 'Firebase has not authorized ' + host + ' yet. Add it in Firebase Authentication > Settings > Authorized domains.';
+    }
+    if(code === 'auth/popup-blocked'){
+      return 'Google sign-in popup was blocked by the browser. Allow popups and try again.';
+    }
+    if(code === 'auth/popup-closed-by-user'){
+      return 'Google sign-in was closed before it finished. Please try again.';
+    }
+    if(code === 'auth/operation-not-allowed'){
+      return flow === 'otp'
+        ? 'Phone OTP sign-in is not enabled in Firebase yet.'
+        : 'This sign-in method is not enabled in Firebase yet.';
+    }
+    if(code === 'auth/captcha-check-failed'){
+      return 'OTP verification could not start. Refresh the page and try again.';
+    }
+    if(code === 'auth/invalid-phone-number'){
+      return 'Please enter a valid 10-digit mobile number.';
+    }
+    if(code === 'auth/quota-exceeded' || code === 'auth/too-many-requests'){
+      return flow === 'otp'
+        ? 'Firebase SMS quota is currently exhausted. Please use email or Google login for now.'
+        : 'Too many attempts were made. Please wait a moment and try again.';
+    }
+    if(code === 'auth/invalid-app-credential'){
+      return 'OTP could not be started from this domain yet. Please use kritsleep.in after adding it in Firebase authorized domains.';
+    }
+    if(code === 'auth/account-exists-with-different-credential'){
+      return 'This email is already linked with another sign-in method. Try logging in with that method first.';
+    }
+    return flow === 'otp'
+      ? 'OTP could not be sent right now. Please try again in a moment.'
+      : 'Sign-in could not be completed right now. Please try again in a moment.';
+  }
+
   async function sendOtpLogin(){
     clearAuthMessage();
     var phoneEl = document.getElementById('auth-otp-phone');
@@ -235,7 +274,7 @@
       authMessage('OTP sent successfully. Enter the code to continue.', 'ok');
     } catch(error) {
       phoneConfirmationResult = null;
-      authMessage('OTP could not be sent right now. Please try again in a moment.', 'err');
+      authMessage(firebaseAuthErrorMessage(error, 'otp'), 'err');
     }
   }
 
@@ -562,7 +601,7 @@
         continuePendingCheckout();
       }, 600);
     } catch(error) {
-      authMessage('Google login could not be completed. You can still continue with email and password.', 'err');
+      authMessage(firebaseAuthErrorMessage(error, 'google'), 'err');
     }
   }
 
