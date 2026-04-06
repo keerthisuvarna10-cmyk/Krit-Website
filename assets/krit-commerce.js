@@ -1755,6 +1755,7 @@
         : ((responseBody && responseBody.error) || ('ERP sync failed with status ' + response.status + '.'));
       localStorage.setItem('krit_orders', JSON.stringify(window._kritOrders || []));
       if(response.ok){
+        notifyOrderStakeholdersForOrder(order);
         renderAccountDashboard();
       } else {
         console.error('KRIT ERP order sync failed', {
@@ -1778,6 +1779,180 @@
         setTimeout(function(){ syncOrderToERP(order); }, 2500);
       }
     }
+  }
+
+  async function notifyOrderStakeholdersForOrder(order){
+    if(!order || order.notificationState === 'sent' || order.notificationState === 'sending') return;
+    order.notificationState = 'sending';
+    order.notificationMessage = 'Sending confirmation updates...';
+    try {
+      var response = await fetch('/api/notify/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      });
+      var raw = await response.text();
+      var payload = null;
+      try {
+        payload = raw ? JSON.parse(raw) : null;
+      } catch(_error) {
+        payload = raw || null;
+      }
+      order.notificationState = response.ok ? 'sent' : 'failed';
+      order.notificationAt = new Date().toISOString();
+      order.notificationMessage = response.ok
+        ? 'Order confirmations sent.'
+        : ((payload && payload.error) || 'Order confirmations could not be sent.');
+      localStorage.setItem('krit_orders', JSON.stringify(window._kritOrders || []));
+    } catch(error) {
+      order.notificationState = 'failed';
+      order.notificationAt = new Date().toISOString();
+      order.notificationMessage = error && error.message ? error.message : 'Order confirmations could not be sent.';
+      localStorage.setItem('krit_orders', JSON.stringify(window._kritOrders || []));
+      console.error('KRIT order notifications failed', { orderId: order.id, error: error });
+    }
+  }
+
+  function formatOrderDateLabel(value){
+    if(!value) return 'Just now';
+    try {
+      return new Date(value).toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch(_error){
+      return String(value);
+    }
+  }
+
+  function playOrderSuccessChime(){
+    try {
+      var AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if(!AudioCtx) return;
+      var ctx = new AudioCtx();
+      var now = ctx.currentTime;
+      [523.25, 659.25, 783.99].forEach(function(freq, index){
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, now + index * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.055, now + index * 0.12 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.12 + 0.24);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + index * 0.12);
+        osc.stop(now + index * 0.12 + 0.26);
+      });
+      setTimeout(function(){
+        if(ctx && typeof ctx.close === 'function') ctx.close();
+      }, 900);
+    } catch(_error) {}
+  }
+
+  function closeOrderSuccessOverlay(){
+    var existing = document.getElementById('krit-order-success-overlay');
+    if(!existing) return;
+    if(existing._kritEscHandler){
+      document.removeEventListener('keydown', existing._kritEscHandler);
+    }
+    existing.remove();
+    var authOverlay = document.getElementById('krit-auth-overlay');
+    var orderOverlay = document.getElementById('krit-account-order-overlay');
+    if(!(authOverlay && authOverlay.classList.contains('open')) && !orderOverlay){
+      document.body.style.overflow = '';
+    }
+  }
+
+  function openOrderSuccessOverlay(order){
+    if(!order) return;
+    closeOrderSuccessOverlay();
+    var firstItem = order.items && order.items[0] ? order.items[0] : null;
+    var paymentLabel = order.paymentLabel || order.paymentMode || 'Website';
+    var total = 'Rs ' + Number(order.total || 0).toLocaleString('en-IN');
+    var createdLabel = order.createdLabel || formatOrderDateLabel(order.createdAt || new Date().toISOString());
+    var overlay = document.createElement('div');
+    overlay.id = 'krit-order-success-overlay';
+    overlay.className = 'krit-order-success-overlay';
+    overlay.onclick = function(event){
+      if(event.target === overlay) closeOrderSuccessOverlay();
+    };
+
+    overlay.innerHTML = [
+      '<div class="krit-order-success-dialog">',
+        '<button type="button" class="krit-order-success-close" aria-label="Close order confirmation">&times;</button>',
+        '<div class="krit-order-success-head">',
+          '<div class="krit-order-success-badge">',
+            '<span class="krit-order-success-check">✓</span>',
+            '<span>Order received</span>',
+          '</div>',
+          '<h2 class="krit-order-success-title">Your KRIT order is confirmed in our system</h2>',
+          '<p class="krit-order-success-copy">You are all set. We have saved your order, started the OMS sync, and the latest status can be tracked instantly from here.</p>',
+        '</div>',
+        '<div class="krit-order-success-grid">',
+          '<div class="krit-order-success-card highlight">',
+            '<div class="krit-order-success-label">Order ID</div>',
+            '<div class="krit-order-success-value">' + escapeHtml(order.id) + '</div>',
+            '<div class="krit-order-success-note">Keep this ID handy for support and tracking.</div>',
+          '</div>',
+          '<div class="krit-order-success-card customer">',
+            '<div class="krit-order-success-label">Customer</div>',
+            '<div class="krit-order-success-value">' + escapeHtml((order.customer && order.customer.name) || 'KRIT Customer') + '</div>',
+            '<div class="krit-order-success-note">' + escapeHtml([(order.customer && order.customer.phone) || '', (order.customer && order.customer.city) || ''].filter(Boolean).join(' • ')) + '</div>',
+          '</div>',
+        '</div>',
+        '<div class="krit-order-success-card order">',
+          '<div class="krit-order-success-orderhead">',
+            '<div>',
+              '<div class="krit-order-success-label">Payment</div>',
+              '<div class="krit-order-success-payment">' + escapeHtml(paymentLabel) + '</div>',
+            '</div>',
+            '<div class="krit-order-success-chip ' + (String(order.paymentState || 'pending') === 'paid' ? 'paid' : 'pending') + '">' + escapeHtml(String(order.paymentState || 'pending') === 'paid' ? 'Paid' : 'Pending') + '</div>',
+          '</div>',
+          '<div class="krit-order-success-productrow">',
+            '<div>',
+              '<div class="krit-order-success-product">' + escapeHtml(firstItem ? firstItem.name : 'KRIT order') + '</div>',
+              '<div class="krit-order-success-meta">' + escapeHtml((firstItem ? ((firstItem.qty || 1) + ' item' + ((firstItem.qty || 1) > 1 ? 's' : '')) : '1 order') + ' • ' + createdLabel) + '</div>',
+            '</div>',
+            '<div class="krit-order-success-total">' + escapeHtml(total) + '</div>',
+          '</div>',
+          '<div class="krit-order-success-statusbar">',
+            '<div class="krit-order-success-statuscopy">We have captured your request. You can track order progress right away, and payment / shipping updates will appear here as your OMS status changes.</div>',
+          '</div>',
+          '<div class="krit-order-success-mini-grid">',
+            '<div class="krit-order-success-mini-card success"><span>OMS sync</span><strong>' + escapeHtml(order.erpSyncState === 'synced' ? 'Connected' : 'In progress') + '</strong><em>' + escapeHtml(order.erpSyncState === 'synced' ? 'Visible to KRIT team now' : 'Refreshing in the background') + '</em></div>',
+            '<div class="krit-order-success-mini-card notice"><span>Tracking</span><strong>' + escapeHtml(order.trackingNumber || 'Opens now') + '</strong><em>' + escapeHtml(order.trackingNumber ? 'Shipment details are available' : 'Timeline opens instantly below') + '</em></div>',
+            '<div class="krit-order-success-mini-card contact"><span>Updates</span><strong>' + escapeHtml(order.notificationState === 'sent' ? 'Sent' : 'Queued') + '</strong><em>' + escapeHtml(order.notificationState === 'sent' ? 'Email / SMS / WhatsApp requested' : 'Provider delivery will start after setup') + '</em></div>',
+          '</div>',
+        '</div>',
+        '<div class="krit-order-success-actions">',
+          '<button type="button" class="krit-btn krit-btn-primary krit-order-success-track">Track this order</button>',
+          '<button type="button" class="krit-btn krit-btn-secondary krit-order-success-continue">Continue shopping</button>',
+        '</div>',
+      '</div>'
+    ].join('');
+
+    var closeBtn = overlay.querySelector('.krit-order-success-close');
+    var trackBtn = overlay.querySelector('.krit-order-success-track');
+    var continueBtn = overlay.querySelector('.krit-order-success-continue');
+    if(closeBtn) closeBtn.onclick = closeOrderSuccessOverlay;
+    if(continueBtn) continueBtn.onclick = closeOrderSuccessOverlay;
+    if(trackBtn){
+      trackBtn.onclick = function(){
+        closeOrderSuccessOverlay();
+        openAccountOrderDetails(order);
+      };
+    }
+    overlay._kritEscHandler = function(event){
+      if(event.key === 'Escape') closeOrderSuccessOverlay();
+    };
+    document.addEventListener('keydown', overlay._kritEscHandler);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    playOrderSuccessChime();
   }
 
   function patchOrderSync(){
@@ -1828,11 +2003,33 @@
     }
   }
 
+  function patchOrderConfirmation(){
+    if(typeof window.kritShowOrderConfirmation === 'function' && !window.kritShowOrderConfirmation.__kritShared){
+      window.kritShowOrderConfirmation = function(order){
+        openOrderSuccessOverlay(order);
+        return order;
+      };
+      window.kritShowOrderConfirmation.__kritShared = true;
+    }
+    if(typeof window.kritCloseOverlay !== 'function' || !window.kritCloseOverlay.__kritSuccessAware){
+      var closeOriginal = window.kritCloseOverlay;
+      window.kritCloseOverlay = function(id){
+        if(id === 'krit-order-success-overlay'){
+          closeOrderSuccessOverlay();
+          return;
+        }
+        if(typeof closeOriginal === 'function') return closeOriginal.apply(this, arguments);
+      };
+      window.kritCloseOverlay.__kritSuccessAware = true;
+    }
+  }
+
   function enhance(){
     mobilePanel();
     patchCheckoutOpen();
     patchOrderSync();
     patchPersistAccount();
+    patchOrderConfirmation();
     enhanceCheckoutOverlay();
   }
 

@@ -12,6 +12,28 @@ const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toSt
 const ACCESS_CONFIGURED = Boolean(ADMIN_USERNAME && ADMIN_PASSWORD);
 const ERP_BASE_URL = String(process.env.ERP_BASE_URL || '').replace(/\/$/, '');
 const ERP_WEBHOOK_SECRET = process.env.ERP_WEBHOOK_SECRET || '';
+const ORDER_ALERT_EMAIL = process.env.ORDER_ALERT_EMAIL || 'hello@kritsleep.in';
+const ORDER_ALERT_PHONE = normalizeIndianPhone(process.env.ORDER_ALERT_PHONE || '9611211121');
+const SMTP_HOST = process.env.SMTP_HOST || '';
+const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
+const SMTP_SECURE = String(process.env.SMTP_SECURE || 'false').toLowerCase() === 'true';
+const SMTP_USER = process.env.SMTP_USER || '';
+const SMTP_PASS = process.env.SMTP_PASS || '';
+const SMTP_FROM = process.env.SMTP_FROM || ORDER_ALERT_EMAIL;
+const MSG91_AUTH_KEY = process.env.MSG91_AUTH_KEY || '';
+const MSG91_FLOW_ID_CUSTOMER_ORDER = process.env.MSG91_FLOW_ID_CUSTOMER_ORDER || '';
+const MSG91_FLOW_ID_OWNER_ORDER = process.env.MSG91_FLOW_ID_OWNER_ORDER || '';
+const AISENSY_API_KEY = process.env.AISENSY_API_KEY || '';
+const AISENSY_CAMPAIGN_CUSTOMER_ORDER = process.env.AISENSY_CAMPAIGN_CUSTOMER_ORDER || '';
+const AISENSY_CAMPAIGN_OWNER_ORDER = process.env.AISENSY_CAMPAIGN_OWNER_ORDER || '';
+
+function normalizeIndianPhone(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.length === 10) return `91${digits}`;
+  if (digits.length === 12 && digits.startsWith('91')) return digits;
+  return digits;
+}
 
 app.set('trust proxy', 1);
 app.use(express.urlencoded({ extended: false }));
@@ -35,6 +57,203 @@ app.use((req, res, next) => {
   res.setHeader('Expires', '0');
   next();
 });
+
+function buildOrderMessageText(order) {
+  const customerName = order.customer && order.customer.name ? order.customer.name : 'KRIT Customer';
+  const paymentLabel = order.paymentLabel || order.paymentMode || 'Website';
+  const total = Number(order.total || 0).toLocaleString('en-IN');
+  const firstItem = order.items && order.items[0] ? order.items[0].name : 'KRIT order';
+  return {
+    customerName,
+    paymentLabel,
+    total,
+    firstItem,
+    subject: `KRIT order received: ${order.id}`,
+    customerText: [
+      `Hi ${customerName},`,
+      '',
+      `Your KRIT order ${order.id} has been received successfully.`,
+      `Item: ${firstItem}`,
+      `Payment: ${paymentLabel}`,
+      `Total: Rs ${total}`,
+      '',
+      'You can track your order anytime from your KRIT account.',
+      '',
+      'Team KRIT'
+    ].join('\n'),
+    ownerText: [
+      'New KRIT order received.',
+      '',
+      `Order ID: ${order.id}`,
+      `Customer: ${customerName}`,
+      `Phone: ${(order.customer && order.customer.phone) || ''}`,
+      `Email: ${(order.customer && order.customer.email) || ''}`,
+      `Payment: ${paymentLabel}`,
+      `Total: Rs ${total}`,
+      `Item: ${firstItem}`
+    ].join('\n')
+  };
+}
+
+async function sendSmtpOrderEmails(order) {
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    return { channel: 'email', ok: false, skipped: true, reason: 'SMTP is not configured.' };
+  }
+  const nodemailer = require('nodemailer');
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_SECURE,
+    auth: { user: SMTP_USER, pass: SMTP_PASS }
+  });
+  const message = buildOrderMessageText(order);
+  const customerEmail = order.customer && order.customer.email ? String(order.customer.email).trim() : '';
+  const tasks = [];
+  if (customerEmail) {
+    tasks.push(transporter.sendMail({
+      from: SMTP_FROM,
+      to: customerEmail,
+      subject: message.subject,
+      text: message.customerText,
+      html: `<div style="font-family:Arial,sans-serif;line-height:1.7;color:#122033">
+        <h2 style="margin:0 0 12px;color:#1e7a46">Your KRIT order has been received</h2>
+        <p>Hi ${message.customerName},</p>
+        <p>Your order <strong>${order.id}</strong> has been received successfully.</p>
+        <p><strong>Item:</strong> ${message.firstItem}<br><strong>Payment:</strong> ${message.paymentLabel}<br><strong>Total:</strong> Rs ${message.total}</p>
+        <p>You can track your order anytime from your KRIT account.</p>
+        <p>Team KRIT</p>
+      </div>`
+    }));
+  }
+  tasks.push(transporter.sendMail({
+    from: SMTP_FROM,
+    to: ORDER_ALERT_EMAIL,
+    subject: `[Owner] ${message.subject}`,
+    text: message.ownerText
+  }));
+  await Promise.all(tasks);
+  return { channel: 'email', ok: true };
+}
+
+async function sendMsg91OrderSms(order) {
+  if (!MSG91_AUTH_KEY) {
+    return { channel: 'sms', ok: false, skipped: true, reason: 'MSG91 is not configured.' };
+  }
+  const customerMobile = normalizeIndianPhone(order.customer && order.customer.phone);
+  const message = buildOrderMessageText(order);
+  const tasks = [];
+  async function callMsg91(flowId, mobile, extra) {
+    if (!flowId || !mobile) return null;
+    const response = await fetch('https://control.msg91.com/api/v5/flow/', {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        authkey: MSG91_AUTH_KEY
+      },
+      body: JSON.stringify({
+        flow_id: flowId,
+        recipients: [{
+          mobiles: mobile,
+          order_id: order.id,
+          customer_name: message.customerName,
+          total: message.total,
+          payment_mode: message.paymentLabel,
+          product_name: message.firstItem,
+          ...extra
+        }]
+      })
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`MSG91 ${response.status}: ${text}`);
+    }
+    return true;
+  }
+  if (customerMobile && MSG91_FLOW_ID_CUSTOMER_ORDER) {
+    tasks.push(callMsg91(MSG91_FLOW_ID_CUSTOMER_ORDER, customerMobile, { audience: 'customer' }));
+  }
+  if (ORDER_ALERT_PHONE && MSG91_FLOW_ID_OWNER_ORDER) {
+    tasks.push(callMsg91(MSG91_FLOW_ID_OWNER_ORDER, ORDER_ALERT_PHONE, {
+      audience: 'owner',
+      customer_phone: customerMobile
+    }));
+  }
+  if (!tasks.length) {
+    return { channel: 'sms', ok: false, skipped: true, reason: 'MSG91 flow IDs are not configured.' };
+  }
+  await Promise.all(tasks);
+  return { channel: 'sms', ok: true };
+}
+
+async function sendAiSensyOrderWhatsapp(order) {
+  if (!AISENSY_API_KEY) {
+    return { channel: 'whatsapp', ok: false, skipped: true, reason: 'AiSensy is not configured.' };
+  }
+  const customerMobile = normalizeIndianPhone(order.customer && order.customer.phone);
+  const message = buildOrderMessageText(order);
+  const tasks = [];
+  async function callAiSensy(campaignName, destination, templateParams) {
+    if (!campaignName || !destination) return null;
+    const response = await fetch('https://backend.aisensy.com/campaign/t1/api/v2', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        apiKey: AISENSY_API_KEY,
+        campaignName: campaignName,
+        destination: destination,
+        userName: message.customerName,
+        templateParams: templateParams,
+        source: 'krit-website'
+      })
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`AiSensy ${response.status}: ${text}`);
+    }
+    return true;
+  }
+  if (customerMobile && AISENSY_CAMPAIGN_CUSTOMER_ORDER) {
+    tasks.push(callAiSensy(AISENSY_CAMPAIGN_CUSTOMER_ORDER, customerMobile, [
+      order.id,
+      message.firstItem,
+      `Rs ${message.total}`,
+      message.paymentLabel
+    ]));
+  }
+  if (ORDER_ALERT_PHONE && AISENSY_CAMPAIGN_OWNER_ORDER) {
+    tasks.push(callAiSensy(AISENSY_CAMPAIGN_OWNER_ORDER, ORDER_ALERT_PHONE, [
+      order.id,
+      message.customerName,
+      (order.customer && order.customer.phone) || '',
+      `Rs ${message.total}`
+    ]));
+  }
+  if (!tasks.length) {
+    return { channel: 'whatsapp', ok: false, skipped: true, reason: 'AiSensy campaign names are not configured.' };
+  }
+  await Promise.all(tasks);
+  return { channel: 'whatsapp', ok: true };
+}
+
+async function notifyOrderStakeholders(order) {
+  const results = [];
+  for (const sender of [sendSmtpOrderEmails, sendMsg91OrderSms, sendAiSensyOrderWhatsapp]) {
+    try {
+      results.push(await sender(order));
+    } catch (error) {
+      results.push({
+        channel: sender.name,
+        ok: false,
+        skipped: false,
+        reason: error.message || 'Notification failed.'
+      });
+    }
+  }
+  return results;
+}
 
 function renderLogin(errorText = '') {
   const errorBlock = errorText
@@ -223,6 +442,31 @@ app.post('/api/erp/customer-orders', requireAuth, async (req, res) => {
 app.post('/api/erp/visit', requireAuth, async (req, res) => {
   const result = await postToErp('/api/webhook/visit', req.body);
   res.status(result.status).json(result.body);
+});
+
+app.post('/api/notify/order', requireAuth, async (req, res) => {
+  const order = req.body || {};
+  if (!order.id) {
+    return res.status(400).json({ error: 'Order ID is required for notifications.' });
+  }
+
+  try {
+    const channels = await notifyOrderStakeholders(order);
+    const delivered = channels.filter((item) => item && item.ok).map((item) => item.channel);
+    const failed = channels.filter((item) => item && !item.ok && !item.skipped);
+    const skipped = channels.filter((item) => item && item.skipped);
+    return res.status(failed.length ? 207 : 200).json({
+      ok: failed.length === 0,
+      delivered,
+      failed,
+      skipped
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      error: error && error.message ? error.message : 'Order notifications failed.'
+    });
+  }
 });
 
 app.use('/assets', requireAuth, express.static(path.join(__dirname, 'assets')));

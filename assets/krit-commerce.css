@@ -342,6 +342,271 @@
   cursor:pointer;
 }
 .krit-account-order-dialog-close:hover{background:rgba(255,255,255,.08)}
+.krit-order-success-overlay{
+  position:fixed;
+  inset:0;
+  z-index:11100;
+  background:rgba(4,10,18,.76);
+  backdrop-filter:blur(10px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.krit-order-success-dialog{
+  width:min(1040px,100%);
+  max-height:min(94vh,880px);
+  overflow:auto;
+  border-radius:28px;
+  background:linear-gradient(180deg,#081321 0%,#091828 100%);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 34px 96px rgba(0,0,0,.46);
+  position:relative;
+  padding:28px 28px 26px;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(126,227,157,.45) rgba(255,255,255,.05);
+}
+.krit-order-success-dialog::-webkit-scrollbar{
+  width:10px;
+}
+.krit-order-success-dialog::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.04);
+  border-radius:999px;
+}
+.krit-order-success-dialog::-webkit-scrollbar-thumb{
+  background:rgba(126,227,157,.38);
+  border-radius:999px;
+}
+.krit-order-success-close{
+  position:absolute;
+  top:18px;
+  right:18px;
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.045);
+  color:#F4F8FF;
+  font-size:1.45rem;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+.krit-order-success-close:hover{
+  background:rgba(255,255,255,.1);
+  transform:translateY(-1px);
+}
+.krit-order-success-head{
+  padding-right:70px;
+  margin-bottom:24px;
+}
+.krit-order-success-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border-radius:999px;
+  background:rgba(67,203,119,.12);
+  border:1px solid rgba(67,203,119,.24);
+  color:#8EF0B0;
+  font-size:.78rem;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  font-weight:800;
+  margin-bottom:18px;
+}
+.krit-order-success-check{
+  width:28px;
+  height:28px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:linear-gradient(135deg,#34C56B,#78E49A);
+  color:#06131D;
+  font-size:1rem;
+  font-weight:900;
+  box-shadow:0 10px 24px rgba(67,203,119,.24);
+}
+.krit-order-success-title{
+  margin:0 0 12px;
+  font-family:'Playfair Display',serif;
+  font-size:2.2rem;
+  line-height:1.04;
+  color:#F6FAFF;
+}
+.krit-order-success-copy{
+  margin:0;
+  font-size:1rem;
+  line-height:1.8;
+  color:#B8CAE6;
+  max-width:68ch;
+}
+.krit-order-success-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+  margin-bottom:18px;
+}
+.krit-order-success-card{
+  padding:22px;
+  border-radius:22px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);
+  display:grid;
+  gap:10px;
+}
+.krit-order-success-card.highlight{
+  background:linear-gradient(180deg,rgba(67,203,119,.16),rgba(9,25,40,.88));
+  border-color:rgba(67,203,119,.24);
+}
+.krit-order-success-card.customer{
+  background:linear-gradient(180deg,rgba(55,105,196,.16),rgba(10,24,39,.88));
+  border-color:rgba(92,147,239,.2);
+}
+.krit-order-success-card.order{
+  gap:18px;
+  background:linear-gradient(180deg,rgba(16,30,49,.94),rgba(8,18,31,.98));
+}
+.krit-order-success-label{
+  font-size:.74rem;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:#8FA7CE;
+  font-weight:800;
+}
+.krit-order-success-value{
+  font-size:1.35rem;
+  line-height:1.25;
+  color:#F5F8FF;
+  font-weight:800;
+  word-break:break-word;
+}
+.krit-order-success-note{
+  font-size:.9rem;
+  line-height:1.7;
+  color:#BDD0EA;
+}
+.krit-order-success-orderhead{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.krit-order-success-payment{
+  margin-top:6px;
+  font-size:1.28rem;
+  color:#F5F8FF;
+  font-weight:800;
+}
+.krit-order-success-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 14px;
+  border-radius:999px;
+  font-size:.76rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  font-weight:800;
+  white-space:nowrap;
+}
+.krit-order-success-chip.pending{
+  color:#F7DA71;
+  background:rgba(249,213,72,.08);
+  border:1px solid rgba(249,213,72,.24);
+}
+.krit-order-success-chip.paid{
+  color:#7EE39D;
+  background:rgba(67,203,119,.1);
+  border:1px solid rgba(67,203,119,.22);
+}
+.krit-order-success-productrow{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+}
+.krit-order-success-product{
+  font-size:1.1rem;
+  font-weight:800;
+  color:#F6FAFF;
+  line-height:1.4;
+}
+.krit-order-success-meta{
+  margin-top:6px;
+  font-size:.92rem;
+  line-height:1.7;
+  color:#AFC0DE;
+}
+.krit-order-success-total{
+  font-size:1.7rem;
+  font-weight:900;
+  color:#F7FBFF;
+  white-space:nowrap;
+}
+.krit-order-success-statusbar{
+  padding:18px 20px;
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(67,203,119,.12),rgba(13,33,27,.82));
+  border:1px solid rgba(67,203,119,.2);
+}
+.krit-order-success-statuscopy{
+  font-size:.96rem;
+  line-height:1.8;
+  color:#E2F8EA;
+}
+.krit-order-success-mini-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+}
+.krit-order-success-mini-card{
+  padding:18px;
+  border-radius:18px;
+  display:grid;
+  gap:8px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.035);
+}
+.krit-order-success-mini-card.success{
+  background:rgba(67,203,119,.1);
+  border-color:rgba(67,203,119,.22);
+}
+.krit-order-success-mini-card.notice{
+  background:rgba(47,93,168,.12);
+  border-color:rgba(47,93,168,.2);
+}
+.krit-order-success-mini-card.contact{
+  background:rgba(255,255,255,.04);
+  border-color:rgba(255,255,255,.07);
+}
+.krit-order-success-mini-card span{
+  font-size:.7rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#8FA7CE;
+}
+.krit-order-success-mini-card strong{
+  font-size:1rem;
+  line-height:1.45;
+  color:#F5F8FF;
+}
+.krit-order-success-mini-card em{
+  font-size:.84rem;
+  line-height:1.65;
+  color:#BBD0EA;
+  font-style:normal;
+}
+.krit-order-success-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
+  margin-top:22px;
+}
+.krit-order-success-actions .krit-btn,
+.krit-order-success-actions .krit-btn-secondary{
+  min-width:180px;
+}
 .krit-btn-secondary{padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#E4ECFB;font-size:.78rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
 .krit-btn-secondary:hover{background:rgba(255,255,255,.08)}
 .krit-account-profile-grid,.krit-account-support-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
@@ -395,6 +660,10 @@
   .krit-account-order-dialog-grid{grid-template-columns:1fr}
   .krit-account-order-dialog{width:min(100%,960px)}
   .krit-account-order-dialog-body{padding:20px}
+  .krit-order-success-grid,
+  .krit-order-success-mini-grid{grid-template-columns:1fr}
+  .krit-order-success-productrow,
+  .krit-order-success-orderhead{flex-direction:column;align-items:flex-start}
 }
 @media (max-height:940px){
   .krit-auth-card.krit-auth-premium{
@@ -506,6 +775,35 @@
   .krit-account-order-dialog-body{padding:18px}
   .krit-account-order-step{grid-template-columns:auto 1fr}
   .krit-account-order-step-time{grid-column:2}
+  .krit-order-success-overlay{padding:10px}
+  .krit-order-success-dialog{
+    width:100%;
+    max-height:min(96vh,100%);
+    padding:20px 18px 18px;
+    border-radius:22px;
+  }
+  .krit-order-success-head{padding-right:50px;margin-bottom:18px}
+  .krit-order-success-title{font-size:1.62rem}
+  .krit-order-success-copy{font-size:.92rem;line-height:1.7}
+  .krit-order-success-close{
+    top:14px;
+    right:14px;
+    width:46px;
+    height:46px;
+  }
+  .krit-order-success-grid{gap:14px}
+  .krit-order-success-card{padding:18px}
+  .krit-order-success-value{font-size:1.1rem}
+  .krit-order-success-total{font-size:1.42rem}
+  .krit-order-success-actions{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+  .krit-order-success-actions .krit-btn,
+  .krit-order-success-actions .krit-btn-secondary{
+    width:100%;
+    min-width:0;
+  }
 }
 
 /* Mobile hamburger + app-like checkout */
