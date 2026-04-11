@@ -1955,6 +1955,25 @@
     playOrderSuccessChime();
   }
 
+  function openOrderSuccessOverlaySafely(order, fallback){
+    try {
+      openOrderSuccessOverlay(order);
+      return order;
+    } catch(error){
+      console.error('KRIT order confirmation overlay failed:', error);
+      if(typeof fallback === 'function'){
+        try {
+          fallback(order);
+          return order;
+        } catch(fallbackError){
+          console.error('KRIT order confirmation fallback failed:', fallbackError);
+        }
+      }
+      if(window.kritToast) window.kritToast('Your order was saved. Please refresh once to view confirmation.');
+      return order;
+    }
+  }
+
   function patchOrderSync(){
     if(typeof window.kritCreateOrderRecord === 'function' && !window.kritCreateOrderRecord.__kritERP){
       var original = window.kritCreateOrderRecord;
@@ -2005,9 +2024,9 @@
 
   function patchOrderConfirmation(){
     if(typeof window.kritShowOrderConfirmation === 'function' && !window.kritShowOrderConfirmation.__kritShared){
+      var originalShowOrderConfirmation = window.kritShowOrderConfirmation;
       window.kritShowOrderConfirmation = function(order){
-        openOrderSuccessOverlay(order);
-        return order;
+        return openOrderSuccessOverlaySafely(order, originalShowOrderConfirmation);
       };
       window.kritShowOrderConfirmation.__kritShared = true;
     }
