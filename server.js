@@ -390,7 +390,9 @@ async function postToErp(endpoint, payload) {
 }
 
 app.get('/', (req, res) => {
-  if (req.session && req.session.authenticated) return res.redirect('/index.html');
+  if (req.session && req.session.authenticated) {
+    return res.sendFile(path.join(__dirname, 'index.html'));
+  }
   res.status(200).send(renderLogin());
 });
 
@@ -403,7 +405,7 @@ app.post('/login', (req, res) => {
   if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
     req.session.authenticated = true;
     req.session.username = username;
-    return res.redirect('/index.html');
+    return res.redirect('/');
   }
   res.status(401).send(renderLogin('Invalid username or password.'));
 });
@@ -470,7 +472,7 @@ app.post('/api/notify/order', requireAuth, async (req, res) => {
 });
 
 app.use('/assets', requireAuth, express.static(path.join(__dirname, 'assets')));
-app.get('/site', requireAuth, (_req, res) => res.redirect('/index.html'));
+app.get('/site', requireAuth, (_req, res) => res.redirect('/'));
 app.get('/index.html', requireAuth, sendProtectedPage('index.html'));
 app.get('/product.html', requireAuth, sendProtectedPage('product.html'));
 app.get('/account.html', requireAuth, sendProtectedPage('account.html'));

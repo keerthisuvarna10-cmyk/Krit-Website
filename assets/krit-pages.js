@@ -1,10 +1,10 @@
 ﻿(function(){
   var page = (document.body && document.body.getAttribute('data-krit-page')) || 'index';
   var pageMap = {
-    index: './index.html',
-    product: './product.html',
-    account: './account.html',
-    checkout: './checkout.html'
+    index: '/',
+    product: '/product.html',
+    account: '/account.html',
+    checkout: '/checkout.html'
   };
 
   function onReady(fn){
@@ -133,7 +133,7 @@
         +   '</div>'
         +   '<div class="krit-checkout-launch-actions">'
         +     '<button type="button" class="primary" id="krit-open-checkout-page-btn">Open Checkout</button>'
-        +     '<a href="./product.html">Continue Shopping</a>'
+        +     '<a href="/product.html">Continue Shopping</a>'
         +   '</div>'
         + '</div>';
       buy.parentNode.insertBefore(wrap, buy);
@@ -156,7 +156,7 @@
 
   function enhanceAccountPage(){
     if(page !== 'account') return;
-    window.location.replace('./index.html?view=account');
+    window.location.replace('/?view=account');
   }
 
   function enhanceProductPage(){
@@ -177,7 +177,7 @@
         setTimeout(function(){
           if(typeof window.openAuthModal === 'function') window.openAuthModal();
           try {
-            window.history.replaceState(null, '', './index.html');
+            window.history.replaceState(null, '', '/');
           } catch(e){}
         }, 120);
       }
