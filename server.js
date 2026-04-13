@@ -23,6 +23,12 @@ const SMTP_FROM = process.env.SMTP_FROM || ORDER_ALERT_EMAIL;
 const MSG91_AUTH_KEY = process.env.MSG91_AUTH_KEY || '';
 const MSG91_FLOW_ID_CUSTOMER_ORDER = process.env.MSG91_FLOW_ID_CUSTOMER_ORDER || '';
 const MSG91_FLOW_ID_OWNER_ORDER = process.env.MSG91_FLOW_ID_OWNER_ORDER || '';
+const WHATSAPP_CLOUD_ACCESS_TOKEN = process.env.WHATSAPP_CLOUD_ACCESS_TOKEN || '';
+const WHATSAPP_CLOUD_PHONE_NUMBER_ID = process.env.WHATSAPP_CLOUD_PHONE_NUMBER_ID || '';
+const WHATSAPP_CLOUD_TEMPLATE_CUSTOMER_ORDER = process.env.WHATSAPP_CLOUD_TEMPLATE_CUSTOMER_ORDER || '';
+const WHATSAPP_CLOUD_TEMPLATE_OWNER_ORDER = process.env.WHATSAPP_CLOUD_TEMPLATE_OWNER_ORDER || '';
+const WHATSAPP_CLOUD_TEMPLATE_LANG = process.env.WHATSAPP_CLOUD_TEMPLATE_LANG || 'en';
+const WHATSAPP_GRAPH_VERSION = process.env.WHATSAPP_GRAPH_VERSION || 'v22.0';
 const AISENSY_API_KEY = process.env.AISENSY_API_KEY || '';
 const AISENSY_CAMPAIGN_CUSTOMER_ORDER = process.env.AISENSY_CAMPAIGN_CUSTOMER_ORDER || '';
 const AISENSY_CAMPAIGN_OWNER_ORDER = process.env.AISENSY_CAMPAIGN_OWNER_ORDER || '';
@@ -186,6 +192,68 @@ async function sendMsg91OrderSms(order) {
   return { channel: 'sms', ok: true };
 }
 
+async function sendMetaWhatsAppOrderMessages(order) {
+  if (!WHATSAPP_CLOUD_ACCESS_TOKEN || !WHATSAPP_CLOUD_PHONE_NUMBER_ID) {
+    return { channel: 'whatsapp', ok: false, skipped: true, reason: 'WhatsApp Cloud API is not configured.' };
+  }
+  const customerMobile = normalizeIndianPhone(order.customer && order.customer.phone);
+  const message = buildOrderMessageText(order);
+  const tasks = [];
+  async function callWhatsAppTemplate(destination, templateName, bodyParams) {
+    if (!destination || !templateName) return null;
+    const response = await fetch(`https://graph.facebook.com/${WHATSAPP_GRAPH_VERSION}/${WHATSAPP_CLOUD_PHONE_NUMBER_ID}/messages`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${WHATSAPP_CLOUD_ACCESS_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: destination,
+        type: 'template',
+        template: {
+          name: templateName,
+          language: { code: WHATSAPP_CLOUD_TEMPLATE_LANG },
+          components: [{
+            type: 'body',
+            parameters: bodyParams.map((value) => ({
+              type: 'text',
+              text: String(value || '')
+            }))
+          }]
+        }
+      })
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`WhatsApp Cloud API ${response.status}: ${text}`);
+    }
+    return true;
+  }
+
+  if (customerMobile && WHATSAPP_CLOUD_TEMPLATE_CUSTOMER_ORDER) {
+    tasks.push(callWhatsAppTemplate(customerMobile, WHATSAPP_CLOUD_TEMPLATE_CUSTOMER_ORDER, [
+      order.id,
+      message.firstItem,
+      `Rs ${message.total}`,
+      message.paymentLabel
+    ]));
+  }
+  if (ORDER_ALERT_PHONE && WHATSAPP_CLOUD_TEMPLATE_OWNER_ORDER) {
+    tasks.push(callWhatsAppTemplate(ORDER_ALERT_PHONE, WHATSAPP_CLOUD_TEMPLATE_OWNER_ORDER, [
+      order.id,
+      message.customerName,
+      (order.customer && order.customer.phone) || '',
+      `Rs ${message.total}`
+    ]));
+  }
+  if (!tasks.length) {
+    return { channel: 'whatsapp', ok: false, skipped: true, reason: 'WhatsApp template names are not configured.' };
+  }
+  await Promise.all(tasks);
+  return { channel: 'whatsapp', ok: true, provider: 'meta-cloud-api' };
+}
+
 async function sendAiSensyOrderWhatsapp(order) {
   if (!AISENSY_API_KEY) {
     return { channel: 'whatsapp', ok: false, skipped: true, reason: 'AiSensy is not configured.' };
@@ -240,7 +308,7 @@ async function sendAiSensyOrderWhatsapp(order) {
 
 async function notifyOrderStakeholders(order) {
   const results = [];
-  for (const sender of [sendSmtpOrderEmails, sendMsg91OrderSms, sendAiSensyOrderWhatsapp]) {
+  for (const sender of [sendSmtpOrderEmails, sendMsg91OrderSms, sendMetaWhatsAppOrderMessages, sendAiSensyOrderWhatsapp]) {
     try {
       results.push(await sender(order));
     } catch (error) {
