@@ -532,7 +532,18 @@
 
   function openAccountOrderTracker(orderId){
     if(!orderId) return;
-    var orders = Array.isArray(window._kritAccountOrders) ? window._kritAccountOrders : [];
+    var orders = Array.isArray(window._kritAccountOrders) ? window._kritAccountOrders.slice() : [];
+    var storedOrders = getStoredOrders();
+    if(Array.isArray(storedOrders) && storedOrders.length){
+      storedOrders.forEach(function(entry){
+        if(entry && entry.id && !orders.some(function(existing){ return existing && String(existing.id) === String(entry.id); })){
+          orders.push(entry);
+        }
+      });
+    }
+    if(window._kritLastConfirmedOrder && window._kritLastConfirmedOrder.id && !orders.some(function(existing){ return existing && String(existing.id) === String(window._kritLastConfirmedOrder.id); })){
+      orders.unshift(window._kritLastConfirmedOrder);
+    }
     var order = orders.find(function(entry){
       return entry && String(entry.id) === String(orderId);
     });
@@ -1707,6 +1718,41 @@
     prefillCheckoutFields();
   }
 
+  function ensureKritOverlayStyles(){
+    if(document.getElementById('krit-commerce-enhanced-styles')) return;
+    var style = document.createElement('style');
+    style.id = 'krit-commerce-enhanced-styles';
+    style.textContent = [
+      '.krit-checkout-card{width:min(1120px,calc(100vw - 56px))!important;max-height:min(90vh,940px)!important;overflow:auto!important;border-radius:28px!important;box-shadow:0 30px 90px rgba(2,8,23,.58)!important;}',
+      '.krit-checkout-grid{gap:20px!important;}',
+      '.krit-checkout-pane{padding:22px 24px!important;}',
+      '.krit-checkout-pane.summary{padding:22px 24px!important;}',
+      '.krit-checkout-support{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px!important;margin:16px 0 20px!important;}',
+      '.krit-checkout-support .item{padding:14px 16px!important;border-radius:18px!important;}',
+      '.krit-checkout-form-grid{gap:14px!important;}',
+      '.krit-checkout-inline-note{margin:14px 0 18px!important;padding:14px 16px!important;border-radius:18px!important;line-height:1.65!important;}',
+      '.krit-checkout-summary-card{margin-top:18px!important;padding:18px 18px!important;border-radius:20px!important;}',
+      '.krit-order-success-dialog{width:min(1040px,calc(100vw - 48px))!important;max-height:min(92vh,920px)!important;overflow:auto!important;border-radius:30px!important;box-shadow:0 32px 100px rgba(3,10,24,.62)!important;}',
+      '.krit-order-success-head{background:linear-gradient(180deg,rgba(20,62,41,.76),rgba(15,32,56,.18))!important;}',
+      '.krit-order-success-badge{background:rgba(34,197,94,.12)!important;border:1px solid rgba(126,231,157,.28)!important;color:#d7ffe3!important;}',
+      '.krit-order-success-hero{align-items:center!important;}',
+      '.krit-order-success-hero-icon{background:radial-gradient(circle at 30% 30%,rgba(126,231,157,.34),rgba(34,197,94,.12))!important;box-shadow:0 0 0 1px rgba(126,231,157,.18),0 18px 40px rgba(34,197,94,.18)!important;transform:scale(1.06)!important;}',
+      '.krit-order-success-title{color:#f4fff8!important;}',
+      '.krit-order-success-copy{max-width:760px!important;}',
+      '.krit-order-success-celebration span{background:rgba(126,231,157,.13)!important;border:1px solid rgba(126,231,157,.2)!important;color:#b8ffd1!important;}',
+      '.krit-order-success-grid{gap:16px!important;}',
+      '.krit-order-success-card{padding:22px!important;border-radius:22px!important;}',
+      '.krit-order-success-card.highlight{background:linear-gradient(180deg,rgba(34,197,94,.12),rgba(8,17,32,.92))!important;}',
+      '.krit-order-success-statusbar{background:linear-gradient(180deg,rgba(126,231,157,.14),rgba(15,23,42,.55))!important;border:1px solid rgba(126,231,157,.2)!important;}',
+      '.krit-order-success-mini-grid{gap:12px!important;}',
+      '.krit-order-success-mini-card{min-height:unset!important;padding:16px 16px!important;}',
+      '.krit-order-success-actions{display:flex!important;flex-wrap:wrap!important;gap:12px!important;align-items:center!important;padding-top:18px!important;}',
+      '.krit-order-success-actions .krit-btn{min-height:50px!important;padding:14px 18px!important;border-radius:16px!important;}',
+      '@media (max-width:900px){.krit-checkout-card,.krit-order-success-dialog{width:min(100vw - 20px,760px)!important;max-height:92vh!important;}.krit-checkout-support{grid-template-columns:1fr!important;}.krit-checkout-grid{grid-template-columns:1fr!important;}.krit-checkout-pane,.krit-checkout-pane.summary{padding:18px 16px!important;}.krit-order-success-grid,.krit-order-success-mini-grid{grid-template-columns:1fr!important;}}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
   async function syncOrderToERP(order){
     if(!order || order.erpSyncState === 'synced' || order.erpSyncState === 'syncing') return;
     order.erpSyncState = 'syncing';
@@ -1782,35 +1828,11 @@
   }
 
   async function notifyOrderStakeholdersForOrder(order){
-    if(!order || order.notificationState === 'sent' || order.notificationState === 'sending') return;
-    order.notificationState = 'sending';
-    order.notificationMessage = 'Sending confirmation updates...';
-    try {
-      var response = await fetch('/api/notify/order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(order)
-      });
-      var raw = await response.text();
-      var payload = null;
-      try {
-        payload = raw ? JSON.parse(raw) : null;
-      } catch(_error) {
-        payload = raw || null;
-      }
-      order.notificationState = response.ok ? 'sent' : 'failed';
-      order.notificationAt = new Date().toISOString();
-      order.notificationMessage = response.ok
-        ? 'Order confirmations sent.'
-        : ((payload && payload.error) || 'Order confirmations could not be sent.');
-      localStorage.setItem('krit_orders', JSON.stringify(window._kritOrders || []));
-    } catch(error) {
-      order.notificationState = 'failed';
-      order.notificationAt = new Date().toISOString();
-      order.notificationMessage = error && error.message ? error.message : 'Order confirmations could not be sent.';
-      localStorage.setItem('krit_orders', JSON.stringify(window._kritOrders || []));
-      console.error('KRIT order notifications failed', { orderId: order.id, error: error });
-    }
+    if(!order || order.notificationState === 'manual_ready') return;
+    order.notificationState = 'manual_ready';
+    order.notificationAt = new Date().toISOString();
+    order.notificationMessage = 'Manual customer and owner messages are ready.';
+    localStorage.setItem('krit_orders', JSON.stringify(window._kritOrders || []));
   }
 
   function formatOrderDateLabel(value){
@@ -1826,6 +1848,134 @@
     } catch(_error){
       return String(value);
     }
+  }
+
+  var KRIT_OWNER_WHATSAPP_NUMBER = '919611211121';
+
+  function getOrderItemsLabel(order){
+    if(!order || !Array.isArray(order.items) || !order.items.length) return 'KRIT order';
+    return order.items.map(function(item){
+      if(!item) return '';
+      return (item.name || 'KRIT item') + ' x' + (item.qty || 1);
+    }).filter(Boolean).join(', ');
+  }
+
+  function buildCustomerOrderWhatsAppMessage(order){
+    return [
+      'Hi ' + (((order && order.customer && order.customer.name) || 'there').trim()) + ',',
+      '',
+      'Thank you for shopping with KRIT.',
+      'Your order has been received successfully.',
+      'Order ID: ' + ((order && order.id) || '-'),
+      'Items: ' + getOrderItemsLabel(order),
+      'Amount: Rs ' + Number((order && order.total) || 0).toLocaleString('en-IN'),
+      'Payment: ' + (((order && (order.paymentLabel || order.paymentMode)) || 'Website')),
+      '',
+      'You can track your order anytime from your KRIT account.'
+    ].join('\n');
+  }
+
+  function buildOwnerOrderWhatsAppMessage(order){
+    return [
+      'New KRIT order received',
+      '',
+      'Order ID: ' + ((order && order.id) || '-'),
+      'Customer: ' + (((order && order.customer && order.customer.name) || 'KRIT Customer')),
+      'Phone: ' + (((order && order.customer && order.customer.phone) || '-')),
+      'Items: ' + getOrderItemsLabel(order),
+      'Amount: Rs ' + Number((order && order.total) || 0).toLocaleString('en-IN'),
+      'Payment: ' + (((order && (order.paymentLabel || order.paymentMode)) || 'Website')),
+      'Address: ' + [
+        order && order.customer && order.customer.address,
+        order && order.customer && order.customer.city,
+        order && order.customer && order.customer.pincode
+      ].filter(Boolean).join(', ')
+    ].join('\n');
+  }
+
+  function openWhatsAppMessage(phone, message){
+    var digits = String(phone || '').replace(/[^0-9]/g, '');
+    if(!digits){
+      if(window.kritToast) window.kritToast('WhatsApp number is not available yet.');
+      return;
+    }
+    window.open('https://wa.me/' + digits + '?text=' + encodeURIComponent(message || ''), '_blank', 'noopener,noreferrer');
+  }
+
+  function copyKritMessage(text, label){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text || '').then(function(){
+        if(window.kritToast) window.kritToast((label || 'Message') + ' copied');
+      }).catch(function(){
+        if(window.kritToast) window.kritToast('Could not copy automatically.');
+      });
+      return;
+    }
+    if(window.kritToast) window.kritToast('Clipboard is not available in this browser.');
+  }
+
+  var KRIT_OWNER_WHATSAPP_NUMBER = '919611211121';
+
+  function getOrderItemsLabel(order){
+    if(!order || !Array.isArray(order.items) || !order.items.length) return 'KRIT order';
+    return order.items.map(function(item){
+      if(!item) return '';
+      return (item.name || 'KRIT item') + ' x' + (item.qty || 1);
+    }).filter(Boolean).join(', ');
+  }
+
+  function buildCustomerOrderWhatsAppMessage(order){
+    return [
+      'Hi ' + (((order && order.customer && order.customer.name) || 'there').trim()) + ',',
+      '',
+      'Thank you for shopping with KRIT.',
+      'Your order has been received successfully.',
+      'Order ID: ' + ((order && order.id) || '-'),
+      'Items: ' + getOrderItemsLabel(order),
+      'Amount: Rs ' + Number((order && order.total) || 0).toLocaleString('en-IN'),
+      'Payment: ' + (((order && (order.paymentLabel || order.paymentMode)) || 'Website')),
+      '',
+      'You can track your order anytime from your KRIT account.'
+    ].join('\n');
+  }
+
+  function buildOwnerOrderWhatsAppMessage(order){
+    return [
+      'New KRIT order received',
+      '',
+      'Order ID: ' + ((order && order.id) || '-'),
+      'Customer: ' + (((order && order.customer && order.customer.name) || 'KRIT Customer')),
+      'Phone: ' + (((order && order.customer && order.customer.phone) || '-')),
+      'Items: ' + getOrderItemsLabel(order),
+      'Amount: Rs ' + Number((order && order.total) || 0).toLocaleString('en-IN'),
+      'Payment: ' + (((order && (order.paymentLabel || order.paymentMode)) || 'Website')),
+      'Address: ' + [
+        order && order.customer && order.customer.address,
+        order && order.customer && order.customer.city,
+        order && order.customer && order.customer.pincode
+      ].filter(Boolean).join(', ')
+    ].join('\n');
+  }
+
+  function openWhatsAppMessage(phone, message){
+    var digits = String(phone || '').replace(/[^0-9]/g, '');
+    if(!digits){
+      if(window.kritToast) window.kritToast('WhatsApp number is not available yet.');
+      return;
+    }
+    window.open('https://wa.me/' + digits + '?text=' + encodeURIComponent(message || ''), '_blank', 'noopener,noreferrer');
+  }
+
+  function copyKritMessage(text, label){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text || '').then(function(){
+        if(window.kritToast) window.kritToast((label || 'Message') + ' copied');
+      }).catch(function(){
+        if(window.kritToast) window.kritToast('Could not copy automatically.');
+      });
+      return;
+    }
+    if(window.kritToast) window.kritToast('Clipboard is not available in this browser.');
   }
 
   function playOrderSuccessChime(){
@@ -1870,6 +2020,11 @@
   function openOrderSuccessOverlay(order){
     if(!order) return;
     closeOrderSuccessOverlay();
+    window._kritLastConfirmedOrder = order;
+    if(!Array.isArray(window._kritAccountOrders)) window._kritAccountOrders = [];
+    if(!window._kritAccountOrders.some(function(entry){ return entry && String(entry.id) === String(order.id); })){
+      window._kritAccountOrders.unshift(order);
+    }
     var firstItem = order.items && order.items[0] ? order.items[0] : null;
     var paymentLabel = order.paymentLabel || order.paymentMode || 'Website';
     var total = 'Rs ' + Number(order.total || 0).toLocaleString('en-IN');
@@ -1887,10 +2042,21 @@
         '<div class="krit-order-success-head">',
           '<div class="krit-order-success-badge">',
             '<span class="krit-order-success-check">✓</span>',
-            '<span>Order received</span>',
+            '<span>Order received successfully</span>',
           '</div>',
-          '<h2 class="krit-order-success-title">Your KRIT order is confirmed in our system</h2>',
-          '<p class="krit-order-success-copy">You are all set. We have saved your order, started the OMS sync, and the latest status can be tracked instantly from here.</p>',
+          '<div class="krit-order-success-hero">',
+            '<div class="krit-order-success-hero-icon" aria-hidden="true">🎉</div>',
+            '<div class="krit-order-success-hero-copy">',
+              '<h2 class="krit-order-success-title">Your KRIT order is confirmed</h2>',
+              '<p class="krit-order-success-copy">You are all set. We have saved your order, started the OMS sync, and you can track the latest status instantly from here.</p>',
+            '</div>',
+          '</div>',
+          '<div class="krit-order-success-celebration">',
+            '<span>Confirmed</span>',
+            '<span>Saved</span>',
+            '<span>Synced</span>',
+            '<span>Trackable now</span>',
+          '</div>',
         '</div>',
         '<div class="krit-order-success-grid">',
           '<div class="krit-order-success-card highlight">',
@@ -1925,11 +2091,14 @@
           '<div class="krit-order-success-mini-grid">',
             '<div class="krit-order-success-mini-card success"><span>OMS sync</span><strong>' + escapeHtml(order.erpSyncState === 'synced' ? 'Connected' : 'In progress') + '</strong><em>' + escapeHtml(order.erpSyncState === 'synced' ? 'Visible to KRIT team now' : 'Refreshing in the background') + '</em></div>',
             '<div class="krit-order-success-mini-card notice"><span>Tracking</span><strong>' + escapeHtml(order.trackingNumber || 'Opens now') + '</strong><em>' + escapeHtml(order.trackingNumber ? 'Shipment details are available' : 'Timeline opens instantly below') + '</em></div>',
-            '<div class="krit-order-success-mini-card contact"><span>Updates</span><strong>' + escapeHtml(order.notificationState === 'sent' ? 'Sent' : 'Queued') + '</strong><em>' + escapeHtml(order.notificationState === 'sent' ? 'Email / SMS / WhatsApp requested' : 'Provider delivery will start after setup') + '</em></div>',
+            '<div class="krit-order-success-mini-card contact"><span>Updates</span><strong>' + escapeHtml(order.notificationState === 'manual_ready' ? 'Manual ready' : 'Ready') + '</strong><em>' + escapeHtml('Use the quick actions below to open WhatsApp and copy your message.') + '</em></div>',
           '</div>',
         '</div>',
         '<div class="krit-order-success-actions">',
           '<button type="button" class="krit-btn krit-btn-primary krit-order-success-track">Track this order</button>',
+          '<button type="button" class="krit-btn krit-btn-secondary krit-order-success-customer-wa">Customer WhatsApp</button>',
+          '<button type="button" class="krit-btn krit-btn-secondary krit-order-success-owner-wa">Owner WhatsApp</button>',
+          '<button type="button" class="krit-btn krit-btn-secondary krit-order-success-copy">Copy customer text</button>',
           '<button type="button" class="krit-btn krit-btn-secondary krit-order-success-continue">Continue shopping</button>',
         '</div>',
       '</div>'
@@ -1937,13 +2106,35 @@
 
     var closeBtn = overlay.querySelector('.krit-order-success-close');
     var trackBtn = overlay.querySelector('.krit-order-success-track');
+    var customerWaBtn = overlay.querySelector('.krit-order-success-customer-wa');
+    var ownerWaBtn = overlay.querySelector('.krit-order-success-owner-wa');
+    var copyBtn = overlay.querySelector('.krit-order-success-copy');
     var continueBtn = overlay.querySelector('.krit-order-success-continue');
+    var customerMessage = buildCustomerOrderWhatsAppMessage(order);
+    var ownerMessage = buildOwnerOrderWhatsAppMessage(order);
     if(closeBtn) closeBtn.onclick = closeOrderSuccessOverlay;
     if(continueBtn) continueBtn.onclick = closeOrderSuccessOverlay;
     if(trackBtn){
       trackBtn.onclick = function(){
         closeOrderSuccessOverlay();
-        openAccountOrderDetails(order);
+        setTimeout(function(){
+          openAccountOrderTracker(order.id);
+        }, 60);
+      };
+    }
+    if(customerWaBtn){
+      customerWaBtn.onclick = function(){
+        openWhatsAppMessage(order && order.customer && order.customer.phone, customerMessage);
+      };
+    }
+    if(ownerWaBtn){
+      ownerWaBtn.onclick = function(){
+        openWhatsAppMessage(KRIT_OWNER_WHATSAPP_NUMBER, ownerMessage);
+      };
+    }
+    if(copyBtn){
+      copyBtn.onclick = function(){
+        copyKritMessage(customerMessage, 'Customer message');
       };
     }
     overlay._kritEscHandler = function(event){
@@ -2044,6 +2235,7 @@
   }
 
   function enhance(){
+    ensureKritOverlayStyles();
     mobilePanel();
     patchCheckoutOpen();
     patchOrderSync();
