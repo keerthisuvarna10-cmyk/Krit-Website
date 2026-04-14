@@ -2101,6 +2101,10 @@
     }
   }
 
+  window.__kritSharedOrderOverlay = function(order, fallback){
+    return openOrderSuccessOverlaySafely(order, fallback);
+  };
+
   function patchOrderSync(){
     if(typeof window.kritCreateOrderRecord === 'function' && !window.kritCreateOrderRecord.__kritERP){
       var original = window.kritCreateOrderRecord;

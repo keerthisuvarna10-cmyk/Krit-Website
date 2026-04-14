@@ -3767,42 +3767,10 @@ function kritCreateOrderRecord(customer, paymentMode, paymentState, extra){
 }
 
 function kritShowOrderConfirmation(order){
-  var isPendingOnline = order.paymentState === "pending" && order.paymentMode !== "cod";
-  var isPaidOnline = order.paymentState === "paid";
-  var eyebrow = isPendingOnline ? "Payment pending" : (isPaidOnline ? "Payment successful" : "Order received");
-  var eyebrowColor = isPendingOnline ? "#F9D548" : (isPaidOnline ? "#4ade80" : "#8FC4E8");
-  var heading = isPendingOnline ? "Complete your payment to confirm this order" : (isPaidOnline ? "Thank you for ordering with KRIT" : "Your order request has been received");
-  var intro = isPendingOnline
-    ? "Your KRIT order ID has been created. Complete the payment through secure Razorpay checkout using UPI, cards, or netbanking to confirm this order."
-    : (isPaidOnline
-        ? "Your payment was received successfully. Use your KRIT order ID anytime to view the latest status updates."
-        : "We have saved your pay-on-delivery request. Use your KRIT order ID anytime to view the latest status updates.");
-  var helperCard = isPendingOnline
-    ? '<div style="grid-column:1 / -1;padding:18px;border-radius:18px;background:rgba(249,213,72,.08);border:1px solid rgba(249,213,72,.18)"><div style="font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:#F9D548;margin-bottom:8px">Payment methods</div><div style="font-size:.86rem;color:#D8E4F8;line-height:1.8">UPI opens a Razorpay app handoff or QR flow, cards open Razorpay&apos;s secure hosted card form, and netbanking lets customers choose their bank inside the same checkout. Cash on delivery stays available if they prefer to pay later.</div></div>'
-    : '';
-  kritCloseOverlay("krit-checkout-overlay");
-  var overlay = document.createElement("div");
-  overlay.id = "krit-order-success-overlay";
-  overlay.style.cssText = "position:fixed;inset:0;background:rgba(3,8,15,.78);backdrop-filter:blur(8px);z-index:9850;display:flex;align-items:center;justify-content:center;padding:12px";
-  overlay.innerHTML = ''
-    + '<div style="width:min(1120px,calc(100vw - 24px));max-height:calc(100vh - 24px);display:flex;flex-direction:column;background:#091525;border:1px solid rgba(47,93,168,.18);border-radius:24px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.34)">'
-    +   '<div style="padding:22px 24px;border-bottom:1px solid rgba(47,93,168,.12);display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:nowrap">'
-    +     '<div style="min-width:0"><div style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:' + eyebrowColor + '">Order received</div><div style="font-family:\'Playfair Display\',serif;font-size:clamp(1.55rem,2.4vw,2.2rem);line-height:1.05;color:#F0F4FF;font-weight:700;margin-top:8px">' + heading + '</div><div style="font-size:.9rem;color:#AFC0DE;line-height:1.65;margin-top:10px;max-width:62ch">' + intro + '</div></div>'
-    +     '<button type="button" onclick="kritCloseOverlay(\'krit-order-success-overlay\')" aria-label="Close order confirmation" style="flex:0 0 auto;width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:#D7E6FF;font-size:1.15rem;line-height:1;cursor:pointer">×</button>'
-    +   '</div>'
-    +   '<div style="padding:20px 24px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;overflow:auto;min-height:0">'
-    +     '<div style="padding:16px;border-radius:18px;background:rgba(8,18,34,.76);border:1px solid rgba(47,93,168,.12)"><div style="font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:#92A8CE">Order ID</div><div style="font-family:monospace;font-size:1.15rem;color:#F0F4FF;margin-top:8px;word-break:break-word">' + order.id + '</div><div style="font-size:.8rem;color:#AFC0DE;line-height:1.65;margin-top:10px">Use this order ID anytime to track updates on your purchase.</div></div>'
-    +     '<div style="padding:16px;border-radius:18px;background:rgba(8,18,34,.76);border:1px solid rgba(47,93,168,.12)"><div style="font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:#92A8CE">Customer</div><div style="font-size:.98rem;color:#F0F4FF;font-weight:700;margin-top:8px">' + kritEscapeHtml(order.customer.name) + '</div><div style="font-size:.82rem;color:#AFC0DE;line-height:1.7;margin-top:10px">' + kritEscapeHtml(order.customer.phone) + '<br>' + kritEscapeHtml(order.customer.address) + '</div></div>'
-    +     helperCard
-    +     '<div style="grid-column:1 / -1;padding:18px;border-radius:18px;background:rgba(47,93,168,.08);border:1px solid rgba(47,93,168,.12);max-height:min(46vh,420px);overflow:auto">' + kritRenderTrackedOrder(order) + '</div>'
-    +   '</div>'
-    +   '<div style="padding:0 24px 20px;display:flex;gap:10px;flex-wrap:wrap">'
-    +     '<button type="button" onclick="kritCloseOverlay(\'krit-order-success-overlay\');openTrackModal();setTimeout(function(){var input=document.getElementById(\'track-awb\');if(input){input.value=\'' + order.id + '\';doTrack();}},120);" style="padding:13px 18px;border:none;border-radius:12px;background:#2F5DA8;color:#fff;font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Track This Order</button>'
-    +     '<button type="button" onclick="kritCloseOverlay(\'krit-order-success-overlay\')" style="padding:13px 18px;border:none;border-radius:12px;background:rgba(255,255,255,.06);color:#D8E4F8;font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Continue Shopping</button>'
-    +   '</div>'
-    + '</div>';
-  document.body.appendChild(overlay);
-  document.body.style.overflow = "hidden";
+  if (window.__kritSharedOrderOverlay && typeof window.__kritSharedOrderOverlay === "function"){
+    return window.__kritSharedOrderOverlay(order);
+  }
+  kritToast("Your order was saved. Please refresh once to view the updated confirmation.");
 }
 
 function kritOmsUpdateOrderStatus(orderId, patch){

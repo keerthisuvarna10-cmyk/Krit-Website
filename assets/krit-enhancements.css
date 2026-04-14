@@ -370,3 +370,443 @@
     display:flex;
   }
 }
+
+@media (max-width:900px){
+  html,body{
+    overflow-x:hidden;
+  }
+
+  #faq-trigger{
+    top:auto!important;
+    bottom:96px!important;
+    left:12px!important;
+    transform:none!important;
+    writing-mode:horizontal-tb!important;
+    text-orientation:mixed!important;
+    border-radius:14px!important;
+    padding:12px 14px!important;
+    font-size:.72rem!important;
+    letter-spacing:.1em!important;
+  }
+
+  #krit-auth-overlay,
+  .krit-account-order-overlay,
+  .krit-order-success-overlay{
+    padding:10px!important;
+    align-items:flex-start!important;
+  }
+
+  .krit-auth-card.krit-auth-premium,
+  .krit-auth-card.krit-auth-premium.krit-account-mode{
+    width:min(100vw - 20px,760px)!important;
+    max-width:none!important;
+    max-height:min(94dvh,94vh)!important;
+    grid-template-columns:1fr!important;
+    border-radius:24px!important;
+  }
+
+  .krit-auth-side{
+    padding:18px 18px 16px!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+
+  .krit-auth-side .krit-auth-logo{
+    margin-bottom:8px!important;
+  }
+
+  .krit-auth-side .krit-auth-logo img{
+    height:60px!important;
+  }
+
+  .krit-auth-side .krit-auth-title{
+    font-size:1.9rem!important;
+    line-height:1.05!important;
+  }
+
+  .krit-auth-side .krit-auth-sub{
+    font-size:.92rem!important;
+    line-height:1.65!important;
+    margin-bottom:12px!important;
+  }
+
+  .krit-auth-benefits{
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+
+  .krit-auth-benefit,
+  .krit-auth-benefit:last-child{
+    grid-column:auto!important;
+    padding:12px 14px!important;
+    font-size:.82rem!important;
+    line-height:1.55!important;
+  }
+
+  .krit-auth-main{
+    padding:18px!important;
+  }
+
+  #krit-auth-account{
+    padding:4px 0 18px!important;
+  }
+
+  .krit-auth-account-card{
+    padding:18px!important;
+    border-radius:20px!important;
+  }
+
+  .krit-account-shell{
+    grid-template-columns:1fr!important;
+    gap:18px!important;
+  }
+
+  .krit-account-sidebar,
+  .krit-account-content{
+    gap:14px!important;
+  }
+
+  .krit-account-quickstats{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+
+  .krit-account-stat{
+    padding:14px 12px!important;
+  }
+
+  .krit-account-nav{
+    grid-template-columns:1fr!important;
+  }
+
+  .krit-account-order-card{
+    padding:18px!important;
+    gap:16px!important;
+  }
+
+  .krit-account-order-main,
+  .krit-account-order-grid,
+  .krit-account-profile-grid,
+  .krit-account-support-grid,
+  .krit-account-order-dialog-grid{
+    grid-template-columns:1fr!important;
+  }
+
+  .krit-account-order-meta{
+    padding:16px!important;
+  }
+
+  .krit-account-order-actions{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+
+  .krit-account-order-actions .krit-btn,
+  .krit-account-order-actions .krit-btn-secondary{
+    width:100%!important;
+    min-width:0!important;
+  }
+
+  .krit-account-order-dialog{
+    width:100%!important;
+    max-height:min(94dvh,94vh)!important;
+    border-radius:22px!important;
+  }
+
+  .krit-account-order-dialog-head{
+    padding:18px 18px 14px!important;
+  }
+
+  .krit-account-order-dialog-title{
+    font-size:1.55rem!important;
+  }
+
+  .krit-account-order-dialog-copy{
+    font-size:.9rem!important;
+  }
+
+  .krit-account-order-dialog-body{
+    padding:16px!important;
+    gap:16px!important;
+  }
+
+  .krit-account-order-step{
+    grid-template-columns:auto 1fr!important;
+  }
+
+  .krit-account-order-step-time{
+    grid-column:2!important;
+    white-space:normal!important;
+  }
+
+  .krit-order-success-dialog,
+  .krit-checkout-card{
+    width:100%!important;
+    max-height:min(94dvh,94vh)!important;
+    border-radius:22px!important;
+  }
+
+  .krit-order-success-dialog{
+    padding:18px 16px 18px!important;
+  }
+
+  .krit-order-success-head{
+    padding-right:54px!important;
+    margin-bottom:16px!important;
+  }
+
+  .krit-order-success-badge{
+    margin-bottom:14px!important;
+  }
+
+  .krit-order-success-title{
+    font-size:1.7rem!important;
+    line-height:1.08!important;
+  }
+
+  .krit-order-success-copy{
+    font-size:.92rem!important;
+    line-height:1.7!important;
+  }
+
+  .krit-order-success-grid,
+  .krit-order-success-mini-grid,
+  .krit-checkout-grid,
+  .krit-checkout-support,
+  .krit-checkout-form-grid{
+    grid-template-columns:1fr!important;
+  }
+
+  .krit-order-success-card,
+  .krit-order-success-mini-card,
+  .krit-checkout-pane,
+  .krit-checkout-summary-card{
+    padding:16px!important;
+  }
+
+  .krit-order-success-productrow,
+  .krit-order-success-orderhead{
+    flex-direction:column!important;
+    align-items:flex-start!important;
+  }
+
+  .krit-order-success-total{
+    font-size:1.45rem!important;
+  }
+
+  .krit-order-success-actions{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+
+  .krit-order-success-actions .krit-btn,
+  .krit-order-success-actions .krit-btn-secondary{
+    width:100%!important;
+    min-width:0!important;
+  }
+
+  .krit-checkout-pane{
+    padding:18px 16px!important;
+  }
+
+  .krit-checkout-support .item{
+    padding:14px!important;
+  }
+
+  .krit-checkout-field input,
+  .krit-checkout-field textarea{
+    font-size:16px!important;
+  }
+
+  footer > div:first-child,
+  footer > div:nth-child(2),
+  footer > div:last-child{
+    padding-left:18px!important;
+    padding-right:18px!important;
+  }
+
+  footer form{
+    width:100%!important;
+    min-width:0!important;
+    justify-content:stretch!important;
+  }
+
+  footer form input,
+  footer form button{
+    width:100%!important;
+  }
+}
+
+@media (max-width:640px){
+  #nav{
+    min-height:78px!important;
+    padding:12px 14px!important;
+    gap:10px!important;
+  }
+
+  .nl-logo{
+    width:104px!important;
+  }
+
+  .nl-tag{
+    font-size:.64rem!important;
+    line-height:1.2!important;
+  }
+
+  .nav-icons{
+    padding:4px 6px!important;
+    gap:4px!important;
+  }
+
+  .nav-icon-btn{
+    width:38px!important;
+    height:38px!important;
+  }
+
+  .hi{
+    padding:98px 16px 34px!important;
+  }
+
+  .h-h1{
+    font-size:clamp(1.9rem,11vw,2.8rem)!important;
+    line-height:.98!important;
+  }
+
+  .h-sub{
+    font-size:.92rem!important;
+    line-height:1.68!important;
+  }
+
+  .h-ctas{
+    gap:10px!important;
+    max-width:100%!important;
+  }
+
+  .h-proof{
+    gap:10px!important;
+  }
+
+  .h-proof-card{
+    padding:14px!important;
+  }
+
+  .krit-storyband-card{
+    padding:16px!important;
+  }
+
+  .krit-storyband-title{
+    font-size:1.5rem!important;
+  }
+
+  .krit-shop-intro-title{
+    font-size:1.65rem!important;
+  }
+
+  .krit-shop-intro-copy p{
+    font-size:.92rem!important;
+    line-height:1.72!important;
+  }
+
+  #krit-grid{
+    grid-template-columns:1fr!important;
+    gap:14px!important;
+  }
+
+  #krit-detail-layout{
+    grid-template-columns:1fr!important;
+  }
+
+  #krit-detail-layout > div:last-child{
+    padding:18px 14px!important;
+  }
+
+  #detail-thumbs button{
+    width:64px!important;
+    height:64px!important;
+  }
+
+  #krit-detail-share{
+    grid-template-columns:1fr 1fr!important;
+  }
+
+  .krit-share-btn{
+    padding:11px 10px!important;
+    font-size:.68rem!important;
+  }
+
+  .krit-auth-side .krit-auth-title{
+    font-size:1.65rem!important;
+  }
+
+  .krit-account-quickstats{
+    grid-template-columns:1fr!important;
+  }
+
+  .krit-order-success-title{
+    font-size:1.5rem!important;
+  }
+
+  .krit-order-success-badge{
+    font-size:.7rem!important;
+    letter-spacing:.12em!important;
+  }
+
+  .krit-checkout-step{
+    font-size:.68rem!important;
+  }
+}
+
+@media (max-width:420px){
+  #faq-trigger{
+    bottom:84px!important;
+    left:10px!important;
+    padding:10px 12px!important;
+  }
+
+  .krit-mobile-cta{
+    left:10px!important;
+    right:10px!important;
+    bottom:10px!important;
+    padding:8px!important;
+    gap:8px!important;
+    border-radius:18px!important;
+  }
+
+  .krit-mobile-cta a,
+  .krit-mobile-cta button{
+    min-height:44px!important;
+    font-size:.68rem!important;
+    letter-spacing:.12em!important;
+  }
+
+  .krit-auth-card.krit-auth-premium,
+  .krit-auth-card.krit-auth-premium.krit-account-mode,
+  .krit-order-success-dialog,
+  .krit-account-order-dialog,
+  .krit-checkout-card{
+    width:min(100vw - 12px,100%)!important;
+    border-radius:18px!important;
+  }
+
+  .krit-auth-side,
+  .krit-auth-main,
+  .krit-account-order-dialog-head,
+  .krit-account-order-dialog-body,
+  .krit-checkout-pane,
+  .krit-order-success-dialog{
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+
+  .krit-auth-side .krit-auth-logo img{
+    height:52px!important;
+  }
+
+  .krit-auth-side .krit-auth-title,
+  .krit-account-order-dialog-title,
+  .krit-order-success-title{
+    font-size:1.35rem!important;
+  }
+}
