@@ -554,6 +554,24 @@
     openAccountOrderDetails(order);
   }
 
+  async function openTrackModal(){
+    if(!window._kritAccount || (!window._kritAccount.email && !window._kritAccount.phone)){
+      if(typeof window.openAuthModal === 'function') window.openAuthModal();
+      authMessage('Log in to view and track your KRIT orders.', 'info');
+      return;
+    }
+    await renderAccountDashboard();
+    if(typeof window.openAuthModal === 'function') window.openAuthModal();
+    switchAccountPanel('orders');
+
+    var orders = Array.isArray(window._kritAccountOrders) ? window._kritAccountOrders.slice() : [];
+    if(!orders.length){
+      if(window.kritToast) window.kritToast('No orders are available in your account yet.');
+      return;
+    }
+    openAccountOrderTracker(orders[0].id);
+  }
+
   function buildOrderTrackingTimeline(order){
     var timeline = Array.isArray(order.timeline) && order.timeline.length ? order.timeline.slice() : [];
     if(!timeline.length){
@@ -1447,6 +1465,7 @@
     window.kritSendOtpLogin = sendOtpLogin;
     window.kritVerifyOtpLogin = verifyOtpLogin;
     window.switchAccountPanel = switchAccountPanel;
+    window.openTrackModal = openTrackModal;
     window.openAccountOrderTracker = openAccountOrderTracker;
     window.openAccountOrderShipment = openAccountOrderShipment;
     window.kritCloseAccountOrderDetails = closeAccountOrderDetails;
