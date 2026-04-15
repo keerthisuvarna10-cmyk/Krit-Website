@@ -519,21 +519,29 @@ body.clk
 
 /* FOOTER */
 footer{background:#1A2332;border-top:none;position:relative;z-index:1}
-.fi{max-width:1120px;margin:0 auto;padding:34px 40px 16px;display:grid;grid-template-columns:1.6fr .9fr .9fr .9fr;gap:26px}
-.fb-logo{display:flex;flex-direction:column;align-items:flex-start;margin-bottom:8px}
+.fi{max-width:1040px;margin:0 auto;padding:24px 28px 10px;display:grid;grid-template-columns:1.28fr .78fr .78fr .78fr;gap:18px}
+.fb-logo{display:flex;flex-direction:column;align-items:flex-start;margin-bottom:4px}
 .fb-logo-text{font-family:'Playfair Display',serif;font-size:2rem;font-weight:400;letter-spacing:.2em;color:var(--white);text-shadow:0 0 20px rgba(47,93,168,.3)}
 .fb-domain{font-size:.94rem;letter-spacing:.3em;text-transform:uppercase;color:var(--silver);opacity:.35;margin-top:2px}
-.fb p{font-size:.88rem;line-height:1.5;color:var(--silver);opacity:.44;max-width:250px}
-.fc h5{font-size:.88rem;letter-spacing:.28em;text-transform:uppercase;color:var(--glow);margin-bottom:10px}
-.fc a{display:block;font-size:.82rem;line-height:1.3;color:var(--silver);opacity:.46;margin-bottom:4px;transition:opacity .2s,color .2s}
+.fb p{font-size:.8rem;line-height:1.45;color:var(--silver);opacity:.42;max-width:220px}
+.fc h5{font-size:.8rem;letter-spacing:.24em;text-transform:uppercase;color:var(--glow);margin-bottom:8px}
+.fc a{display:block;font-size:.77rem;line-height:1.28;color:var(--silver);opacity:.46;margin-bottom:3px;transition:opacity .2s,color .2s}
 .fc a:hover{opacity:1;color:var(--white)}
-.fbot{border-top:1px solid rgba(47,93,168,.08);padding:12px 40px 18px;max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
-.fcp{font-size:.84rem;color:var(--silver);opacity:.28;letter-spacing:.12em;text-transform:uppercase}
-.fleg{display:flex;gap:18px}
-.fleg a{font-size:.84rem;color:var(--silver);opacity:.28;transition:opacity .2s}
+.fnr{max-width:1040px;margin:0 auto;padding:8px 28px;border-top:1px solid rgba(47,93,168,.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.fnr-copy{min-width:150px;flex:0 1 260px}
+.fnr-title{font-size:.72rem;font-weight:700;color:var(--white);margin-bottom:2px}
+.fnr-sub{font-size:.66rem;color:var(--silver);opacity:.7;line-height:1.3}
+.fnr-form{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;flex:1;min-width:220px}
+.fnr-form input{flex:1;min-width:170px;padding:8px 12px;border-radius:999px;border:1px solid rgba(47,93,168,.18);background:#081221;color:#F0F4FF;font-size:.74rem;outline:none}
+.fnr-form button{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:linear-gradient(180deg,#2F5DA8,#244A86);border:none;border-radius:999px;color:#fff;font-size:.64rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;cursor:pointer;transition:opacity .2s}
+.fnr-form button:hover{opacity:.88}
+.fbot{border-top:1px solid rgba(47,93,168,.08);padding:10px 28px 14px;max-width:1040px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.fcp{font-size:.78rem;color:var(--silver);opacity:.28;letter-spacing:.11em;text-transform:uppercase}
+.fleg{display:flex;gap:14px}
+.fleg a{font-size:.78rem;color:var(--silver);opacity:.28;transition:opacity .2s}
 .fleg a:hover{opacity:.75}
-.f-kritniv{max-width:1120px;margin:0 auto;padding:10px 40px 14px;border-top:1px solid rgba(47,93,168,.05);text-align:center}
-.f-kritniv p{font-family:'Playfair Display',serif;font-style:italic;font-size:.85rem;color:var(--silver);opacity:.45;letter-spacing:.06em}
+.f-kritniv{max-width:1040px;margin:0 auto;padding:8px 28px 10px;border-top:1px solid rgba(47,93,168,.05);text-align:center}
+.f-kritniv p{font-family:'Playfair Display',serif;font-style:italic;font-size:.78rem;color:var(--silver);opacity:.42;letter-spacing:.05em}
 
 /* MODAL */
 #ov{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.86);backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s}
@@ -566,8 +574,8 @@ footer{background:#1A2332;border-top:none;position:relative;z-index:1}
 
 /* RESPONSIVE */
 @media(max-width:1060px){.pg{grid-template-columns:repeat(2,1fr)}.bc2{grid-template-columns:1fr}.lg{grid-template-columns:1fr 1fr}.lca{grid-column:1/3;grid-row:1;min-height:280px}.lcb,.lcc2,.lcd,.lce{grid-column:auto;grid-row:auto}}
-@media(max-width:900px){.nls{display:none}.hbg{display:flex}.tg{grid-template-columns:1fr}.tbi{grid-template-columns:1fr 1fr}.ti:nth-child(2){border-right:none}.fi{grid-template-columns:1fr 1fr;gap:18px;padding:24px 22px 12px}.fbot{flex-direction:column;gap:10px;text-align:center;padding:12px 22px 16px}.guar{padding:30px 24px}.blg{grid-template-columns:1fr}.lg{grid-template-columns:1fr}.lca{grid-column:1;min-height:260px}#nav{padding:0 18px;height:84px}.nl{width:148px;gap:4px}.nl-logo{width:136px}.nl-tag{font-size:.74rem;width:136px}.nav-icons{padding:4px 6px}}
-@media(max-width:560px){.pg{grid-template-columns:1fr}.tbi{grid-template-columns:1fr}.ti{border-right:none;border-bottom:1px solid rgba(47,93,168,.08)}.fi{grid-template-columns:1fr;padding:20px 18px 10px;gap:14px}.sca,.scb{display:none}.h-ctas{flex-direction:column;align-items:center}.wa-tx{display:none}.wa{padding:14px}.f-kritniv{padding:10px 18px 14px}.nl{width:126px}.nl-logo{width:118px}.nl-tag{font-size:.64rem;letter-spacing:.03em;width:118px}}
+@media(max-width:900px){.nls{display:none}.hbg{display:flex}.tg{grid-template-columns:1fr}.tbi{grid-template-columns:1fr 1fr}.ti:nth-child(2){border-right:none}.fi{grid-template-columns:1fr 1fr;gap:14px;padding:18px 18px 8px}.fnr{padding:8px 18px}.fbot{flex-direction:column;gap:8px;text-align:center;padding:10px 18px 12px}.guar{padding:30px 24px}.blg{grid-template-columns:1fr}.lg{grid-template-columns:1fr}.lca{grid-column:1;min-height:260px}#nav{padding:0 18px;height:84px}.nl{width:148px;gap:4px}.nl-logo{width:136px}.nl-tag{font-size:.74rem;width:136px}.nav-icons{padding:4px 6px}}
+@media(max-width:560px){.pg{grid-template-columns:1fr}.tbi{grid-template-columns:1fr}.ti{border-right:none;border-bottom:1px solid rgba(47,93,168,.08)}.fi{grid-template-columns:1fr;padding:16px 14px 8px;gap:10px}.fnr{padding:8px 14px;gap:6px}.fnr-copy,.fnr-form{flex:1 1 100%;min-width:0}.fnr-form{justify-content:stretch}.fnr-form input,.fnr-form button{width:100%}.sca,.scb{display:none}.h-ctas{flex-direction:column;align-items:center}.wa-tx{display:none}.wa{padding:14px}.f-kritniv{padding:6px 14px 10px}.nl{width:126px}.nl-logo{width:118px}.nl-tag{font-size:.64rem;letter-spacing:.03em;width:118px}}
 
 
 
@@ -2415,7 +2423,7 @@ setTimeout(_kritInit, 600);
               <a href="#buy" onclick="kritSelectProduct(1)">Half Pillow (3")</a>
               <a href="#buy" onclick="kritSelectProduct(2)">Half Pillow (2")</a>
               <a href="#buy" onclick="kritSelectProduct(3)">Soap Shape Pillow</a></div>
-    <div class="fc"><h5>Company</h5><a href="#about">Our Story</a><a href="#blog">Blog</a><a href="#" onclick="openInfoModal('contact-modal');return false">Contact Us</a><a href="#" onclick="event.preventDefault();openTrackModal()">Track Order</a></div>
+    <div class="fc"><h5>Company</h5><a href="#about">Our Story</a><a href="#blog">Blog</a><a href="#" onclick="openInfoModal('contact-modal');return false">Contact Us</a><a href="#" onclick="event.preventDefault();if(window.openTrackModal){window.openTrackModal();}return false;">Track Order</a></div>
     <div class="fc"><h5>Support</h5><a href="#" onclick="openInfoModal('returns-modal');return false">Returns Policy</a><a href="#" onclick="openInfoModal('shipping-modal');return false">Shipping Info</a><a href="mailto:hello@kritsleep.in">Email Us</a></div>
   </div>
   <div style="max-width:1120px;margin:0 auto;padding:10px 40px;border-top:1px solid rgba(47,93,168,.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
@@ -3683,41 +3691,11 @@ function kritRazorpayDisplayConfig(mode){
 }
 
 function kritShowCodNudge(customer){
-  var savings = kritFormatINR(KRIT_PAYMENT_OFFERS.prepaidDiscount);
-  var existing = document.getElementById("krit-cod-nudge-overlay");
-  if(existing) existing.remove();
-  var overlay = document.createElement("div");
-  overlay.id = "krit-cod-nudge-overlay";
-  overlay.style.cssText = "position:fixed;inset:0;background:rgba(3,8,15,.78);backdrop-filter:blur(8px);z-index:9865;display:flex;align-items:center;justify-content:center;padding:20px";
-  overlay.innerHTML = ''
-    + '<div style="width:100%;max-width:520px;background:#091525;border:1px solid rgba(47,93,168,.18);border-radius:22px;box-shadow:0 30px 60px rgba(0,0,0,.34);padding:28px">'
-    +   '<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">'
-    +     '<div><div style="font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:#F9D548">Before you continue</div><div style="font-family:\'Playfair Display\',serif;font-size:1.8rem;color:#F0F4FF;font-weight:700;margin-top:8px">Pay online and save ' + savings + '</div></div>'
-    +     '<button type="button" onclick="kritCloseOverlay(\'krit-cod-nudge-overlay\')" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.08);background:transparent;color:#A7BAD9;cursor:pointer">x</button>'
-    +   '</div>'
-    +   '<div style="font-size:.9rem;color:#AFC0DE;line-height:1.8;margin-top:14px">Online payments get an instant discount of ' + savings + ', faster confirmation, and quicker dispatch. You can still continue with pay on delivery if you prefer.</div>'
-    +   '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:22px">'
-    +     '<button type="button" onclick="kritCloseOverlay(\'krit-cod-nudge-overlay\');kritSelectPaymentMode(\'upi\')" style="flex:1;min-width:220px;padding:14px 16px;border:none;border-radius:12px;background:#F9D548;color:#1B2340;font-size:.76rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Switch To Online Payment</button>'
-    +     '<button type="button" onclick="kritContinueCodFlow()" style="flex:1;min-width:220px;padding:14px 16px;border:none;border-radius:12px;background:#2F5DA8;color:#fff;font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Continue With Pay On Delivery</button>'
-    +   '</div>'
-    + '</div>';
-  document.body.appendChild(overlay);
-}
-
-function kritContinueCodFlow(){
-  var customer = kritCollectCustomer();
-  if(!kritValidateCustomer(customer)) return;
-  kritCloseOverlay('krit-cod-nudge-overlay');
-  kritFinalizeCodOrder(customer);
-}
-
-function kritFinalizeCodOrder(customer){
-  customer = customer || kritCollectCustomer();
-  if(!kritValidateCustomer(customer)) return;
-  var codOrder = kritCreateOrderRecord(customer, "cod", "pending");
-  _cart = [];
-  kritSaveCart();
-  kritShowOrderConfirmation(codOrder);
+  /* In new checkout flow, COD is handled inside kmPlaceOrder → kmConfirmCOD.
+     This stub is kept for any legacy callers. */
+  if(typeof kmConfirmCOD === 'function'){
+    kmConfirmCOD(customer);
+  }
 }
 
 function kritCreateOrderRecord(customer, paymentMode, paymentState, extra){
@@ -3990,66 +3968,528 @@ function kritOpenCheckout(items){
     return;
   }
   _kritCheckoutItems = items.map(function(item){
-    return { id: item.id || "", name: item.name, qty: item.qty, price: item.price };
+    return { id: item.id || "", name: item.name, qty: item.qty, price: item.price, image: item.image || "" };
   });
 
   kritCloseOverlay("krit-checkout-overlay");
-  var overlay = document.createElement("div");
-  overlay.id = "krit-checkout-overlay";
-  overlay.style.cssText = "position:fixed;inset:0;background:rgba(3,8,15,.72);backdrop-filter:blur(7px);z-index:9800;overflow:auto;padding:28px 16px";
+
+  /* ── inject styles once ── */
+  if(!document.getElementById('krit-mabish-css')){
+    var st = document.createElement('style');
+    st.id = 'krit-mabish-css';
+    st.textContent = `
+      @keyframes kmSlideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+      @keyframes kmFadeIn{from{opacity:0}to{opacity:1}}
+      #krit-checkout-overlay{animation:kmFadeIn .22s ease}
+      .km-sheet{animation:kmSlideUp .32s cubic-bezier(.2,.8,.4,1)}
+      .km-step{display:none}.km-step.km-active{display:block}
+      .km-pay-row{
+        display:flex;align-items:center;justify-content:space-between;
+        padding:16px 0;border-bottom:1px solid #f0f0f0;cursor:pointer;
+      }
+      .km-pay-row:last-child{border-bottom:none}
+      .km-pay-icon{width:38px;height:38px;border-radius:10px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+      .km-pay-row .km-radio{width:20px;height:20px;border-radius:50%;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s}
+      .km-pay-row.km-selected .km-radio{border-color:#2a7d46;background:#2a7d46}
+      .km-pay-row.km-selected .km-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:#fff}
+      .km-pay-row.km-selected{background:#f6fdf9}
+      .km-input{
+        width:100%;padding:13px 14px;border-radius:10px;border:1.5px solid #e8e8e8;
+        font-size:.95rem;color:#1a1a1a;outline:none;box-sizing:border-box;
+        transition:border-color .15s;font-family:inherit;background:#fff;
+      }
+      .km-input:focus{border-color:#2a7d46}
+      .km-input::placeholder{color:#b0b0b0}
+      .km-btn-green{
+        width:100%;padding:15px;border:none;border-radius:12px;
+        background:linear-gradient(135deg,#2a7d46,#34a057);
+        color:#fff;font-size:.92rem;font-weight:700;cursor:pointer;
+        letter-spacing:.04em;transition:opacity .15s;
+      }
+      .km-btn-green:hover{opacity:.92}
+      .km-btn-outline{
+        width:100%;padding:14px;border:1.5px solid #e0e0e0;border-radius:12px;
+        background:#fff;color:#444;font-size:.9rem;font-weight:600;cursor:pointer;
+        transition:border-color .15s;font-family:inherit;
+      }
+      .km-btn-outline:hover{border-color:#aaa}
+      .km-tag-save{padding:3px 8px;border-radius:6px;background:#e8f5ec;color:#2a7d46;font-size:.68rem;font-weight:700;letter-spacing:.06em}
+      .km-tag-fee{padding:3px 8px;border-radius:6px;background:#fff8e6;color:#b07a00;font-size:.68rem;font-weight:700;letter-spacing:.06em}
+      .km-progress{display:flex;gap:6px;align-items:center;margin-bottom:18px}
+      .km-prog-step{flex:1;height:3px;border-radius:99px;background:#e8e8e8;transition:background .3s}
+      .km-prog-step.done{background:#2a7d46}
+      .km-prog-step.active{background:#2a7d46;opacity:.5}
+      .km-order-confirm-wrap{text-align:center;padding:28px 0 12px}
+      .km-check-circle{width:54px;height:54px;border-radius:50%;background:#2a7d46;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;animation:kmPop .4s cubic-bezier(.2,.8,.4,1)}
+      @keyframes kmPop{0%{transform:scale(0)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+      .km-order-card{background:#f8f8f8;border-radius:14px;padding:16px;margin-top:18px;text-align:left}
+      .km-order-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed #e8e8e8;font-size:.88rem}
+      .km-order-row:last-child{border-bottom:none;font-weight:700;padding-top:12px;font-size:.92rem}
+      .km-insta-bar{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid #f0f0f0;margin-top:18px}
+      .km-bottom-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+    `;
+    document.head.appendChild(st);
+  }
 
   var subtotal = kritCheckoutBaseTotal();
-  var summary = _kritCheckoutItems.map(function(item){
-    return '<div style="display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid rgba(47,93,168,.1)"><span style="color:#D8E4F8">' + item.qty + ' x ' + item.name + '</span><span style="color:#F0F4FF;font-weight:700">' + kritFormatINR(item.qty * item.price) + '</span></div>';
-  }).join("");
+  var pricing  = kritCheckoutPricing(_kritSelectedPaymentMode || 'upi');
 
-  overlay.innerHTML = ''
-    + '<div style="max-width:980px;margin:0 auto;background:#091525;border:1px solid rgba(47,93,168,.18);border-radius:20px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.32)">'
-    +   '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">'
-    +     '<div style="padding:26px">'
-    +       '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:20px">'
-    +         '<div><div style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#C9A84C">Checkout</div><div style="font-family:\'Playfair Display\',serif;font-size:1.6rem;color:#F0F4FF;font-weight:700">Customer details</div></div>'
-    +         '<button type="button" onclick="kritCloseOverlay(\'krit-checkout-overlay\')" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.08);background:transparent;color:#A7BAD9;cursor:pointer">x</button>'
-    +       '</div>'
-    +       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
-    +         '<input id="krit-co-name" placeholder="Full name" style="padding:13px 14px;border-radius:12px;border:1px solid rgba(47,93,168,.18);background:#06101d;color:#F0F4FF;outline:none">'
-    +         '<input id="krit-co-phone" placeholder="Phone number" style="padding:13px 14px;border-radius:12px;border:1px solid rgba(47,93,168,.18);background:#06101d;color:#F0F4FF;outline:none">'
-    +         '<input id="krit-co-email" placeholder="Email" style="grid-column:1 / span 2;padding:13px 14px;border-radius:12px;border:1px solid rgba(47,93,168,.18);background:#06101d;color:#F0F4FF;outline:none">'
-    +         '<input id="krit-co-city" placeholder="City" style="padding:13px 14px;border-radius:12px;border:1px solid rgba(47,93,168,.18);background:#06101d;color:#F0F4FF;outline:none">'
-    +         '<input id="krit-co-pincode" placeholder="Pincode" style="padding:13px 14px;border-radius:12px;border:1px solid rgba(47,93,168,.18);background:#06101d;color:#F0F4FF;outline:none">'
-    +         '<textarea id="krit-co-address" placeholder="Shipping address" style="grid-column:1 / span 2;min-height:110px;padding:13px 14px;border-radius:12px;border:1px solid rgba(47,93,168,.18);background:#06101d;color:#F0F4FF;outline:none;resize:vertical"></textarea>'
-    +         '<textarea id="krit-co-notes" placeholder="Order notes (optional)" style="grid-column:1 / span 2;min-height:90px;padding:13px 14px;border-radius:12px;border:1px solid rgba(47,93,168,.18);background:#06101d;color:#F0F4FF;outline:none;resize:vertical"></textarea>'
-    +       '</div>'
-    +       '<div style="margin-top:22px">'
-    +         '<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px">'
-    +           '<div><div style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#92A8CE">Payment method</div><div style="font-size:.88rem;color:#D8E4F8;margin-top:6px">Prepaid is faster to confirm and comes with an instant savings benefit.</div></div>'
-    +           '<div id="krit-payment-badge" style="padding:7px 12px;border-radius:999px;border:1px solid rgba(74,222,128,.28);background:rgba(74,222,128,.08);color:#7EE39D;font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Recommended</div>'
-    +         '</div>'
-    +         '<div style="display:grid;gap:10px">'
-    +           '<button type="button" id="krit-pay-upi" data-krit-pay-option="upi" onclick="kritSelectPaymentMode(\'upi\')" style="text-align:left;padding:16px 16px;border-radius:16px;border:1px solid rgba(47,93,168,.18);background:rgba(6,16,29,.8);color:#F0F4FF;cursor:pointer;transition:all .2s"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div style="font-size:.94rem;font-weight:700">UPI / QR Scan</div><div style="font-size:.78rem;color:#AFC0DE;line-height:1.6;margin-top:5px">GPay, PhonePe, Paytm, QR scan, and UPI details if supported by Razorpay on the device.</div></div><div style="font-size:.72rem;color:#7EE39D;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Save ' + kritFormatINR(KRIT_PAYMENT_OFFERS.prepaidDiscount) + '</div></div></button>'
-    +           '<button type="button" id="krit-pay-card" data-krit-pay-option="card" onclick="kritSelectPaymentMode(\'card\')" style="text-align:left;padding:16px 16px;border-radius:16px;border:1px solid rgba(47,93,168,.18);background:rgba(6,16,29,.8);color:#F0F4FF;cursor:pointer;transition:all .2s"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div style="font-size:.94rem;font-weight:700">Credit / Debit Cards</div><div style="font-size:.78rem;color:#AFC0DE;line-height:1.6;margin-top:5px">Visa, Mastercard, RuPay and supported debit or credit cards through secure checkout.</div></div><div style="font-size:.72rem;color:#7EE39D;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Save ' + kritFormatINR(KRIT_PAYMENT_OFFERS.prepaidDiscount) + '</div></div></button>'
-    +           '<button type="button" id="krit-pay-netbanking" data-krit-pay-option="netbanking" onclick="kritSelectPaymentMode(\'netbanking\')" style="text-align:left;padding:16px 16px;border-radius:16px;border:1px solid rgba(47,93,168,.18);background:rgba(6,16,29,.8);color:#F0F4FF;cursor:pointer;transition:all .2s"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div style="font-size:.94rem;font-weight:700">Internet Banking</div><div style="font-size:.78rem;color:#AFC0DE;line-height:1.6;margin-top:5px">Choose your bank inside Razorpay secure checkout and complete the payment from your internet banking account.</div></div><div style="font-size:.72rem;color:#7EE39D;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Save ' + kritFormatINR(KRIT_PAYMENT_OFFERS.prepaidDiscount) + '</div></div></button>'
-    +           '<button type="button" id="krit-pay-cod" data-krit-pay-option="cod" onclick="kritSelectPaymentMode(\'cod\')" style="text-align:left;padding:16px 16px;border-radius:16px;border:1px solid rgba(47,93,168,.18);background:rgba(6,16,29,.8);color:#F0F4FF;cursor:pointer;transition:all .2s"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div style="font-size:.94rem;font-weight:700">Pay On Delivery</div><div style="font-size:.78rem;color:#AFC0DE;line-height:1.6;margin-top:5px">Choose this if you prefer to pay at delivery. A small service fee applies.</div></div><div style="font-size:.72rem;color:#F9D548;font-weight:700;letter-spacing:.12em;text-transform:uppercase">+' + kritFormatINR(KRIT_PAYMENT_OFFERS.codFee) + ' fee</div></div></button>'
-    +         '</div>'
-    +         '<div id="krit-payment-note" style="margin-top:12px;padding:14px;border-radius:12px;background:rgba(8,18,34,.78);border:1px solid rgba(47,93,168,.14);font-size:.8rem;line-height:1.7;color:#AFC0DE"></div>'
-    +         '<button type="button" id="krit-checkout-submit" onclick="kritProceedCheckout()" style="width:100%;margin-top:16px;padding:15px 18px;border:none;border-radius:12px;background:#F9D548;color:#1B2340;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Pay Online Securely</button>'
-    +       '</div>'
-    +     '</div>'
-    +     '<div style="padding:26px;background:rgba(47,93,168,.08);border-left:1px solid rgba(47,93,168,.12)">'
-    +       '<div style="font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:#92A8CE;margin-bottom:8px">Order Summary</div>'
-    +       '<div style="font-family:\'Playfair Display\',serif;font-size:1.5rem;color:#F0F4FF;font-weight:700;margin-bottom:10px">Review before payment</div>'
-    +       '<div>' + summary + '</div>'
-    +       '<div style="display:flex;justify-content:space-between;padding-top:14px;margin-top:12px;border-top:1px solid rgba(47,93,168,.14);color:#D8E4F8"><span>Subtotal</span><span id="krit-checkout-subtotal">' + kritFormatINR(subtotal) + '</span></div>'
-    +       '<div style="display:flex;justify-content:space-between;padding-top:10px;color:#D8E4F8"><span id="krit-checkout-adjust-label">Online payment discount</span><span id="krit-checkout-adjust-value" style="color:#7EE39D">-' + kritFormatINR(KRIT_PAYMENT_OFFERS.prepaidDiscount) + '</span></div>'
-    +       '<div style="display:flex;justify-content:space-between;padding-top:14px;margin-top:12px;border-top:1px solid rgba(47,93,168,.14)"><span style="color:#F0F4FF;font-weight:700">Total payable</span><span id="krit-checkout-total" style="font-family:\'Playfair Display\',serif;font-size:1.35rem;color:#F0F4FF;font-weight:700">' + kritFormatINR(Math.max(0, subtotal - KRIT_PAYMENT_OFFERS.prepaidDiscount)) + '</span></div>'
-    +       '<div style="margin-top:18px;padding:16px;border-radius:14px;background:rgba(8,18,34,.78);border:1px solid rgba(47,93,168,.14)"><div style="font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:#C9A84C;margin-bottom:8px">Why prepaid works better</div><div style="font-size:.8rem;line-height:1.8;color:#AFC0DE">Online payments get instant confirmation, prepaid savings, and faster dispatch. Pay on delivery is still available if you need it.</div></div>'
-    +     '</div>'
-    +   '</div>'
-    + '</div>';
+  /* ── item thumbnails for summary ── */
+  var firstItem  = _kritCheckoutItems[0] || {};
+  var firstImg   = kritGetCartItemImage ? kritGetCartItemImage(firstItem) : (firstItem.image || '');
+  var totalItems = _kritCheckoutItems.reduce(function(s,i){return s+i.qty;},0);
+
+  function buildSummaryRows(){
+    return _kritCheckoutItems.map(function(it){
+      var img = kritGetCartItemImage ? kritGetCartItemImage(it) : (it.image||'');
+      return '<div class="km-order-row">'
+        +'<div style="display:flex;align-items:center;gap:10px;min-width:0">'
+        +  (img ? '<div style="position:relative;flex-shrink:0"><img src="'+img+'" style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid #eee"><span style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#555;color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center">'+it.qty+'</span></div>' : '')
+        +  '<span style="color:#333;font-size:.86rem;line-height:1.4">'+it.name+'</span>'
+        +'</div>'
+        +'<span style="font-weight:600;color:#1a1a1a;flex-shrink:0">'+kritFormatINR(it.qty*it.price)+'</span>'
+        +'</div>';
+    }).join('');
+  }
+
+  function buildPricingRows(mode){
+    var p = kritCheckoutPricing(mode);
+    var rows = '<div class="km-order-row"><span style="color:#555">Subtotal</span><span>'+kritFormatINR(p.subtotal)+'</span></div>';
+    rows += '<div class="km-order-row"><span style="color:#555">Shipping</span><span style="color:#2a7d46">Free</span></div>';
+    if(p.discount > 0) rows += '<div class="km-order-row"><span style="color:#2a7d46">Online discount</span><span style="color:#2a7d46">-'+kritFormatINR(p.discount)+'</span></div>';
+    if(p.codFee  > 0) rows += '<div class="km-order-row"><span style="color:#b07a00">COD fee</span><span style="color:#b07a00">+'+kritFormatINR(p.codFee)+'</span></div>';
+    rows += '<div class="km-order-row"><span>Total</span><span>'+kritFormatINR(p.total)+'</span></div>';
+    return rows;
+  }
+
+  /* ── OVERLAY ── */
+  var overlay = document.createElement('div');
+  overlay.id  = 'krit-checkout-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9800;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden';
+
+  overlay.innerHTML =
+  '<div class="km-sheet" style="background:#fff;border-radius:20px 20px 0 0;max-height:92vh;overflow-y:auto;width:100%;max-width:520px;margin:0 auto;box-shadow:0 -8px 40px rgba(0,0,0,.18)">'
+
+  /* ── drag handle ── */
+  +'<div style="padding:10px 0 0;text-align:center"><div style="width:36px;height:4px;border-radius:99px;background:#e0e0e0;display:inline-block"></div></div>'
+
+  /* ── header strip ── */
+  +'<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px 0">'
+  +'<div id="km-header-left" style="display:flex;align-items:center;gap:10px">'
+  +  (firstImg ? '<img src="'+firstImg+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid #f0f0f0">' : '')
+  +  '<div><div style="font-weight:700;font-size:.95rem;color:#1a1a1a">'+kritFormatINR(subtotal)+'</div><div style="font-size:.74rem;color:#888">for '+totalItems+' item'+(totalItems>1?'s':'')+'</div></div>'
+  +'</div>'
+  +'<button onclick="kritCloseOverlay(\'krit-checkout-overlay\')" style="width:32px;height:32px;border-radius:50%;border:1px solid #e0e0e0;background:#f8f8f8;color:#666;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>'
+  +'</div>'
+
+  /* ── prepaid banner ── */
+  +'<div style="margin:12px 20px 0;padding:10px 14px;border-radius:10px;background:#fffbe6;border:1px solid #ffe082;font-size:.78rem;color:#7a5c00;font-weight:600">'
+  +'⭐ Get flat ₹50 off on all Prepaid Orders'
+  +'</div>'
+
+  /* ── progress bar ── */
+  +'<div class="km-progress" style="padding:14px 20px 0">'
+  +'<div class="km-prog-step active" id="km-prog-1"></div>'
+  +'<div class="km-prog-step" id="km-prog-2"></div>'
+  +'<div class="km-prog-step" id="km-prog-3"></div>'
+  +'</div>'
+
+  /* ══ STEP 1 — Payment ══ */
+  +'<div class="km-step km-active" id="km-step-1" style="padding:0 20px 24px">'
+  +'<div style="font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#888;margin-bottom:12px">Suggested</div>'
+
+  /* UPI */
+  +'<div class="km-pay-row km-selected" data-km-pay="upi" onclick="kmSelectPay(this,\'upi\')">'
+  +'<div style="display:flex;align-items:center;gap:12px;flex:1">'
+  +  '<div class="km-pay-icon">⚡</div>'
+  +  '<div><div style="font-weight:700;font-size:.94rem;color:#1a1a1a">UPI</div><div style="font-size:.74rem;color:#888;margin-top:2px">PhonePe, GPay, BHIM &amp; More</div></div>'
+  +'</div>'
+  +'<div style="display:flex;align-items:center;gap:8px">'
+  +  '<span style="font-weight:600;font-size:.88rem;color:#1a1a1a" id="km-price-upi">'+kritFormatINR(kritCheckoutPricing('upi').total)+'</span>'
+  +  '<div class="km-radio"></div>'
+  +'</div>'
+  +'</div>'
+
+  /* Card */
+  +'<div class="km-pay-row" data-km-pay="card" onclick="kmSelectPay(this,\'card\')">'
+  +'<div style="display:flex;align-items:center;gap:12px;flex:1">'
+  +  '<div class="km-pay-icon">💳</div>'
+  +  '<div><div style="font-weight:700;font-size:.94rem;color:#1a1a1a">Credit / Debit Card</div><div style="font-size:.74rem;color:#888;margin-top:2px">Visa &amp; Mastercard</div></div>'
+  +'</div>'
+  +'<div style="display:flex;align-items:center;gap:8px">'
+  +  '<span style="font-weight:600;font-size:.88rem;color:#1a1a1a" id="km-price-card">'+kritFormatINR(kritCheckoutPricing('card').total)+'</span>'
+  +  '<div class="km-radio"></div>'
+  +'</div>'
+  +'</div>'
+
+  /* separator */
+  +'<div style="font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#888;margin:14px 0 4px">More Payment Options</div>'
+
+  /* Netbanking */
+  +'<div class="km-pay-row" data-km-pay="netbanking" onclick="kmSelectPay(this,\'netbanking\')">'
+  +'<div style="display:flex;align-items:center;gap:12px;flex:1">'
+  +  '<div class="km-pay-icon">🏦</div>'
+  +  '<div><div style="font-weight:700;font-size:.94rem;color:#1a1a1a">Netbanking</div><div style="font-size:.74rem;color:#888;margin-top:2px">All major banks supported</div></div>'
+  +'</div>'
+  +'<div style="display:flex;align-items:center;gap:8px">'
+  +  '<span style="font-weight:600;font-size:.88rem;color:#1a1a1a" id="km-price-nb">'+kritFormatINR(kritCheckoutPricing('netbanking').total)+'</span>'
+  +  '<div class="km-radio"></div>'
+  +'</div>'
+  +'</div>'
+
+  /* COD */
+  +'<div style="font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#888;margin:14px 0 4px">Cash</div>'
+  +'<div class="km-pay-row" data-km-pay="cod" onclick="kmSelectPay(this,\'cod\')">'
+  +'<div style="display:flex;align-items:center;gap:12px;flex:1">'
+  +  '<div class="km-pay-icon">💵</div>'
+  +  '<div><div style="font-weight:700;font-size:.94rem;color:#1a1a1a">Cash On Delivery</div><div style="font-size:.74rem;color:#888;margin-top:2px">Pay on Delivery</div></div>'
+  +'</div>'
+  +'<div style="display:flex;align-items:center;gap:8px">'
+  +  '<span style="font-weight:600;font-size:.88rem;color:#1a1a1a" id="km-price-cod">'+kritFormatINR(kritCheckoutPricing('cod').total)+'</span>'
+  +  '<div class="km-radio"></div>'
+  +'</div>'
+  +'</div>'
+
+  +'<button class="km-btn-green" style="margin-top:18px" onclick="kmGoStep2()">Continue</button>'
+  +'</div>'
+
+  /* ══ STEP 2 — Details ══ */
+  +'<div class="km-step" id="km-step-2" style="padding:0 20px 24px">'
+  +'<div style="font-size:1rem;font-weight:700;color:#1a1a1a;margin-bottom:16px">Delivery Details</div>'
+  +'<div style="display:flex;flex-direction:column;gap:12px">'
+  +'<input class="km-input" id="krit-co-name" placeholder="Full name" autocomplete="name">'
+  +'<input class="km-input" id="krit-co-phone" placeholder="Phone number" type="tel" autocomplete="tel" inputmode="numeric">'
+  +'<input class="km-input" id="krit-co-email" placeholder="Email address" type="email" autocomplete="email">'
+  +'<input class="km-input" id="krit-co-pincode" placeholder="Pincode" inputmode="numeric" autocomplete="postal-code" oninput="kmPinLookup(this.value)">'
+  +'<input class="km-input" id="krit-co-city" placeholder="City" autocomplete="address-level2">'
+  +'<textarea class="km-input" id="krit-co-address" placeholder="Full shipping address" rows="3" style="resize:none" autocomplete="street-address"></textarea>'
+  +'<textarea class="km-input" id="krit-co-notes" placeholder="Order notes (optional)" rows="2" style="resize:none"></textarea>'
+  +'</div>'
+  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">'
+  +'<button class="km-btn-outline" onclick="kmGoStep(1)">← Back</button>'
+  +'<button class="km-btn-green" onclick="kmGoStep3()">Review Order</button>'
+  +'</div>'
+  +'</div>'
+
+  /* ══ STEP 3 — Review ══ */
+  +'<div class="km-step" id="km-step-3" style="padding:0 20px 24px">'
+  +'<div style="font-size:1rem;font-weight:700;color:#1a1a1a;margin-bottom:14px">Order Summary</div>'
+  +'<div id="km-review-items" class="km-order-card" style="margin-top:0">'+buildSummaryRows()+'<div id="km-review-pricing">'+buildPricingRows(_kritSelectedPaymentMode||'upi')+'</div></div>'
+  +'<div id="km-review-addr" style="margin-top:12px;padding:14px;border-radius:12px;background:#f8f8f8;font-size:.86rem;color:#555;line-height:1.7"></div>'
+  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">'
+  +'<button class="km-btn-outline" onclick="kmGoStep(2)">← Back</button>'
+  +'<button class="km-btn-green" id="km-place-btn" onclick="kmPlaceOrder()">Place Order</button>'
+  +'</div>'
+  +'</div>'
+
+  /* ══ STEP 4 — Confirmed ══ */
+  +'<div class="km-step" id="km-step-4" style="padding:0 20px 28px">'
+  +'<div class="km-order-confirm-wrap">'
+  +'<div class="km-check-circle"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><polyline points="5,13 11,19 21,8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+  +'<div style="font-size:1.2rem;font-weight:800;color:#1a1a1a">Yay! Order Received.</div>'
+  +'<div id="km-confirm-email" style="font-size:.84rem;color:#666;margin-top:6px;line-height:1.6"></div>'
+  +'</div>'
+  +'<div class="km-order-card" id="km-confirm-card"></div>'
+  +'<div class="km-bottom-btns">'
+  +'<button class="km-btn-outline" onclick="kritCloseOverlay(\'krit-checkout-overlay\');openTrackModal&&openTrackModal()" style="font-size:.82rem">📍 Track Order</button>'
+  +'<button class="km-btn-green" onclick="kritCloseOverlay(\'krit-checkout-overlay\')" style="font-size:.82rem">🛍️ Shop More</button>'
+  +'</div>'
+  +'<div class="km-insta-bar">'
+  +'<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">📷</div>'
+  +'<div style="flex:1"><div style="font-size:.82rem;font-weight:600;color:#1a1a1a">Connect with KRIT on Instagram</div><div style="font-size:.76rem;color:#888;margin-top:2px">@kritsleep</div></div>'
+  +'<a href="https://instagram.com/kritsleep" target="_blank" style="padding:7px 14px;border-radius:20px;border:1.5px solid #ddd;font-size:.74rem;font-weight:700;color:#333;text-decoration:none">Follow</a>'
+  +'</div>'
+  +'</div>'
+
+  +'</div>'; /* /km-sheet */
 
   document.body.appendChild(overlay);
-  document.body.style.overflow = "hidden";
-  kritSelectPaymentMode(_kritSelectedPaymentMode || "upi");
+  document.body.style.overflow = 'hidden';
+
+  /* ── close on backdrop tap ── */
+  overlay.addEventListener('click', function(e){
+    if(e.target === overlay) kritCloseOverlay('krit-checkout-overlay');
+  });
+
+  /* prefill from saved customer */
+  try {
+    var saved = JSON.parse(localStorage.getItem('krit_customer') || '{}');
+    if(saved.name)    document.getElementById('krit-co-name').value    = saved.name;
+    if(saved.phone)   document.getElementById('krit-co-phone').value   = saved.phone;
+    if(saved.email)   document.getElementById('krit-co-email').value   = saved.email;
+    if(saved.city)    document.getElementById('krit-co-city').value    = saved.city;
+    if(saved.pincode) document.getElementById('krit-co-pincode').value = saved.pincode;
+    if(saved.address) document.getElementById('krit-co-address').value = saved.address;
+  } catch(e){}
+
+  /* ── helper: select payment row ── */
+  window.kmSelectPay = function(el, mode){
+    document.querySelectorAll('.km-pay-row').forEach(function(r){ r.classList.remove('km-selected'); });
+    el.classList.add('km-selected');
+    _kritSelectedPaymentMode = mode;
+    kritSelectPaymentMode(mode);
+  };
+
+  /* ── pincode autofill ── */
+  window.kmPinLookup = function(pin){
+    if(pin.length !== 6) return;
+    fetch('https://api.postalpincode.in/pincode/'+pin)
+      .then(function(r){return r.json();})
+      .then(function(data){
+        if(data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice[0]){
+          var po = data[0].PostOffice[0];
+          var cityEl = document.getElementById('krit-co-city');
+          if(cityEl && !cityEl.value) cityEl.value = po.District || po.Name || '';
+        }
+      }).catch(function(){});
+  };
+
+  /* ── step navigation ── */
+  window.kmGoStep = function(n){
+    document.querySelectorAll('.km-step').forEach(function(s){ s.classList.remove('km-active'); });
+    var el = document.getElementById('km-step-'+n);
+    if(el){ el.classList.add('km-active'); el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+    /* progress */
+    [1,2,3].forEach(function(i){
+      var p = document.getElementById('km-prog-'+i);
+      if(!p) return;
+      p.classList.remove('done','active');
+      if(i < n) p.classList.add('done');
+      else if(i === n) p.classList.add('active');
+    });
+    /* scroll sheet to top */
+    var sheet = document.querySelector('.km-sheet');
+    if(sheet) sheet.scrollTop = 0;
+  };
+
+  /* ── step 1 → 2 ── */
+  window.kmGoStep2 = function(){
+    kmGoStep(2);
+    setTimeout(function(){
+      var f = document.getElementById('krit-co-name');
+      if(f) f.focus();
+    }, 350);
+  };
+
+  /* ── step 2 → 3 ── */
+  window.kmGoStep3 = function(){
+    var customer = kritCollectCustomer();
+    if(!kritValidateCustomer(customer)) return;
+    /* refresh review */
+    var pricing = kritCheckoutPricing(_kritSelectedPaymentMode);
+    var addr = document.getElementById('km-review-addr');
+    if(addr){
+      addr.innerHTML = '<strong style="color:#333">'+customer.name+'</strong><br>'+customer.phone+(customer.email?'<br>'+customer.email:'')+'<br>'+customer.address+(customer.city?', '+customer.city:'')+(customer.pincode?' - '+customer.pincode:'');
+    }
+    var prEl = document.getElementById('km-review-pricing');
+    if(prEl) prEl.innerHTML = buildPricingRows(_kritSelectedPaymentMode);
+    var placeBtn = document.getElementById('km-place-btn');
+    var modeLbl = {upi:'Pay via UPI',card:'Pay via Card',netbanking:'Pay via Netbanking',cod:'Confirm COD Order'};
+    if(placeBtn) placeBtn.textContent = modeLbl[_kritSelectedPaymentMode] || 'Place Order';
+    kmGoStep(3);
+  };
+
+  /* ── place order ── */
+  window.kmPlaceOrder = function(){
+    var customer = kritCollectCustomer();
+    if(!kritValidateCustomer(customer)) return;
+    if(_kritSelectedPaymentMode === 'cod'){
+      kmConfirmCOD(customer);
+    } else {
+      kmLaunchRazorpay(customer);
+    }
+  };
+
+  /* ── COD confirm ── */
+  window.kmConfirmCOD = function(customer){
+    var order = kritCreateOrderRecord(customer, 'cod', 'pending');
+    _cart = []; kritSaveCart();
+    kmShowConfirmed(order);
+  };
+
+  /* ── Razorpay ── */
+  window.kmLaunchRazorpay = function(customer){
+    var mode = _kritSelectedPaymentMode;
+    var payload = kritCheckoutPayload(customer);
+    if(!window.Razorpay || !KRIT_RAZORPAY.key || KRIT_RAZORPAY.key.indexOf('replace_with_your_key') !== -1){
+      var o = kritCreateOrderRecord(customer, mode, 'pending');
+      _cart = []; kritSaveCart();
+      kmShowConfirmed(o);
+      return;
+    }
+    kritCreateRazorpayOrder(payload).then(function(orderData){
+      var amountPaise = Math.round(payload.amount * 100);
+      var options = {
+        key: KRIT_RAZORPAY.key,
+        amount: orderData && orderData.amount ? orderData.amount : amountPaise,
+        currency: orderData && orderData.currency ? orderData.currency : payload.currency,
+        name: KRIT_RAZORPAY.merchantName,
+        description: KRIT_RAZORPAY.description,
+        image: KRIT_RAZORPAY.image,
+        order_id: orderData && orderData.id ? orderData.id : undefined,
+        prefill: { name: customer.name, email: customer.email, contact: customer.phone },
+        notes: { address: customer.address, city: customer.city, pincode: customer.pincode },
+        config: kritRazorpayDisplayConfig(mode),
+        theme: { color: '#2a7d46' },
+        handler: function(response){
+          var paidOrder = kritCreateOrderRecord(customer, mode, 'paid', {
+            omsRef: response.razorpay_order_id || '',
+            trackingNumber: response.razorpay_payment_id || ''
+          });
+          paidOrder.status = 'confirmed';
+          paidOrder.timeline.push({ status:'confirmed', note:'Payment captured via Razorpay.', time: new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) });
+          kritSaveOrders();
+          _cart = []; kritSaveCart();
+          kmShowConfirmed(paidOrder);
+        }
+      };
+      var rzp = new Razorpay(options);
+      rzp.on('payment.failed', function(){ kritToast('Payment failed or was cancelled'); });
+      rzp.open();
+    }).catch(function(err){ kritToast(err.message || 'Checkout could not start'); });
+  };
+
+  /* ── show confirmed step ── */
+  window.kmShowConfirmed = function(order){
+    /* save customer for next time */
+    try{ localStorage.setItem('krit_customer', JSON.stringify(order.customer)); }catch(e){}
+    /* sync OMS / notifications */
+    if(typeof kritSyncOrderToOms === 'function') kritSyncOrderToOms(order);
+
+    /* ── Contact info line ── */
+    var emailEl = document.getElementById('km-confirm-email');
+    if(emailEl){
+      var contactParts = [];
+      if(order.customer && order.customer.email && order.customer.email.trim())
+        contactParts.push('📧 <strong>'+order.customer.email.trim()+'</strong>');
+      if(order.customer && order.customer.phone && order.customer.phone.trim())
+        contactParts.push('📱 <strong>'+order.customer.phone.trim()+'</strong>');
+      if(contactParts.length){
+        emailEl.innerHTML = 'Order updates will be sent to<br>'+contactParts.join(' &nbsp;·&nbsp; ');
+      } else {
+        emailEl.innerHTML = 'Your order has been placed successfully.';
+      }
+    }
+
+    /* ── Status timeline ── */
+    var isCOD     = order.paymentMode === 'cod';
+    var isPaid    = order.paymentState === 'paid';
+    var statusSteps = [
+      { icon:'✅', label:'Order Placed',    done:true,    active:false },
+      { icon:'🔄', label:'Processing',      done:false,   active:true  },
+      { icon:'📦', label:'Packed & Dispatched', done:false, active:false },
+      { icon:'🚚', label:'Out for Delivery',done:false,   active:false },
+      { icon: isCOD ? '💵' : '✅',
+        label: isCOD ? 'Pay on Delivery'  : 'Delivered', done:false, active:false }
+    ];
+    var timelineHtml = '<div style="margin:14px 0 4px">'
+      +'<div style="font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:10px;font-weight:600">Order Status</div>'
+      +'<div style="display:flex;align-items:flex-start;gap:0;position:relative">';
+
+    statusSteps.forEach(function(st, idx){
+      var isLast = idx === statusSteps.length - 1;
+      var dotColor  = st.done ? '#2a7d46' : (st.active ? '#2a7d46' : '#e0e0e0');
+      var lineColor = st.done ? '#2a7d46' : '#e0e0e0';
+      var txtColor  = st.done || st.active ? '#1a1a1a' : '#bbb';
+      timelineHtml += '<div style="display:flex;flex-direction:column;align-items:center;flex:1;position:relative">'
+        /* dot */
+        +'<div style="width:28px;height:28px;border-radius:50%;background:'+(st.done?'#2a7d46':(st.active?'#fff':'#f5f5f5'))+';border:2px solid '+dotColor+';display:flex;align-items:center;justify-content:center;font-size:.75rem;z-index:1;position:relative;flex-shrink:0">'
+        +(st.done ? '<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>'
+          : (st.active ? '<div style="width:8px;height:8px;border-radius:50%;background:#2a7d46;animation:kmPulse 1.4s infinite"></div>' : ''))
+        +'</div>'
+        /* connector line */
+        +(isLast ? '' : '<div style="position:absolute;top:14px;left:calc(50% + 14px);right:calc(-50% + 14px);height:2px;background:'+lineColor+'"></div>')
+        /* label */
+        +'<div style="font-size:.62rem;color:'+txtColor+';text-align:center;margin-top:5px;line-height:1.3;font-weight:'+(st.done||st.active?'600':'400')+'">'+st.label+'</div>'
+        +'</div>';
+    });
+    timelineHtml += '</div></div>';
+
+    /* ── Order card ── */
+    var card = document.getElementById('km-confirm-card');
+    if(card){
+      var firstIt   = _kritCheckoutItems[0] || {};
+      var firstImgC = kritGetCartItemImage ? kritGetCartItemImage(firstIt) : '';
+      var totalQty  = _kritCheckoutItems.reduce(function(s,i){return s+i.qty;},0);
+
+      card.innerHTML =
+        /* product row */
+        '<div style="display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px dashed #e8e8e8;margin-bottom:4px">'
+        +(firstImgC
+          ? '<div style="position:relative;flex-shrink:0"><img src="'+firstImgC+'" style="width:60px;height:60px;border-radius:10px;object-fit:cover;border:1px solid #eee"><span style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#444;color:#fff;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center">'+totalQty+'</span></div>'
+          : '')
+        +'<div style="min-width:0"><div style="font-size:.88rem;font-weight:600;color:#1a1a1a;line-height:1.4">'+firstIt.name+(_kritCheckoutItems.length>1?' <span style="color:#888;font-weight:400">+ '+(_kritCheckoutItems.length-1)+' more</span>':'')+'</div>'
+        +'<div style="font-size:.74rem;color:#888;margin-top:3px;line-height:1.4">'+((order.customer&&order.customer.address)||'')+'</div></div>'
+        +'</div>'
+        /* status timeline */
+        + timelineHtml
+        /* order details */
+        +'<div style="border-top:1px dashed #e8e8e8;margin-top:10px;padding-top:4px">'
+        +'<div class="km-order-row"><span style="color:#666">Total Amount Paid</span><span style="font-weight:700">'+kritFormatINR(order.total)+'</span></div>'
+        +'<div class="km-order-row"><span style="color:#666">Payment Option</span><span style="text-transform:uppercase;letter-spacing:.04em;font-size:.8rem;font-weight:600">'+(order.paymentLabel||order.paymentMode||'')+'</span></div>'
+        +'<div class="km-order-row"><span style="color:#666">Order No.</span><span style="font-weight:700;font-family:monospace">#'+order.id+'</span></div>'
+        +'</div>'
+        /* copy order ID button */
+        +'<button onclick="navigator.clipboard&&navigator.clipboard.writeText(''+order.id+'').then(function(){this.textContent='✅ Copied!';setTimeout(function(){document.querySelectorAll('.km-copy-id').forEach(function(b){b.textContent='📋 Copy Order ID'})},1800)}.bind(this))" '
+        +'class="km-copy-id" style="width:100%;margin-top:12px;padding:10px;border:1.5px dashed #ccc;border-radius:10px;background:transparent;color:#555;font-size:.78rem;font-weight:600;cursor:pointer">📋 Copy Order ID</button>';
+    }
+
+    /* ── Track Order button — wire it to show order detail ── */
+    var trackBtn = document.querySelector('#km-step-4 .km-bottom-btns button:first-child');
+    if(trackBtn){
+      trackBtn.onclick = function(){
+        /* Try native track modal first, else show inline status */
+        if(typeof openTrackModal === 'function'){
+          kritCloseOverlay('krit-checkout-overlay');
+          openTrackModal();
+          setTimeout(function(){
+            var inp = document.getElementById('track-awb');
+            if(inp){ inp.value = order.id; if(typeof doTrack==='function') doTrack(); }
+          }, 200);
+        } else {
+          /* fallback: show a simple status popup */
+          var popup = document.createElement('div');
+          popup.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+          popup.innerHTML='<div style="background:#fff;border-radius:18px;padding:24px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
+            +'<div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:4px">Order #'+order.id+'</div>'
+            +'<div style="font-size:.82rem;color:#2a7d46;font-weight:600;margin-bottom:16px">🔄 Processing — we'll notify you when dispatched</div>'
+            +'<div style="font-size:.84rem;color:#555;line-height:1.8">'
+            +'<div>👤 '+((order.customer&&order.customer.name)||'')+'</div>'
+            +'<div>📱 '+((order.customer&&order.customer.phone)||'')+'</div>'
+            +'<div style="margin-top:6px">📍 '+((order.customer&&order.customer.address)||'')+((order.customer&&order.customer.city)?', '+order.customer.city:'')+((order.customer&&order.customer.pincode)?' - '+order.customer.pincode:'')+'</div>'
+            +'</div>'
+            +'<button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;margin-top:18px;padding:13px;border:none;border-radius:10px;background:#2a7d46;color:#fff;font-weight:700;cursor:pointer">Close</button>'
+            +'</div>';
+          document.body.appendChild(popup);
+          popup.addEventListener('click', function(e){ if(e.target===popup) popup.remove(); });
+        }
+      };
+    }
+
+    /* ── progress all done ── */
+    [1,2,3].forEach(function(i){
+      var p = document.getElementById('km-prog-'+i);
+      if(p){ p.classList.remove('active'); p.classList.add('done'); }
+    });
+
+    kmGoStep(4);
+
+    /* ── add pulse animation ── */
+    if(!document.getElementById('km-pulse-css')){
+      var ps=document.createElement('style');ps.id='km-pulse-css';
+      ps.textContent='@keyframes kmPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}';
+      document.head.appendChild(ps);
+    }
+
+    /* ── play chime ── */
+    (function(){
+      try{
+        var ctx=new(window.AudioContext||window.webkitAudioContext)();
+        function note(f,s,d,v){var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(f,ctx.currentTime+s);g.gain.setValueAtTime(0,ctx.currentTime+s);g.gain.linearRampToValueAtTime(v,ctx.currentTime+s+.02);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+s+d);o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+s);o.stop(ctx.currentTime+s+d);}
+        note(523.25,0,.35,.22);note(659.25,.18,.35,.2);note(783.99,.34,.55,.18);
+      }catch(e){}
+    })();
+  };
 }
 
 function kritCollectCustomer(){
@@ -4214,9 +4654,6 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
 <script src="./assets/krit-enhancements.js"></script>
 </body>
 </html>
-
-
-
 
 
 
