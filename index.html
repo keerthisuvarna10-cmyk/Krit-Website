@@ -2426,18 +2426,16 @@ setTimeout(_kritInit, 600);
     <div class="fc"><h5>Company</h5><a href="#about">Our Story</a><a href="#blog">Blog</a><a href="#" onclick="openInfoModal('contact-modal');return false">Contact Us</a><a href="#" onclick="event.preventDefault();if(window.openTrackModal){window.openTrackModal();}return false;">Track Order</a></div>
     <div class="fc"><h5>Support</h5><a href="#" onclick="openInfoModal('returns-modal');return false">Returns Policy</a><a href="#" onclick="openInfoModal('shipping-modal');return false">Shipping Info</a><a href="mailto:hello@kritsleep.in">Email Us</a></div>
   </div>
-  <div style="max-width:1120px;margin:0 auto;padding:10px 40px;border-top:1px solid rgba(47,93,168,.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-  <div style="min-width:180px;flex:0 1 300px">
-    <div style="font-size:.74rem;font-weight:600;color:#F0F4FF;margin-bottom:0">✉️ Join Our Email Newsletter</div>
-    <div style="font-size:.68rem;color:#8899BB;opacity:.68;line-height:1.35">Sleep tips, product updates, and occasional offers.</div>
+  <div class="fnr">
+    <div class="fnr-copy">
+      <div class="fnr-title">Join Our Email Newsletter</div>
+      <div class="fnr-sub">Sleep tips, product updates, and occasional offers.</div>
+    </div>
+    <form class="fnr-form" onsubmit="event.preventDefault(); window.location.href='mailto:hello@kritsleep.in?subject=' + encodeURIComponent('Newsletter signup') + '&body=' + encodeURIComponent('Please add this email to the KRIT newsletter: ' + document.getElementById('krit-newsletter-email').value); kritToast('Opening your email app for newsletter signup');">
+      <input id="krit-newsletter-email" type="email" placeholder="Enter your email" required>
+      <button type="submit">Join by Email →</button>
+    </form>
   </div>
-  <form onsubmit="event.preventDefault(); window.location.href='mailto:hello@kritsleep.in?subject=' + encodeURIComponent('Newsletter signup') + '&body=' + encodeURIComponent('Please add this email to the KRIT newsletter: ' + document.getElementById('krit-newsletter-email').value); kritToast('Opening your email app for newsletter signup');" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;flex:1;min-width:220px">
-    <input id="krit-newsletter-email" type="email" placeholder="Enter your email" required style="flex:1;min-width:170px;padding:8px 12px;border-radius:999px;border:1px solid rgba(47,93,168,.18);background:#081221;color:#F0F4FF;font-size:.75rem;outline:none">
-    <button type="submit" style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:linear-gradient(180deg,#2F5DA8,#244A86);border:none;border-radius:999px;color:#fff;font-size:.66rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;cursor:pointer;transition:opacity .2s" onmouseenter="this.style.opacity='.88'" onmouseleave="this.style.opacity='1'">
-      Join by Email →
-    </button>
-  </form>
-</div>
 <div class="fbot">
     <div class="fcp">© 2026 KRIT™. All rights reserved.</div>
     <div class="fleg"><a href="#" onclick="openInfoModal('privacy-modal');return false">Privacy Policy</a><a href="#" onclick="openInfoModal('terms-modal');return false">Terms of Use</a></div>
@@ -4654,7 +4652,6 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
 <script src="./assets/krit-enhancements.js"></script>
 </body>
 </html>
-
 
 
 

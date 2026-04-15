@@ -10,6 +10,7 @@ const ADMIN_USERNAME = process.env.ADMIN_USERNAME || (IS_PRODUCTION ? '' : 'Krit
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || (IS_PRODUCTION ? '' : 'Kritniv');
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 const ACCESS_CONFIGURED = Boolean(ADMIN_USERNAME && ADMIN_PASSWORD);
+const ACCESS_GATE_ENABLED = String(process.env.ACCESS_GATE_ENABLED || 'false').toLowerCase() === 'true';
 const ERP_BASE_URL = String(process.env.ERP_BASE_URL || '').replace(/\/$/, '');
 const ERP_WEBHOOK_SECRET = process.env.ERP_WEBHOOK_SECRET || '';
 const ORDER_ALERT_EMAIL = process.env.ORDER_ALERT_EMAIL || 'hello@kritsleep.in';
@@ -409,6 +410,7 @@ function renderLogin(errorText = '') {
 }
 
 function requireAuth(req, res, next) {
+  if (!ACCESS_GATE_ENABLED) return next();
   if (req.session && req.session.authenticated) return next();
   return res.redirect('/');
 }
@@ -458,6 +460,9 @@ async function postToErp(endpoint, payload) {
 }
 
 app.get('/', (req, res) => {
+  if (!ACCESS_GATE_ENABLED) {
+    return res.sendFile(path.join(__dirname, 'index.html'));
+  }
   if (req.session && req.session.authenticated) {
     return res.sendFile(path.join(__dirname, 'index.html'));
   }
@@ -486,7 +491,7 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', app: 'KRIT Website', protected: true, pages: ['index','product','account','checkout'] });
+  res.json({ status: 'ok', app: 'KRIT Website', protected: ACCESS_GATE_ENABLED, pages: ['index','product','account','checkout'] });
 });
 
 app.use((req, res, next) => {

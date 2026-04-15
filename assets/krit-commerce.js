@@ -530,6 +530,33 @@
     ].filter(Boolean).join(', ');
   }
 
+  function mergeTransientOrders(orderList){
+    var orders = Array.isArray(orderList) ? orderList.slice() : [];
+    function pushIfMissing(entry, prioritize){
+      if(!entry || !entry.id) return;
+      var normalized = normalizeErpOrder(entry) || entry;
+      var exists = orders.some(function(existing){
+        return existing && String(existing.id) === String(normalized.id);
+      });
+      if(exists) return;
+      if(prioritize){
+        orders.unshift(normalized);
+      } else {
+        orders.push(normalized);
+      }
+    }
+    var storedOrders = getStoredOrders();
+    if(Array.isArray(storedOrders) && storedOrders.length){
+      storedOrders.forEach(function(entry){ pushIfMissing(entry, false); });
+    }
+    if(window._kritLastConfirmedOrder){
+      pushIfMissing(window._kritLastConfirmedOrder, true);
+    }
+    return orders.sort(function(a, b){
+      return new Date((b && b.createdAt) || 0).getTime() - new Date((a && a.createdAt) || 0).getTime();
+    });
+  }
+
   function openAccountOrderTracker(orderId){
     if(!orderId) return;
     var orders = Array.isArray(window._kritAccountOrders) ? window._kritAccountOrders.slice() : [];
@@ -555,21 +582,43 @@
   }
 
   async function openTrackModal(){
-    if(!window._kritAccount || (!window._kritAccount.email && !window._kritAccount.phone)){
-      if(typeof window.openAuthModal === 'function') window.openAuthModal();
-      authMessage('Log in to view and track your KRIT orders.', 'info');
-      return;
-    }
-    await renderAccountDashboard();
-    if(typeof window.openAuthModal === 'function') window.openAuthModal();
-    switchAccountPanel('orders');
+    var hasAccount = !!(window._kritAccount && (window._kritAccount.email || window._kritAccount.phone));
+    var orders = mergeTransientOrders(Array.isArray(window._kritAccountOrders) ? window._kritAccountOrders.slice() : []);
+    window._kritAccountOrders = orders;
 
-    var orders = Array.isArray(window._kritAccountOrders) ? window._kritAccountOrders.slice() : [];
-    if(!orders.length){
-      if(window.kritToast) window.kritToast('No orders are available in your account yet.');
+    if(hasAccount){
+      try{
+        if(typeof window.openAuthModal === 'function') window.openAuthModal();
+        await renderAccountDashboard();
+        switchAccountPanel('orders');
+        if(!orders.length){
+          if(window.kritToast) window.kritToast('No orders are available in your account yet.');
+          return;
+        }
+        setTimeout(function(){
+          openAccountOrderTracker(orders[0].id);
+        }, 120);
+        return;
+      }catch(trackErr){
+        console.warn('Track modal account flow failed, using fallback overlay.', trackErr);
+      }
+    }
+
+    var legacyTrackOverlay = document.getElementById('track-overlay');
+    if(legacyTrackOverlay){
+      legacyTrackOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      var trackInput = document.getElementById('track-awb');
+      if(trackInput) setTimeout(function(){ trackInput.focus(); }, 60);
       return;
     }
-    openAccountOrderTracker(orders[0].id);
+
+    if(orders.length){
+      openAccountOrderTracker(orders[0].id);
+      return;
+    }
+
+    if(window.kritToast) window.kritToast('No recent orders are available yet. Place an order first.');
   }
 
   function buildOrderTrackingTimeline(order){
@@ -722,11 +771,11 @@
     var orders = [];
     try {
       var erpOrders = await fetchCustomerOrdersFromERP(account);
-      orders = mergeCustomerOrders(account, erpOrders);
+      orders = mergeTransientOrders(mergeCustomerOrders(account, erpOrders));
       window._kritAccountOrders = orders;
     } catch(error) {
       console.error('KRIT customer orders fetch failed', error);
-      orders = mergeCustomerOrders(account, []);
+      orders = mergeTransientOrders(mergeCustomerOrders(account, []));
       window._kritAccountOrders = orders;
     }
     if(countNode) countNode.textContent = String(orders.length);
@@ -2141,12 +2190,6 @@
       var original = window.kritOpenCheckout;
       window.__kritOpenCheckoutOriginal = original;
       window.kritOpenCheckout = function(){
-        if(!window._kritAccount || (!window._kritAccount.email && !window._kritAccount.phone)){
-          pendingCheckoutItems = Array.isArray(arguments[0]) ? arguments[0] : (Array.isArray(window._kritCart) ? window._kritCart : []);
-          if(typeof window.openAuthModal === 'function') window.openAuthModal();
-          if(window.kritToast) window.kritToast('Create an account or use mobile OTP before checkout');
-          return;
-        }
         var result = original.apply(this, arguments);
         setTimeout(enhanceCheckoutOverlay, 30);
         setTimeout(enhanceCheckoutOverlay, 180);
