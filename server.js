@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const crypto = require('crypto');
@@ -547,6 +547,48 @@ app.get('/account.html', requireAuth, sendProtectedPage('account.html'));
 app.get('/checkout.html', requireAuth, sendProtectedPage('checkout.html'));
 app.get('/KRIT_website_final%20(53).html', requireAuth, (_req, res) => res.redirect('/index.html'));
 app.get('/KRIT_website_final (53).html', requireAuth, (_req, res) => res.redirect('/index.html'));
+
+
+// ── SEO: robots.txt ──
+app.get('/robots.txt', (_req, res) => {
+  res.type('text/plain');
+  res.send([
+    'User-agent: *',
+    'Allow: /',
+    'Disallow: /login',
+    'Disallow: /logout',
+    'Disallow: /api/',
+    '',
+    'Sitemap: https://www.kritsleep.in/sitemap.xml'
+  ].join('\n'));
+});
+
+// ── SEO: sitemap.xml ──
+app.get('/sitemap.xml', (_req, res) => {
+  const base = 'https://www.kritsleep.in';
+  const now = new Date().toISOString().split('T')[0];
+  const urls = [
+    { loc: base + '/',              priority: '1.0', freq: 'weekly'  },
+    { loc: base + '/product.html',  priority: '0.9', freq: 'weekly'  },
+    { loc: base + '/account.html',  priority: '0.6', freq: 'monthly' },
+    { loc: base + '/checkout.html', priority: '0.5', freq: 'monthly' }
+  ];
+  const xml = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...urls.map(u =>
+      '  <url>\n' +
+      `    <loc>${u.loc}</loc>\n` +
+      `    <lastmod>${now}</lastmod>\n` +
+      `    <changefreq>${u.freq}</changefreq>\n` +
+      `    <priority>${u.priority}</priority>\n` +
+      '  </url>'
+    ),
+    '</urlset>'
+  ].join('\n');
+  res.type('application/xml');
+  res.send(xml);
+});
 
 app.listen(PORT, () => {
   console.log(`KRIT Website live on http://localhost:${PORT}`);
