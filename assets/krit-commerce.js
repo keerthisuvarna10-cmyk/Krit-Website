@@ -200,6 +200,148 @@
     }
   }
 
+  function getStoredCartItems(){
+    try {
+      return JSON.parse(localStorage.getItem('krit_cart') || '[]') || [];
+    } catch(e){
+      return [];
+    }
+  }
+
+  function getStoredWishlistItems(){
+    try {
+      return JSON.parse(localStorage.getItem('krit_wishlist') || '[]') || [];
+    } catch(e){
+      return [];
+    }
+  }
+
+  function fallbackSaveCart(items){
+    try {
+      localStorage.setItem('krit_cart', JSON.stringify(items));
+    } catch(e){}
+    window._cart = items;
+    if(typeof window.kritUpdateBadges === 'function') window.kritUpdateBadges();
+  }
+
+  function fallbackSaveWishlist(items){
+    try {
+      localStorage.setItem('krit_wishlist', JSON.stringify(items));
+    } catch(e){}
+    window._wishlist = items;
+    if(typeof window.kritUpdateBadges === 'function') window.kritUpdateBadges();
+  }
+
+  function safeAddToCart(name, price, qty, productId){
+    if(typeof window.addToCart === 'function'){
+      return window.addToCart(name, price, qty, productId);
+    }
+    var items = Array.isArray(window._cart) ? window._cart.slice() : getStoredCartItems();
+    qty = Math.max(1, Number(qty || 1));
+    var existing = items.find(function(item){ return item.name === name; });
+    if(existing){
+      existing.qty += qty;
+    } else {
+      items.push({ id: productId || '', name: name, price: Number(price || 0), qty: qty });
+    }
+    fallbackSaveCart(items);
+    if(typeof window.kritToast === 'function') window.kritToast(name + ' added to cart');
+    if(typeof window.openCart === 'function'){
+      setTimeout(function(){ window.openCart(); }, 120);
+    }
+  }
+
+  function safeAddToWishlist(name, price, productId){
+    if(typeof window.addToWishlist === 'function'){
+      return window.addToWishlist(name, price, productId);
+    }
+    var items = Array.isArray(window._wishlist) ? window._wishlist.slice() : getStoredWishlistItems();
+    if(!items.some(function(item){ return item.name === name; })){
+      items.push({ id: productId || '', name: name, price: Number(price || 0) });
+      fallbackSaveWishlist(items);
+      if(typeof window.kritToast === 'function') window.kritToast('Saved to wishlist');
+    } else if(typeof window.kritToast === 'function'){
+      window.kritToast('Already in wishlist');
+    }
+  }
+
+  function safeOpenWishlist(){
+    if(typeof window.openWishlist === 'function' && !window.openWishlist.__kritFallback){
+      return window.openWishlist();
+    }
+    var items = Array.isArray(window._wishlist) ? window._wishlist : getStoredWishlistItems();
+    if(typeof window.kritOpenDrawer !== 'function') return;
+    var content = items.length
+      ? items.map(function(item){
+          var safeName = String(item.name || '').replace(/'/g, "\\'");
+          return ''
+            + '<div style="padding:14px 0;border-bottom:1px solid rgba(47,93,168,.1);display:flex;justify-content:space-between;gap:12px;align-items:center">'
+            +   '<div><div style="font-size:.92rem;color:#F0F4FF;font-weight:600;line-height:1.5">' + escapeHtml(item.name) + '</div><div style="font-size:.78rem;color:#C9A84C;margin-top:4px">Rs ' + Number(item.price || 0).toLocaleString('en-IN') + '</div></div>'
+            +   '<div style="display:flex;gap:8px">'
+            +     '<button type="button" onclick="window.__kritSafeAddWishlistItemToCart(\'' + safeName + '\',' + Number(item.price || 0) + ',\'' + escapeHtml(item.id || '') + '\')" style="padding:10px 12px;border:none;border-radius:10px;background:#2F5DA8;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer">Add</button>'
+            +   '</div>'
+            + '</div>';
+        }).join('')
+      : '<div style="text-align:center;padding:32px 8px;color:#93A8CC">No saved items yet.</div>';
+    window.kritOpenDrawer('Wishlist', content);
+  }
+
+  function patchStoreActions(){
+    window.__kritSafeAddWishlistItemToCart = function(name, price, productId){
+      safeAddToCart(name, price, 1, productId);
+      safeOpenWishlist();
+    };
+
+    window.kritQuickAdd = function(productId){
+      if(typeof window.kritGetProduct !== 'function') return;
+      var product = window.kritGetProduct(productId);
+      if(!product) return;
+      safeAddToCart(product.name + ' (' + product.subtitle + ')', product.price, 1, product.id);
+    };
+
+    window.kritDetailAddToCart = function(){
+      if(typeof window._kritSelected !== 'number' || window._kritSelected < 0 || !window.KRIT_PRODUCTS) return;
+      var product = window.KRIT_PRODUCTS[window._kritSelected];
+      var qty = Math.max(1, Number(window._kritDetailQty || 1));
+      safeAddToCart(product.name + ' (' + product.subtitle + ')', product.price, qty, product.id);
+    };
+
+    window.kritDetailWishlist = function(){
+      if(typeof window._kritSelected !== 'number' || window._kritSelected < 0 || !window.KRIT_PRODUCTS) return;
+      var product = window.KRIT_PRODUCTS[window._kritSelected];
+      safeAddToWishlist(product.name + ' (' + product.subtitle + ')', product.price, product.id);
+    };
+
+    window.kritBuySingleNow = function(productId){
+      if(typeof window.kritGetProduct !== 'function' || typeof window.kritOpenCheckout !== 'function') return;
+      var product = window.kritGetProduct(productId);
+      if(!product) return;
+      window.kritOpenCheckout([{ id: product.id, name: product.name + ' (' + product.subtitle + ')', price: product.price, qty: 1 }]);
+    };
+
+    window.kritDetailBuyNow = function(){
+      if(typeof window._kritSelected !== 'number' || window._kritSelected < 0 || !window.KRIT_PRODUCTS || typeof window.kritOpenCheckout !== 'function') return;
+      var product = window.KRIT_PRODUCTS[window._kritSelected];
+      var qty = Math.max(1, Number(window._kritDetailQty || 1));
+      window.kritOpenCheckout([{ id: product.id, name: product.name + ' (' + product.subtitle + ')', price: product.price, qty: qty }]);
+    };
+
+    if(typeof window.openWishlist !== 'function' || !window.openWishlist.__kritFallback){
+      var originalWishlist = typeof window.openWishlist === 'function' ? window.openWishlist : null;
+      window.openWishlist = function(){
+        if(originalWishlist){
+          try {
+            return originalWishlist.apply(this, arguments);
+          } catch(err){
+            console.warn('Wishlist drawer fallback used.', err);
+          }
+        }
+        return safeOpenWishlist();
+      };
+      window.openWishlist.__kritFallback = true;
+    }
+  }
+
   async function ensurePhoneRecaptcha(fb){
     if(phoneRecaptchaVerifier) return phoneRecaptchaVerifier;
     var holder = document.getElementById('krit-phone-recaptcha');
@@ -2239,6 +2381,7 @@
   function enhance(){
     ensureKritOverlayStyles();
     mobilePanel();
+    patchStoreActions();
     patchCheckoutOpen();
     patchOrderSync();
     patchPersistAccount();
