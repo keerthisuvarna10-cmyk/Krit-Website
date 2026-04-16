@@ -234,7 +234,11 @@
 
   function safeAddToCart(name, price, qty, productId){
     if(typeof window.addToCart === 'function'){
-      return window.addToCart(name, price, qty, productId);
+      try {
+        return window.addToCart(name, price, qty, productId);
+      } catch(err){
+        console.warn('Primary addToCart failed, using fallback cart logic.', err);
+      }
     }
     var items = Array.isArray(window._cart) ? window._cart.slice() : getStoredCartItems();
     qty = Math.max(1, Number(qty || 1));
@@ -253,7 +257,11 @@
 
   function safeAddToWishlist(name, price, productId){
     if(typeof window.addToWishlist === 'function'){
-      return window.addToWishlist(name, price, productId);
+      try {
+        return window.addToWishlist(name, price, productId);
+      } catch(err){
+        console.warn('Primary addToWishlist failed, using fallback wishlist logic.', err);
+      }
     }
     var items = Array.isArray(window._wishlist) ? window._wishlist.slice() : getStoredWishlistItems();
     if(!items.some(function(item){ return item.name === name; })){
@@ -286,6 +294,20 @@
     window.kritOpenDrawer('Wishlist', content);
   }
 
+  function safeOpenCheckout(items){
+    if(typeof window.kritOpenCheckout === 'function'){
+      try {
+        return window.kritOpenCheckout(items);
+      } catch(err){
+        console.warn('Primary checkout launch failed, using original checkout fallback.', err);
+      }
+    }
+    if(typeof window.__kritOpenCheckoutOriginal === 'function'){
+      return window.__kritOpenCheckoutOriginal(items);
+    }
+    if(typeof window.kritToast === 'function') window.kritToast('Checkout could not be opened right now. Please refresh once and try again.');
+  }
+
   function patchStoreActions(){
     window.__kritSafeAddWishlistItemToCart = function(name, price, productId){
       safeAddToCart(name, price, 1, productId);
@@ -313,17 +335,17 @@
     };
 
     window.kritBuySingleNow = function(productId){
-      if(typeof window.kritGetProduct !== 'function' || typeof window.kritOpenCheckout !== 'function') return;
+      if(typeof window.kritGetProduct !== 'function') return;
       var product = window.kritGetProduct(productId);
       if(!product) return;
-      window.kritOpenCheckout([{ id: product.id, name: product.name + ' (' + product.subtitle + ')', price: product.price, qty: 1 }]);
+      safeOpenCheckout([{ id: product.id, name: product.name + ' (' + product.subtitle + ')', price: product.price, qty: 1 }]);
     };
 
     window.kritDetailBuyNow = function(){
-      if(typeof window._kritSelected !== 'number' || window._kritSelected < 0 || !window.KRIT_PRODUCTS || typeof window.kritOpenCheckout !== 'function') return;
+      if(typeof window._kritSelected !== 'number' || window._kritSelected < 0 || !window.KRIT_PRODUCTS) return;
       var product = window.KRIT_PRODUCTS[window._kritSelected];
       var qty = Math.max(1, Number(window._kritDetailQty || 1));
-      window.kritOpenCheckout([{ id: product.id, name: product.name + ' (' + product.subtitle + ')', price: product.price, qty: qty }]);
+      safeOpenCheckout([{ id: product.id, name: product.name + ' (' + product.subtitle + ')', price: product.price, qty: qty }]);
     };
 
     if(typeof window.openWishlist !== 'function' || !window.openWishlist.__kritFallback){
