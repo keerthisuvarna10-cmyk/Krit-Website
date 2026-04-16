@@ -22,6 +22,7 @@
   var phoneConfirmationResult = null;
   var phoneRecaptchaVerifier = null;
   var pendingCheckoutItems = null;
+  var kritDelegatesInstalled = false;
 
   function loadScript(src){
     return new Promise(function(resolve, reject){
@@ -232,6 +233,73 @@
     if(typeof window.kritUpdateBadges === 'function') window.kritUpdateBadges();
   }
 
+  function ensureFallbackToast(){
+    var toast = document.getElementById('krit-fallback-toast');
+    if(toast) return toast;
+    toast = document.createElement('div');
+    toast.id = 'krit-fallback-toast';
+    toast.style.cssText = 'position:fixed;right:20px;bottom:20px;z-index:99999;padding:12px 16px;border-radius:12px;background:#142844;color:#F0F4FF;border:1px solid rgba(47,93,168,.32);box-shadow:0 18px 40px rgba(0,0,0,.22);font-size:.84rem;opacity:0;transform:translateY(12px);transition:all .25s ease;pointer-events:none';
+    document.body.appendChild(toast);
+    return toast;
+  }
+
+  function safeToast(message){
+    if(typeof window.kritToast === 'function'){
+      return window.kritToast(message);
+    }
+    var toast = ensureFallbackToast();
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+    clearTimeout(window.__kritFallbackToastTimer);
+    window.__kritFallbackToastTimer = setTimeout(function(){
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(12px)';
+    }, 2200);
+  }
+
+  function ensureFallbackDrawer(){
+    var overlay = document.getElementById('krit-fallback-drawer-overlay');
+    if(overlay) return overlay;
+    overlay = document.createElement('div');
+    overlay.id = 'krit-fallback-drawer-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(3,8,18,.82);z-index:99990;display:none;align-items:stretch;justify-content:flex-end';
+    overlay.innerHTML = ''
+      + '<div id="krit-fallback-drawer" style="width:min(460px,100vw);height:100%;background:#0D1625;border-left:1px solid rgba(47,93,168,.18);box-shadow:-24px 0 60px rgba(0,0,0,.35);display:flex;flex-direction:column">'
+      +   '<div style="display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid rgba(47,93,168,.14)">'
+      +     '<h3 id="krit-fallback-drawer-title" style="margin:0;font-size:1rem;letter-spacing:.14em;text-transform:uppercase;color:#F0F4FF">KRIT</h3>'
+      +     '<button type="button" id="krit-fallback-drawer-close" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.08);background:transparent;color:#A7BAD9;cursor:pointer">×</button>'
+      +   '</div>'
+      +   '<div id="krit-fallback-drawer-body" style="flex:1;overflow:auto;padding:18px 20px;color:#D8E4F8"></div>'
+      + '</div>';
+    overlay.addEventListener('click', function(event){
+      if(event.target === overlay) overlay.style.display = 'none';
+    });
+    overlay.querySelector('#krit-fallback-drawer-close').addEventListener('click', function(){
+      overlay.style.display = 'none';
+      document.body.style.overflow = '';
+    });
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  function safeOpenDrawer(title, body){
+    if(typeof window.kritOpenDrawer === 'function'){
+      try {
+        return window.kritOpenDrawer(title, body);
+      } catch(err){
+        console.warn('Primary drawer open failed, using fallback drawer.', err);
+      }
+    }
+    var overlay = ensureFallbackDrawer();
+    var titleEl = document.getElementById('krit-fallback-drawer-title');
+    var bodyEl = document.getElementById('krit-fallback-drawer-body');
+    if(titleEl) titleEl.textContent = title;
+    if(bodyEl) bodyEl.innerHTML = body;
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
   function safeAddToCart(name, price, qty, productId){
     if(typeof window.addToCart === 'function'){
       try {
@@ -249,10 +317,8 @@
       items.push({ id: productId || '', name: name, price: Number(price || 0), qty: qty });
     }
     fallbackSaveCart(items);
-    if(typeof window.kritToast === 'function') window.kritToast(name + ' added to cart');
-    if(typeof window.openCart === 'function'){
-      setTimeout(function(){ window.openCart(); }, 120);
-    }
+    safeToast(name + ' added to cart');
+    setTimeout(function(){ safeOpenCart(); }, 120);
   }
 
   function safeAddToWishlist(name, price, productId){
@@ -267,9 +333,9 @@
     if(!items.some(function(item){ return item.name === name; })){
       items.push({ id: productId || '', name: name, price: Number(price || 0) });
       fallbackSaveWishlist(items);
-      if(typeof window.kritToast === 'function') window.kritToast('Saved to wishlist');
-    } else if(typeof window.kritToast === 'function'){
-      window.kritToast('Already in wishlist');
+      safeToast('Saved to wishlist');
+    } else {
+      safeToast('Already in wishlist');
     }
   }
 
@@ -278,7 +344,6 @@
       return window.openWishlist();
     }
     var items = Array.isArray(window._wishlist) ? window._wishlist : getStoredWishlistItems();
-    if(typeof window.kritOpenDrawer !== 'function') return;
     var content = items.length
       ? items.map(function(item){
           var safeName = String(item.name || '').replace(/'/g, "\\'");
@@ -291,7 +356,76 @@
             + '</div>';
         }).join('')
       : '<div style="text-align:center;padding:32px 8px;color:#93A8CC">No saved items yet.</div>';
-    window.kritOpenDrawer('Wishlist', content);
+    safeOpenDrawer('Wishlist', content);
+  }
+
+  function safeOpenCart(){
+    if(typeof window.openCart === 'function' && !window.openCart.__kritFallback){
+      try {
+        return window.openCart();
+      } catch(err){
+        console.warn('Cart drawer fallback used.', err);
+      }
+    }
+    var items = Array.isArray(window._cart) ? window._cart : getStoredCartItems();
+    var subtotal = items.reduce(function(sum, item){ return sum + Number(item.qty || 0) * Number(item.price || 0); }, 0);
+    var content = items.length
+      ? items.map(function(item){
+          return ''
+            + '<div style="padding:14px 0;border-bottom:1px solid rgba(47,93,168,.1)">'
+            +   '<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">'
+            +     '<div><div style="font-size:.92rem;color:#F0F4FF;font-weight:600;line-height:1.5">' + escapeHtml(item.name) + '</div><div style="font-size:.78rem;color:#C9A84C;margin-top:4px">Rs ' + Number(item.price || 0).toLocaleString('en-IN') + ' each</div></div>'
+            +     '<div style="font-weight:700;color:#F0F4FF">' + Number(item.qty || 0) + 'x</div>'
+            +   '</div>'
+            + '</div>';
+        }).join('')
+        + '<div style="padding-top:16px">'
+        +   '<div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#A9B8D4"><span>Subtotal</span><span>Rs ' + subtotal.toLocaleString('en-IN') + '</span></div>'
+        +   '<button type="button" id="krit-fallback-cart-checkout" style="width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;background:#F9D548;color:#1B2340;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Checkout</button>'
+        + '</div>'
+      : '<div style="text-align:center;padding:32px 8px;color:#93A8CC">Your cart is empty.</div>';
+    safeOpenDrawer('Your Cart', content);
+    var checkoutBtn = document.getElementById('krit-fallback-cart-checkout');
+    if(checkoutBtn){
+      checkoutBtn.onclick = function(){
+        safeOpenCheckout(Array.isArray(window._cart) ? window._cart : getStoredCartItems());
+      };
+    }
+  }
+
+  function safeOpenTrackOrder(){
+    if(typeof window.openTrackModal === 'function'){
+      try {
+        return window.openTrackModal();
+      } catch(err){
+        console.warn('Track order fallback used.', err);
+      }
+    }
+    var orders = [];
+    try {
+      orders = JSON.parse(localStorage.getItem('krit_orders') || '[]') || [];
+    } catch(e){}
+    if(!orders.length){
+      safeToast('No orders are available yet. Place an order first.');
+      return;
+    }
+    var order = orders[0];
+    if(window.__kritSharedOrderOverlay && typeof window.__kritSharedOrderOverlay === 'function'){
+      return window.__kritSharedOrderOverlay(order);
+    }
+    var body = ''
+      + '<div style="display:grid;gap:14px">'
+      +   '<div style="padding:14px;border-radius:14px;background:rgba(8,18,34,.72);border:1px solid rgba(47,93,168,.12)">'
+      +     '<div style="font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:#92A8CE">Order ID</div>'
+      +     '<div style="margin-top:8px;font-family:monospace;font-size:1rem;color:#F0F4FF">' + escapeHtml(order.id || 'KRIT Order') + '</div>'
+      +   '</div>'
+      +   '<div style="padding:14px;border-radius:14px;background:rgba(8,18,34,.72);border:1px solid rgba(47,93,168,.12)">'
+      +     '<div style="font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:#92A8CE">Status</div>'
+      +     '<div style="margin-top:8px;font-size:1rem;color:#F0F4FF;font-weight:700">' + escapeHtml((order.status || 'processing').replace(/_/g, ' ')) + '</div>'
+      +     '<div style="margin-top:8px;color:#AFC0DE">' + escapeHtml(order.paymentLabel || 'Order update available') + '</div>'
+      +   '</div>'
+      + '</div>';
+    safeOpenDrawer('Track Order', body);
   }
 
   function safeOpenCheckout(items){
@@ -362,6 +496,79 @@
       };
       window.openWishlist.__kritFallback = true;
     }
+
+    if(typeof window.openCart !== 'function' || !window.openCart.__kritFallback){
+      var originalCart = typeof window.openCart === 'function' ? window.openCart : null;
+      window.openCart = function(){
+        if(originalCart){
+          try {
+            return originalCart.apply(this, arguments);
+          } catch(err){
+            console.warn('Cart drawer fallback used.', err);
+          }
+        }
+        return safeOpenCart();
+      };
+      window.openCart.__kritFallback = true;
+    }
+  }
+
+  function executeStoreActionFromNode(node){
+    if(!node) return false;
+    var onclick = String(node.getAttribute('onclick') || '');
+    var text = String((node.textContent || '').trim()).toLowerCase();
+
+    if(onclick.indexOf('openCart(') !== -1 || text === 'cart' || text === 'checkout'){
+      safeOpenCart();
+      return true;
+    }
+    if(onclick.indexOf('openWishlist(') !== -1 || onclick.indexOf('kritQuickWishlist(') !== -1 || text.indexOf('wishlist') !== -1){
+      var quickWishMatch = onclick.match(/kritQuickWishlist\('([^']+)'\)/);
+      if(quickWishMatch){
+        window.kritQuickWishlist && window.kritQuickWishlist(quickWishMatch[1]);
+      } else if(onclick.indexOf('kritDetailWishlist(') !== -1 || text.indexOf('save to wishlist') !== -1){
+        window.kritDetailWishlist && window.kritDetailWishlist();
+      } else {
+        safeOpenWishlist();
+      }
+      return true;
+    }
+    if(onclick.indexOf('kritQuickAdd(') !== -1 || onclick.indexOf('kritDetailAddToCart(') !== -1 || text === 'add to cart'){
+      var quickAddMatch = onclick.match(/kritQuickAdd\('([^']+)'\)/);
+      if(quickAddMatch){
+        window.kritQuickAdd && window.kritQuickAdd(quickAddMatch[1]);
+      } else {
+        window.kritDetailAddToCart && window.kritDetailAddToCart();
+      }
+      return true;
+    }
+    if(onclick.indexOf('kritBuySingleNow(') !== -1 || onclick.indexOf('kritDetailBuyNow(') !== -1 || text === 'buy now'){
+      var quickBuyMatch = onclick.match(/kritBuySingleNow\('([^']+)'\)/);
+      if(quickBuyMatch){
+        window.kritBuySingleNow && window.kritBuySingleNow(quickBuyMatch[1]);
+      } else {
+        window.kritDetailBuyNow && window.kritDetailBuyNow();
+      }
+      return true;
+    }
+    if(onclick.indexOf('openTrackModal(') !== -1 || text.indexOf('track order') !== -1){
+      safeOpenTrackOrder();
+      return true;
+    }
+    return false;
+  }
+
+  function installStoreActionDelegates(){
+    if(kritDelegatesInstalled) return;
+    kritDelegatesInstalled = true;
+    document.addEventListener('click', function(event){
+      var node = event.target && event.target.closest ? event.target.closest('button,a') : null;
+      if(!node) return;
+      if(!executeStoreActionFromNode(node)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if(typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+    }, true);
   }
 
   async function ensurePhoneRecaptcha(fb){
@@ -2404,6 +2611,7 @@
     ensureKritOverlayStyles();
     mobilePanel();
     patchStoreActions();
+    installStoreActionDelegates();
     patchCheckoutOpen();
     patchOrderSync();
     patchPersistAccount();
