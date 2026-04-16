@@ -9,6 +9,17 @@
   overflow:hidden;
   background:linear-gradient(180deg,#081321 0%,#09182b 100%);
 }
+.krit-auth-card.krit-auth-premium,
+.krit-auth-card.krit-auth-premium.krit-account-mode{
+  margin:auto;
+}
+.open#krit-auth-overlay,
+#krit-auth-overlay.open{
+  overflow-y:auto;
+  overflow-x:hidden;
+  align-items:flex-start;
+  padding:22px 16px;
+}
 .krit-auth-side{
   position:relative;
   padding:24px 24px 22px;
@@ -614,19 +625,19 @@
 .krit-account-empty-title{font-size:1.04rem;font-weight:700;color:#F5F8FF;margin-bottom:6px}
 .krit-account-empty-copy{font-size:.88rem;line-height:1.7;color:#AFC0DE}
 .krit-auth-card.krit-auth-premium.krit-account-mode{
-  max-width:1440px;
-  width:min(1440px,calc(100vw - 24px));
-  max-height:min(96vh,920px);
-  grid-template-columns:minmax(290px,.58fr) minmax(0,1.42fr);
+  max-width:1320px;
+  width:min(1320px,calc(100vw - 32px));
+  max-height:min(94vh,860px);
+  grid-template-columns:minmax(260px,.54fr) minmax(0,1.46fr);
 }
 .krit-auth-card.krit-auth-premium.krit-account-mode .krit-auth-side{
-  padding:28px 28px 24px;
+  padding:24px 24px 20px;
 }
 .krit-auth-card.krit-auth-premium.krit-account-mode .krit-auth-main{
-  padding:22px 24px 18px;
+  padding:18px 20px 16px;
 }
 .krit-auth-card.krit-auth-premium.krit-account-mode #krit-auth-account{
-  padding:8px 18px 20px 0;
+  padding:8px 10px 24px 0;
   overflow:auto;
 }
 #krit-detail-share{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0 18px}
@@ -665,6 +676,26 @@
   .krit-order-success-productrow,
   .krit-order-success-orderhead{flex-direction:column;align-items:flex-start}
 }
+@media (max-width:1100px){
+  .krit-auth-card.krit-auth-premium.krit-account-mode{
+    width:min(100vw - 24px,880px);
+    max-height:none;
+    grid-template-columns:1fr;
+  }
+  .krit-auth-card.krit-auth-premium.krit-account-mode .krit-auth-side{
+    border-right:none;
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .krit-auth-card.krit-auth-premium.krit-account-mode .krit-auth-main{
+    padding:18px;
+  }
+  .krit-auth-card.krit-auth-premium.krit-account-mode #krit-auth-account{
+    padding:4px 0 22px;
+  }
+  .krit-auth-card.krit-auth-premium.krit-account-mode .krit-account-shell{
+    grid-template-columns:1fr;
+  }
+}
 @media (max-height:940px){
   .krit-auth-card.krit-auth-premium{
     max-height:min(94vh,720px);
@@ -685,14 +716,14 @@
   #krit-google-btn.krit-btn,
   .krit-auth-otp-wrap .krit-btn{height:40px}
   .krit-auth-card.krit-auth-premium.krit-account-mode{
-    max-height:min(95vh,860px);
-    grid-template-columns:minmax(255px,.6fr) minmax(0,1.4fr);
+    max-height:min(92vh,760px);
+    grid-template-columns:minmax(235px,.58fr) minmax(0,1.42fr);
   }
   .krit-auth-card.krit-auth-premium.krit-account-mode .krit-auth-side{
-    padding:20px 22px 18px;
+    padding:16px 18px 16px;
   }
   .krit-auth-card.krit-auth-premium.krit-account-mode .krit-auth-main{
-    padding:18px 20px 16px;
+    padding:14px 16px 14px;
   }
   .krit-auth-card.krit-auth-premium.krit-account-mode .krit-auth-side .krit-auth-logo img{
     height:68px;
@@ -731,14 +762,14 @@
   .krit-auth-inline-note{font-size:.72rem;line-height:1.35}
   .krit-or{font-size:.66rem}
   .krit-auth-card.krit-auth-premium.krit-account-mode{
-    max-height:min(95vh,820px);
-    grid-template-columns:minmax(245px,.6fr) minmax(0,1.4fr);
+    max-height:min(92vh,720px);
+    grid-template-columns:minmax(220px,.56fr) minmax(0,1.44fr);
   }
   .krit-auth-card.krit-auth-premium.krit-account-mode .krit-auth-side{
-    padding:18px 20px;
+    padding:14px 16px;
   }
   .krit-auth-card.krit-auth-premium.krit-account-mode .krit-auth-main{
-    padding:16px 18px;
+    padding:12px 14px;
   }
   .krit-auth-card.krit-auth-premium.krit-account-mode .krit-auth-side .krit-auth-logo img{
     height:66px;
@@ -754,6 +785,14 @@
   }
 }
 @media (max-width:768px){
+  #krit-auth-overlay.open{
+    padding:10px;
+  }
+  .krit-auth-card.krit-auth-premium,
+  .krit-auth-card.krit-auth-premium.krit-account-mode{
+    width:min(100vw - 20px,760px);
+    max-height:none;
+  }
   #krit-detail-share{grid-template-columns:repeat(2,minmax(0,1fr))}
   #krit-image-lightbox{padding:24px 12px 168px}
   #krit-lightbox-stage{width:100%}

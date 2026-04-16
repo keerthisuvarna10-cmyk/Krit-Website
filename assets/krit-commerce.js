@@ -1920,6 +1920,8 @@
       updateAuthUI();
       overlay.classList.add('open');
       overlay.style.display = 'flex';
+      overlay.scrollTop = 0;
+      overlay.style.overflowY = 'auto';
       document.body.style.overflow = 'hidden';
       authMessage('Create an account, continue with Google, or use mobile OTP to unlock checkout.', 'info');
     };
