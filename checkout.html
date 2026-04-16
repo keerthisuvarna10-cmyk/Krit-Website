@@ -4650,8 +4650,8 @@ function kritOpenCheckout(items){
         +'<div class="km-order-row"><span style="color:#666">Order No.</span><span style="font-weight:700;font-family:monospace">#'+order.id+'</span></div>'
         +'</div>'
         /* copy order ID button */
-        +'<button onclick="navigator.clipboard&&navigator.clipboard.writeText(''+order.id+'').then(function(){this.textContent='✅ Copied!';setTimeout(function(){document.querySelectorAll('.km-copy-id').forEach(function(b){b.textContent='📋 Copy Order ID'})},1800)}.bind(this))" '
-        +'class="km-copy-id" style="width:100%;margin-top:12px;padding:10px;border:1.5px dashed #ccc;border-radius:10px;background:transparent;color:#555;font-size:.78rem;font-weight:600;cursor:pointer">📋 Copy Order ID</button>';
+        +'<button onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+String(order.id).replace(/'/g, "\\'")+'\').then(function(){this.textContent=\'Copied!\';setTimeout(function(){document.querySelectorAll(\'.km-copy-id\').forEach(function(b){b.textContent=\'Copy Order ID\'})},1800)}.bind(this))" '
+        +'class="km-copy-id" style="width:100%;margin-top:12px;padding:10px;border:1.5px dashed #ccc;border-radius:10px;background:transparent;color:#555;font-size:.78rem;font-weight:600;cursor:pointer">Copy Order ID</button>';
     }
 
     /* ── Track Order button — wire it to show order detail ── */
@@ -4670,7 +4670,7 @@ function kritOpenCheckout(items){
           /* fallback: show a simple status popup */
           var popup = document.createElement('div');
           popup.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
-          popup.innerHTML='<div style="background:#fff;border-radius:18px;padding:24px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
+          popup.innerHTML='<div class="krit-track-fallback" style="background:#fff;border-radius:18px;padding:24px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
             +'<div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:4px">Order #'+order.id+'</div>'
             +'<div style="font-size:.82rem;color:#2a7d46;font-weight:600;margin-bottom:16px">🔄 Processing — we'll notify you when dispatched</div>'
             +'<div style="font-size:.84rem;color:#555;line-height:1.8">'
@@ -4678,7 +4678,7 @@ function kritOpenCheckout(items){
             +'<div>📱 '+((order.customer&&order.customer.phone)||'')+'</div>'
             +'<div style="margin-top:6px">📍 '+((order.customer&&order.customer.address)||'')+((order.customer&&order.customer.city)?', '+order.customer.city:'')+((order.customer&&order.customer.pincode)?' - '+order.customer.pincode:'')+'</div>'
             +'</div>'
-            +'<button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;margin-top:18px;padding:13px;border:none;border-radius:10px;background:#2a7d46;color:#fff;font-weight:700;cursor:pointer">Close</button>'
+            +'<button onclick="this.closest(&quot;.krit-track-fallback&quot;).parentNode.remove()" style="width:100%;margin-top:18px;padding:13px;border:none;border-radius:10px;background:#2a7d46;color:#fff;font-weight:700;cursor:pointer">Close</button>'
             +'</div>';
           document.body.appendChild(popup);
           popup.addEventListener('click', function(e){ if(e.target===popup) popup.remove(); });
@@ -4875,7 +4875,6 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
 <script src="./assets/krit-storefix.js?v=20260416a"></script>
 </body>
 </html>
-
 
 
 
