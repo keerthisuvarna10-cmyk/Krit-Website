@@ -64,7 +64,7 @@
   .co-err.show{display:block}
 
   /* Contact / Auth */
-  .co-auth-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 14px;border-radius:12px;border:1px dashed rgba(249,213,72,.28);background:rgba(249,213,72,.04);font-size:.85rem;color:var(--soft);margin-bottom:14px}
+  .co-auth-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 14px;border-radius:12px;border:1px dashed rgba(249,213,72,.28);background:rgba(249,213,72,.04);font-size:.85rem;color:var(--soft);margin-bottom:14px;min-height:48px;box-sizing:border-box}
   .co-auth-bar strong{color:var(--ink)}
   .co-auth-bar .co-mini-btn{border:1px solid var(--gold);background:rgba(249,213,72,.12);color:var(--gold);padding:7px 12px;border-radius:10px;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
   .co-auth-bar .co-mini-btn:hover{background:rgba(249,213,72,.22)}
@@ -763,6 +763,9 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
   }
 
   function boot(){
+    // Autofill first so the "Sign in" auth bar is replaced with "Signed in as"
+    // BEFORE the first paint — prevents a visible swap / content-shift.
+    autofillFromProfile();
     state.items = loadCartItems();
     if(!state.items.length){
       $('coMain').classList.add('hide');
@@ -774,7 +777,6 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     renderItems();
     renderCouponSuggest();
     selectPayment('upi');
-    autofillFromProfile();
     wire();
   }
 
@@ -786,7 +788,12 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
 })();
 </script>
 
-<script src="./assets/krit-storefix.js?v=20260419a"></script>
+<!--
+  Note: krit-storefix.js is intentionally NOT loaded on the checkout page.
+  That script is for the storefront (index/product) pages and injects the
+  mobile bottom nav + cart/wishlist drawers, which conflict with this page's
+  self-contained flow and cause layout jitter on load.
+-->
 
 <footer style="max-width:1180px;margin:0 auto;padding:28px 24px 40px;border-top:1px solid rgba(112,150,210,.10);text-align:center;color:#9bb0d2">
   <div style="font-size:.82rem;letter-spacing:.04em">&copy; 2026 KRIT&trade;. All rights reserved.</div>
