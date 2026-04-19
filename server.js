@@ -374,7 +374,7 @@ function renderLogin(errorText = '') {
 <body>
   <div class="shell">
     <div class="side">
-      <img class="logo" src="https://res.cloudinary.com/djicyjlid/image/upload/v1774021620/ChatGPT_Image_Mar_20_2026_09_16_47_PM_byvdhf.png" alt="KRIT">
+      <img class="logo" src="https://res.cloudinary.com/djicyjlid/image/upload/v1773595575/Transparent_Primary_Logo-removebg-preview_atpk6x.png" alt="KRIT">
       <div class="eyebrow">Private KRIT access</div>
       <h1>Enter the KRIT website</h1>
       <div class="copy">This live build is protected behind a login gate. Only approved visitors can open the storefront, product page, account page, and checkout flow.</div>
