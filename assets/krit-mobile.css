@@ -10,7 +10,7 @@ body{overflow-x:hidden}
 }
 
 @media (max-width:1024px){
-  .nls a:not(.nav-shop-btn), .nls .nav-track-btn{display:none!important}
+  .nls{display:none!important}
   .hbg{display:flex!important}
   .hero{min-height:auto!important}
   .hi{padding:110px 22px 52px!important}

@@ -284,6 +284,13 @@
   border:1px solid rgba(255,255,255,.08);
   box-shadow:0 22px 50px rgba(0,0,0,.28);
   backdrop-filter:blur(18px);
+  transition:opacity .22s ease, transform .22s ease;
+}
+
+.krit-mobile-cta.is-hidden{
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(16px);
 }
 
 .krit-mobile-cta a,
@@ -368,6 +375,10 @@
 
   .krit-mobile-cta{
     display:flex;
+  }
+
+  .krit-page-index footer{
+    padding-bottom:108px!important;
   }
 }
 

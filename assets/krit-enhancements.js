@@ -97,6 +97,15 @@
       if(typeof window.openQuiz === 'function') window.openQuiz();
     });
     document.body.appendChild(cta);
+
+    var footer = document.querySelector('footer');
+    if(!footer || !('IntersectionObserver' in window)) return;
+    var footerObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        cta.classList.toggle('is-hidden', entry.isIntersecting);
+      });
+    }, { threshold: 0.15 });
+    footerObserver.observe(footer);
   }
 
   function initFadeUps(){
