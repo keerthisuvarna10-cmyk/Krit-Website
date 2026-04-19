@@ -443,6 +443,33 @@
   }
 
   function patchStoreActions(){
+    window.kritGoToCheckoutPage = function(items, source){
+      try {
+        var payload = {
+          items: (items || []).map(function(i){
+            return {
+              id: i.id || '',
+              name: i.name || '',
+              price: Number(i.price || 0),
+              qty: Math.max(1, Number(i.qty || 1)),
+              image: i.image || ''
+            };
+          }),
+          source: source || 'cart',
+          ts: Date.now()
+        };
+        if(!payload.items.length) return false;
+        sessionStorage.setItem('krit_checkout_payload', JSON.stringify(payload));
+      } catch(e){}
+      var href = '/checkout.html';
+      try {
+        var base = location && location.pathname ? location.pathname : '';
+        if(base && base.indexOf('/checkout.html') !== -1) href = base;
+      } catch(e){}
+      window.location.href = href;
+      return true;
+    };
+
     window.__kritSafeAddWishlistItemToCart = function(name, price, productId){
       safeAddToCart(name, price, 1, productId);
       safeOpenWishlist();
@@ -472,14 +499,18 @@
       if(typeof window.kritGetProduct !== 'function') return;
       var product = window.kritGetProduct(productId);
       if(!product) return;
-      safeOpenCheckout([{ id: product.id, name: product.name + ' (' + product.subtitle + ')', price: product.price, qty: 1 }]);
+      var item = { id: product.id, name: product.name + ' (' + product.subtitle + ')', price: product.price, qty: 1, image: (product.images && product.images[0]) || '' };
+      if(window.kritGoToCheckoutPage) return window.kritGoToCheckoutPage([item], 'buy-now');
+      safeOpenCheckout([item]);
     };
 
     window.kritDetailBuyNow = function(){
       if(typeof window._kritSelected !== 'number' || window._kritSelected < 0 || !window.KRIT_PRODUCTS) return;
       var product = window.KRIT_PRODUCTS[window._kritSelected];
       var qty = Math.max(1, Number(window._kritDetailQty || 1));
-      safeOpenCheckout([{ id: product.id, name: product.name + ' (' + product.subtitle + ')', price: product.price, qty: qty }]);
+      var item = { id: product.id, name: product.name + ' (' + product.subtitle + ')', price: product.price, qty: qty, image: (product.images && product.images[0]) || '' };
+      if(window.kritGoToCheckoutPage) return window.kritGoToCheckoutPage([item], 'buy-now');
+      safeOpenCheckout([item]);
     };
 
     if(typeof window.openWishlist !== 'function' || !window.openWishlist.__kritFallback){
@@ -571,6 +602,17 @@
     }, true);
   }
 
+  function resetPhoneRecaptcha(){
+    try {
+      if(phoneRecaptchaVerifier && typeof phoneRecaptchaVerifier.clear === 'function'){
+        phoneRecaptchaVerifier.clear();
+      }
+    } catch(e){}
+    phoneRecaptchaVerifier = null;
+    var existing = document.getElementById('krit-phone-recaptcha');
+    if(existing && existing.parentNode) existing.parentNode.removeChild(existing);
+  }
+
   async function ensurePhoneRecaptcha(fb){
     if(phoneRecaptchaVerifier) return phoneRecaptchaVerifier;
     var holder = document.getElementById('krit-phone-recaptcha');
@@ -590,11 +632,34 @@
     return phoneRecaptchaVerifier;
   }
 
+  var phoneResendTimer = null;
+  function startPhoneResendCooldown(seconds){
+    var btn = document.getElementById('krit-send-otp-btn');
+    if(!btn) return;
+    if(phoneResendTimer) clearInterval(phoneResendTimer);
+    var remaining = Math.max(10, Number(seconds || 30));
+    btn.disabled = true;
+    var originalLabel = btn.dataset.kritLabel || btn.textContent;
+    if(!btn.dataset.kritLabel) btn.dataset.kritLabel = originalLabel;
+    btn.textContent = 'Resend OTP in ' + remaining + 's';
+    phoneResendTimer = setInterval(function(){
+      remaining -= 1;
+      if(remaining <= 0){
+        clearInterval(phoneResendTimer);
+        phoneResendTimer = null;
+        btn.disabled = false;
+        btn.textContent = 'Resend OTP';
+        return;
+      }
+      btn.textContent = 'Resend OTP in ' + remaining + 's';
+    }, 1000);
+  }
+
   function firebaseAuthErrorMessage(error, flow){
     var code = (error && error.code) || '';
     var host = window.location && window.location.hostname ? window.location.hostname : 'this domain';
     if(code === 'auth/unauthorized-domain'){
-      return 'Firebase has not authorized ' + host + ' yet. Add it in Firebase Authentication > Settings > Authorized domains.';
+      return 'Firebase has not authorized ' + host + ' yet. Open Firebase Console (krit-7fa79) > Authentication > Settings > Authorized domains, then add ' + host + ' and kritsleep.in.';
     }
     if(code === 'auth/popup-blocked'){
       return 'Google sign-in popup was blocked by the browser. Allow popups and try again.';
@@ -604,7 +669,7 @@
     }
     if(code === 'auth/operation-not-allowed'){
       return flow === 'otp'
-        ? 'Phone OTP sign-in is not enabled in Firebase yet.'
+        ? 'Phone OTP sign-in is not enabled in Firebase yet. Enable "Phone" under Authentication > Sign-in method in the Firebase console (project krit-7fa79), then retry.'
         : 'This sign-in method is not enabled in Firebase yet.';
     }
     if(code === 'auth/captcha-check-failed'){
@@ -633,27 +698,39 @@
     clearAuthMessage();
     var phoneEl = document.getElementById('auth-otp-phone');
     var phone = phoneEl ? phoneEl.value.replace(/\D/g,'').trim() : '';
-    if(typeof window.kritValidPhone === 'function' && !window.kritValidPhone(phone)){
-      authMessage('Please enter a valid 10-digit mobile number for OTP login.', 'err');
+    var isValidPhone = /^[6-9]\d{9}$/.test(phone);
+    if(typeof window.kritValidPhone === 'function'){
+      isValidPhone = !!window.kritValidPhone(phone);
+    }
+    if(!isValidPhone){
+      authMessage('Please enter a valid 10-digit Indian mobile number for OTP login.', 'err');
+      return;
+    }
+    var cfg = CONFIG.firebase || {};
+    if(!cfg.apiKey || !cfg.projectId){
+      authMessage('Phone login is not configured yet. Please use Google or email for now.', 'err');
       return;
     }
     var fb = await ensureFirebase();
     if(!fb || !fb.auth){
-      authMessage('Phone OTP login is not available right now. Please use Google or email instead.', 'err');
+      authMessage('Could not reach Firebase. Check your internet connection and try again.', 'err');
       return;
     }
     try {
-      authMessage('Sending OTP to your mobile...', 'info');
+      authMessage('Sending OTP to +91 ' + phone + '...', 'info');
       var verifier = await ensurePhoneRecaptcha(fb);
       phoneConfirmationResult = await fb.auth().signInWithPhoneNumber('+91' + phone, verifier);
       var wrap = document.getElementById('krit-otp-verify-wrap');
       var codeEl = document.getElementById('krit-otp-code');
       if(wrap) wrap.style.display = 'grid';
-      if(codeEl) codeEl.focus();
+      if(codeEl){ codeEl.value = ''; setTimeout(function(){ codeEl.focus(); }, 50); }
       track('login', { method: 'phone_otp_requested' });
-      authMessage('OTP sent successfully. Enter the code to continue.', 'ok');
+      authMessage('OTP sent successfully. Enter the 6-digit code below.', 'ok');
+      startPhoneResendCooldown(30);
     } catch(error) {
       phoneConfirmationResult = null;
+      resetPhoneRecaptcha();
+      try { console.warn('KRIT OTP send failed:', error && error.code, error && error.message); } catch(e){}
       authMessage(firebaseAuthErrorMessage(error, 'otp'), 'err');
     }
   }
@@ -696,7 +773,15 @@
       if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
       continuePendingCheckout();
     } catch(error) {
-      authMessage('The OTP was invalid or expired. Please request a new code.', 'err');
+      try { console.warn('KRIT OTP verify failed:', error && error.code, error && error.message); } catch(e){}
+      var code2 = (error && error.code) || '';
+      if(code2 === 'auth/code-expired'){
+        authMessage('This OTP has expired. Please request a new code.', 'err');
+      } else if(code2 === 'auth/invalid-verification-code'){
+        authMessage('That OTP is not correct. Please check the 6-digit code and try again.', 'err');
+      } else {
+        authMessage('The OTP was invalid or expired. Please request a new code.', 'err');
+      }
     }
   }
 
@@ -2562,7 +2647,20 @@
     if(typeof window.kritOpenCheckout === 'function' && !window.kritOpenCheckout.__kritEnhanced){
       var original = window.kritOpenCheckout;
       window.__kritOpenCheckoutOriginal = original;
-      window.kritOpenCheckout = function(){
+      window.kritOpenCheckout = function(items){
+        // Route cart + single-item checkouts to the new /checkout.html page (Mamaearth-style).
+        // Fallback to the legacy inline overlay only if the redirect helper is unavailable.
+        if(typeof window.kritGoToCheckoutPage === 'function'){
+          try {
+            var list = Array.isArray(items) && items.length
+              ? items
+              : (Array.isArray(window._cart) ? window._cart : []);
+            var source = (Array.isArray(items) && items.length === 1) ? 'buy-now' : 'cart';
+            if(list && list.length){
+              return window.kritGoToCheckoutPage(list, source);
+            }
+          } catch(e){}
+        }
         var result = original.apply(this, arguments);
         setTimeout(enhanceCheckoutOverlay, 30);
         setTimeout(enhanceCheckoutOverlay, 180);
