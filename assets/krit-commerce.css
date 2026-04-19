@@ -893,3 +893,117 @@
   .krit-checkout-field.full{grid-column:auto}
 }
 
+
+/* =============================================================
+   v2 OVERLAY FIXES — scrolling + larger close buttons (2026-04-19)
+   ============================================================= */
+/* Auth / account overlay: ensure scroll + bigger touch target */
+#krit-auth-overlay.open{
+  overflow-y:auto !important;
+  align-items:flex-start !important;
+  padding:24px 16px !important;
+}
+.krit-auth-close{
+  width:44px !important;
+  height:44px !important;
+  font-size:1.3rem !important;
+  line-height:1 !important;
+  top:16px !important;
+  right:16px !important;
+  background:rgba(15,28,50,.88) !important;
+  border:1px solid rgba(255,255,255,.3) !important;
+  color:#F0F4FF !important;
+  box-shadow:0 6px 20px rgba(0,0,0,.45) !important;
+  z-index:12 !important;
+}
+.krit-auth-close:hover{
+  background:#F9D548 !important;
+  border-color:#F9D548 !important;
+  color:#1b2340 !important;
+  transform:scale(1.06);
+}
+.krit-auth-card.krit-auth-premium .krit-auth-close{top:18px !important;right:18px !important}
+/* Give the account orders panel a visible, always-on scrollbar */
+#krit-auth-account{
+  scrollbar-width:auto !important;
+  scrollbar-color:rgba(249,213,72,.7) rgba(255,255,255,.06) !important;
+}
+#krit-auth-account::-webkit-scrollbar{width:12px !important}
+#krit-auth-account::-webkit-scrollbar-track{background:rgba(255,255,255,.04) !important;border-radius:999px !important}
+#krit-auth-account::-webkit-scrollbar-thumb{
+  background:rgba(249,213,72,.6) !important;
+  border-radius:999px !important;
+  border:2px solid rgba(10,22,40,.9) !important;
+}
+#krit-auth-account::-webkit-scrollbar-thumb:hover{background:rgba(249,213,72,.9) !important}
+/* When viewport is shorter, let the premium card grow and the overlay scroll */
+.krit-auth-card.krit-auth-premium{
+  max-height:min(94vh,880px);
+}
+@media(max-height:820px){
+  .krit-auth-card.krit-auth-premium{max-height:none !important}
+  .krit-auth-side{overflow:visible !important}
+  .krit-auth-main{overflow:visible !important}
+  #krit-auth-account{overflow:visible !important;max-height:none !important}
+}
+@media(max-width:900px){
+  .krit-auth-card.krit-auth-premium{grid-template-columns:1fr !important;max-height:none !important}
+  .krit-auth-side{border-right:none;border-bottom:1px solid rgba(255,255,255,.06)}
+}
+/* Info banner: compact so it doesn't steal vertical space */
+.krit-auth-card.krit-auth-premium #krit-auth-message.show{
+  font-size:.82rem;
+  padding:10px 44px 10px 14px;
+  border-radius:10px;
+  line-height:1.4;
+}
+
+/* Track-order modal close (index.html) */
+#track-close{
+  width:44px !important;
+  height:44px !important;
+  font-size:1.5rem !important;
+  border-radius:50% !important;
+  border:1px solid rgba(0,0,0,.12) !important;
+  background:#fff !important;
+  color:#1b2340 !important;
+  box-shadow:0 6px 18px rgba(0,0,0,.22) !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  line-height:1 !important;
+  top:12px !important;
+  right:12px !important;
+}
+#track-close:hover{background:#F9D548 !important;color:#1b2340 !important}
+
+/* Dashboard drawer close (Kritniv drawer) */
+.kd-close{
+  width:42px !important;
+  height:42px !important;
+  font-size:1.3rem !important;
+  border-radius:50% !important;
+  border:1px solid rgba(255,255,255,.2) !important;
+  background:rgba(255,255,255,.04) !important;
+  color:#F0F4FF !important;
+}
+.kd-close:hover{background:rgba(249,213,72,.2) !important;color:#F9D548 !important}
+
+/* FAQ side panel close */
+.faq-close{
+  width:42px !important;
+  height:42px !important;
+  font-size:1.2rem !important;
+  color:#F0F4FF !important;
+}
+.faq-close:hover{background:rgba(255,255,255,.08) !important}
+
+/* Image lightbox close */
+#krit-image-lightbox-close{
+  width:56px !important;
+  height:56px !important;
+  font-size:1.6rem !important;
+  top:24px !important;
+  right:24px !important;
+}
+/* === end overlay fixes === */
