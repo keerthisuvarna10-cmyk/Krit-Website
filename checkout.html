@@ -763,7 +763,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       paymentAdjust: pay.isAdd ? pay.amount : -pay.amount,
       shipping: shipping(sub),
       total: totalAmount,
-      status: state.payment === 'cod' ? 'cod_confirmed' : 'prepaid_pending',
+      status: state.payment === 'cod' ? 'confirmed' : 'payment_pending',
       customer: {
         name: $('coName').value.trim(),
         email: $('coEmail').value.trim(),

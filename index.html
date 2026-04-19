@@ -1814,7 +1814,7 @@ function kritOpenDetail(productId, skipScroll){
   document.getElementById("detail-badge").textContent = product.badge;
   document.getElementById("detail-badge").style.background = product.badgeColor;
   document.getElementById("detail-name").textContent = product.name;
-  document.getElementById("detail-sku").textContent = product.sku;
+  document.getElementById("detail-sku").textContent = "";  // SKU hidden from customer UI
   document.getElementById("detail-rating").textContent = product.rating + " / 5 rating";
   document.getElementById("detail-price").textContent = kritFormatINR(product.price);
   document.getElementById("detail-desc").textContent = product.desc;
@@ -2976,10 +2976,10 @@ window.closeInfoModal = closeInfoModal;
 <script>
 var quizAnswers = {};
 var quizResults = {
-  contour: {name:'Contour Pillow',price:'₹1,999',desc:'Deep cervical contour relieves neck & shoulder tension. Doctor-recommended for chronic neck pain. 3-inch height for maximum support. SKU: KRIT-LTX-2012-03-Contour'},
-  half3:   {name:'Half Pillow (3 inch)',price:'₹1,699',desc:'Full-size lofty pillow at 3 inches. Ideal for back and side sleepers who prefer height and support. SKU: KRIT-LTX-2416-03-Half'},
-  half2:   {name:'Half Pillow (2 inch)',price:'₹1,499',desc:'The most versatile KRIT pillow. Medium 2-inch height works for all sleep positions. SKU: KRIT-LTX-2416-02-Half'},
-  soap:    {name:'Soap Shape Pillow',price:'₹1,899',desc:'Unique ergonomic soap-shape follows the natural curve of your neck. 3-inch premium natural latex. SKU: KRIT-LTX-2315-03-Soap'}
+  contour: {name:'Contour Pillow',price:'₹1,999',desc:'Deep cervical contour relieves neck & shoulder tension. Doctor-recommended for chronic neck pain. 3-inch height for maximum support.'},
+  half3:   {name:'Half Pillow (3 inch)',price:'₹1,699',desc:'Full-size lofty pillow at 3 inches. Ideal for back and side sleepers who prefer height and support.'},
+  half2:   {name:'Half Pillow (2 inch)',price:'₹1,499',desc:'The most versatile KRIT pillow. Medium 2-inch height works for all sleep positions.'},
+  soap:    {name:'Soap Shape Pillow',price:'₹1,899',desc:'Unique ergonomic soap-shape follows the natural curve of your neck. 3-inch premium natural latex.'}
 };
 
 function quizAnswer(step, answer) {
@@ -3039,10 +3039,17 @@ function showQuizResult(key) {
 
 function quizOrder() {
   var key = document.getElementById('qr-btn').getAttribute('data-product');
-  var names = {main:'Main Pillow',contour:'Contour Pillow',flat:'Flat Pillow',kids:'Kids Pillow'};
-  var prices = {main:'₹1,599',contour:'₹1,199',flat:'₹799',kids:'₹525'};
+  var idMap = { contour:'contour-3', half3:'half-3', half2:'half-2', soap:'soap-2' };
+  var productId = idMap[key] || 'contour-3';
   closeQuiz();
-  if(window.openModal) openModal(names[key]||'KRIT Pillow', prices[key]||'₹1,599');
+  if(typeof window.kritBuySingleNow === 'function'){
+    try { window.kritBuySingleNow(productId); return; } catch(e){ /* fall through */ }
+  }
+  if(typeof window.kritAddToCart === 'function'){
+    try { window.kritAddToCart(productId); } catch(e){}
+  }
+  // Final fallback: send user to product page with that product focused
+  try { window.location.href = '/product.html#product=' + productId; } catch(e){}
 }
 
 function restartQuiz() {
@@ -4451,7 +4458,7 @@ function kritOpenCheckout(items){
           popup.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
           popup.innerHTML='<div class="krit-track-fallback" style="background:#fff;border-radius:18px;padding:24px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
             +'<div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:4px">Order #'+order.id+'</div>'
-            +'<div style="font-size:.82rem;color:#2a7d46;font-weight:600;margin-bottom:16px">🔄 Processing — we'll notify you when dispatched</div>'
+            +'<div style="font-size:.82rem;color:#2a7d46;font-weight:600;margin-bottom:16px">🔄 Processing — we will notify you when dispatched</div>'
             +'<div style="font-size:.84rem;color:#555;line-height:1.8">'
             +'<div>👤 '+((order.customer&&order.customer.name)||'')+'</div>'
             +'<div>📱 '+((order.customer&&order.customer.phone)||'')+'</div>'

@@ -868,14 +868,21 @@
       new: { label: 'Order placed', tone: 'new' },
       placed: { label: 'Order placed', tone: 'new' },
       confirmed: { label: 'Confirmed', tone: 'confirmed' },
+      cod_confirmed: { label: 'Confirmed', tone: 'confirmed' },
+      prepaid_pending: { label: 'Payment pending', tone: 'pending' },
       processing: { label: 'Processing', tone: 'confirmed' },
       packed: { label: 'Packed', tone: 'shipped' },
       shipped: { label: 'Shipped', tone: 'shipped' },
+      out_for_delivery: { label: 'Out for delivery', tone: 'shipped' },
       delivered: { label: 'Delivered', tone: 'delivered' },
       cancelled: { label: 'Cancelled', tone: 'cancelled' },
       payment_pending: { label: 'Payment pending', tone: 'pending' }
     };
-    return lookup[status] || { label: status, tone: 'new' };
+    // humanize any unknown code: "prepaid_pending" -> "Prepaid pending"
+    if(lookup[status]) return lookup[status];
+    var human = String(status || 'placed').replace(/[_-]+/g,' ');
+    human = human.charAt(0).toUpperCase() + human.slice(1);
+    return { label: human, tone: 'new' };
   }
 
   function getCustomerOrders(account, sourceOrders){
@@ -1090,7 +1097,7 @@
       if(order.status && order.status !== 'placed'){
         timeline.push({
           status: order.status,
-          note: 'Latest order status updated in KRIT OMS.',
+          note: 'Order status updated.',
           time: order.updatedAt || order.createdAt || order.createdLabel || 'Recently'
         });
       }
@@ -1153,7 +1160,7 @@
           '<span class="krit-account-order-step-dot"></span>',
           '<div>',
             '<div class="krit-account-order-step-title">' + escapeHtml(stepMeta.label) + '</div>',
-            '<div class="krit-account-order-step-note">' + escapeHtml(step.note || 'Status updated in KRIT') + '</div>',
+            '<div class="krit-account-order-step-note">' + escapeHtml(step.note || 'Status updated') + '</div>',
           '</div>',
           '<div class="krit-account-order-step-time">' + escapeHtml(step.time || 'Recently') + '</div>',
         '</div>'
@@ -1267,7 +1274,7 @@
         new: 'We have received your order and the KRIT team will confirm it shortly.',
         placed: 'We have received your order and the KRIT team will confirm it shortly.',
         confirmed: 'Your order is confirmed and being prepared for dispatch.',
-        processing: 'Your order is being prepared in KRIT OMS.',
+        processing: 'Your order is being prepared.',
         packed: 'Your order is packed and ready for courier pickup.',
         shipped: 'Your shipment is on the move. Tracking details are available below.',
         delivered: 'Your order has been delivered successfully.',
@@ -2070,7 +2077,7 @@
     if(dataStorageTitle){
       var text = dataStorageTitle.parentElement.querySelector('.im-text');
       if(text){
-        text.textContent = 'Customer accounts, website visits, and order records are stored securely in Firebase / Google Cloud and can sync into KRIT ERP for follow-up, support, and order operations.';
+        text.textContent = 'Your account keeps your details, orders, and saved items in one secure place so future purchases and support are faster.';
       }
     }
     var cookiesTitle = Array.from(document.querySelectorAll('.im-section-title')).find(function(el){ return el.textContent.trim() === 'Cookies'; });
@@ -2213,7 +2220,7 @@
       support.innerHTML = [
         '<div class="item"><div class="k">Support email</div><div class="v">' + (CONFIG.supportEmail || 'hello@kritsleep.in') + '</div></div>',
         '<div class="item"><div class="k">Support phone</div><div class="v">+91 ' + (CONFIG.supportPhone || '9611211121') + '</div></div>',
-        '<div class="item"><div class="k">ERP order sync</div><div class="v">Orders sync to KRIT ERP after submission.</div></div>'
+        '<div class=\"item\"><div class=\"k\">Order sync</div><div class=\"v\">Your order is being prepared by our team.</div></div>'
       ].join('');
       steps.insertAdjacentElement('afterend', support);
     }
@@ -2237,7 +2244,7 @@
     if(panes[1] && !panes[1].querySelector('.krit-checkout-summary-card')){
       var card2 = document.createElement('div');
       card2.className = 'krit-checkout-summary-card';
-      card2.innerHTML = '<div class="eyebrow">Why this flow feels better</div><div class="copy">Customers can review details, choose payment clearly, and move into a cleaner confirmation state while your order data is prepared for ERP sync.</div>';
+      card2.innerHTML = '<div class="eyebrow">Why this flow feels better</div><div class="copy">Review your details, choose your payment method, and move into a clean confirmation screen — we take care of the rest behind the scenes.</div>';
       panes[1].appendChild(card2);
     }
 
@@ -2282,7 +2289,7 @@
   async function syncOrderToERP(order){
     if(!order || order.erpSyncState === 'synced' || order.erpSyncState === 'syncing') return;
     order.erpSyncState = 'syncing';
-    order.erpSyncMessage = 'Syncing to KRIT ERP...';
+    order.erpSyncMessage = 'Confirming your order...';
     try {
       var payload = {
         id: order.id,
@@ -2323,8 +2330,8 @@
       order.erpSyncState = response.ok ? 'synced' : 'failed';
       order.erpSyncAt = new Date().toISOString();
       order.erpSyncMessage = response.ok
-        ? 'Order synced to KRIT ERP.'
-        : ((responseBody && responseBody.error) || ('ERP sync failed with status ' + response.status + '.'));
+        ? 'Order confirmed with our team.'
+        : 'We are still confirming your order — it is safely saved and we will reach out if anything is needed.';
       localStorage.setItem('krit_orders', JSON.stringify(window._kritOrders || []));
       if(response.ok){
         notifyOrderStakeholdersForOrder(order);
@@ -2510,13 +2517,13 @@
             '<div class="krit-order-success-hero-icon" aria-hidden="true">🎉</div>',
             '<div class="krit-order-success-hero-copy">',
               '<h2 class="krit-order-success-title">Your KRIT order is confirmed</h2>',
-              '<p class="krit-order-success-copy">You are all set. We have saved your order, started the OMS sync, and you can track the latest status instantly from here.</p>',
+              '<p class="krit-order-success-copy">You are all set. Your order has been saved and you can track its status instantly from here.</p>',
             '</div>',
           '</div>',
           '<div class="krit-order-success-celebration">',
             '<span>Confirmed</span>',
             '<span>Saved</span>',
-            '<span>Synced</span>',
+            '<span>With our team</span>',
             '<span>Trackable now</span>',
           '</div>',
         '</div>',
@@ -2548,10 +2555,10 @@
             '<div class="krit-order-success-total">' + escapeHtml(total) + '</div>',
           '</div>',
           '<div class="krit-order-success-statusbar">',
-            '<div class="krit-order-success-statuscopy">We have captured your request. You can track order progress right away, and payment / shipping updates will appear here as your OMS status changes.</div>',
+            '<div class="krit-order-success-statuscopy">We have captured your order. You can track progress right away, and payment / shipping updates will appear here as they happen.</div>',
           '</div>',
           '<div class="krit-order-success-mini-grid">',
-            '<div class="krit-order-success-mini-card success"><span>OMS sync</span><strong>' + escapeHtml(order.erpSyncState === 'synced' ? 'Connected' : 'In progress') + '</strong><em>' + escapeHtml(order.erpSyncState === 'synced' ? 'Visible to KRIT team now' : 'Refreshing in the background') + '</em></div>',
+            '<div class=\"krit-order-success-mini-card success\"><span>Order sync</span><strong>' + escapeHtml(order.erpSyncState === 'synced' ? 'Confirmed' : 'In progress') + '</strong><em>' + escapeHtml(order.erpSyncState === 'synced' ? 'Our team has your order' : 'Being processed in the background') + '</em></div>',
             '<div class="krit-order-success-mini-card notice"><span>Tracking</span><strong>' + escapeHtml(order.trackingNumber || 'Opens now') + '</strong><em>' + escapeHtml(order.trackingNumber ? 'Shipment details are available' : 'Timeline opens instantly below') + '</em></div>',
             '<div class="krit-order-success-mini-card contact"><span>Updates</span><strong>' + escapeHtml(order.notificationState === 'manual_ready' ? 'Manual ready' : 'Ready') + '</strong><em>' + escapeHtml('Use the quick actions below to open WhatsApp and copy your message.') + '</em></div>',
           '</div>',
