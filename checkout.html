@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Secure Checkout | KRIT</title>
-<link rel="icon" type="image/svg+xml" href="./assets/krit-favicon.svg">
+<link rel="icon" type="image/png" href="https://res.cloudinary.com/djicyjlid/image/upload/v1774021620/ChatGPT_Image_Mar_20_2026_09_16_47_PM_byvdhf.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -138,16 +138,66 @@
   .co-empty a{display:inline-block;margin-top:16px;padding:12px 20px;border:1px solid var(--gold);border-radius:12px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;font-size:.76rem;font-weight:700}
 
   /* Success overlay */
-  .co-success{position:fixed;inset:0;background:rgba(3,8,18,.86);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px;z-index:99}
-  .co-success.show{display:flex}
-  .co-success-card{width:min(520px,100%);background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:22px;padding:32px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.5)}
-  .co-success-check{width:72px;height:72px;border-radius:50%;background:rgba(74,222,128,.14);border:2px solid var(--ok);color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 14px}
-  .co-success-card h2{font-family:'Playfair Display',serif;margin:4px 0 8px;font-size:1.6rem}
-  .co-success-card p{color:var(--soft);line-height:1.7}
-  .co-success-id{margin:12px 0 18px;padding:10px;border:1px dashed var(--line);border-radius:12px;font-family:monospace;letter-spacing:.08em;color:var(--gold);font-size:.94rem}
-  .co-success-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-  .co-success-actions a,.co-success-actions button{padding:12px 18px;border-radius:12px;font-size:.76rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);background:transparent;color:var(--soft)}
-  .co-success-actions a.primary{background:var(--gold);border-color:var(--gold);color:#1b2340}
+  .co-success{position:fixed;inset:0;background:rgba(3,8,18,.92);backdrop-filter:blur(14px);display:none;overflow-y:auto;padding:32px 20px;z-index:99}
+  .co-success.show{display:block}
+  .co-success-wrap{max-width:960px;margin:0 auto}
+  .co-success-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:26px}
+  .co-success-brand img{height:36px;width:auto;display:block}
+  .co-success-brand span{font-family:'Playfair Display',serif;font-weight:700;font-size:1.35rem;color:var(--ink);letter-spacing:.04em}
+  .co-success-card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:24px;padding:48px 40px;box-shadow:0 40px 100px rgba(0,0,0,.55);overflow:hidden}
+  .co-success-hero{text-align:center;padding:8px 0 36px;border-bottom:1px solid var(--line)}
+  .co-success-check{width:84px;height:84px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(126,227,157,.35),rgba(74,222,128,.08));border:2px solid var(--ok);color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:2.4rem;margin:0 auto 20px;box-shadow:0 0 0 8px rgba(126,227,157,.08)}
+  .co-success-hero h2{font-family:'Playfair Display',serif;margin:0 0 10px;font-size:2.1rem;letter-spacing:.01em}
+  .co-success-hero p{color:var(--soft);line-height:1.7;max-width:560px;margin:0 auto 22px;font-size:.98rem}
+  .co-success-chiprow{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .co-success-chip{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(15,25,45,.6);font-size:.78rem;color:var(--soft);letter-spacing:.04em}
+  .co-success-chip strong{color:var(--gold);font-weight:700}
+  .co-success-chip.delivery strong{color:var(--ok)}
+  .co-success-timeline{padding:36px 0;border-bottom:1px solid var(--line)}
+  .co-success-timeline h3,.co-success-section h3{font-family:'Playfair Display',serif;font-size:1.25rem;margin:0 0 22px;color:var(--ink);letter-spacing:.02em}
+  .co-timeline{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .co-timeline::before{content:"";position:absolute;top:18px;left:6%;right:6%;height:2px;background:var(--line);z-index:0}
+  .co-timeline-step{position:relative;text-align:center;z-index:1}
+  .co-timeline-dot{width:36px;height:36px;border-radius:50%;background:var(--panel-2);border:2px solid var(--line);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;margin:0 auto 10px;transition:all .2s ease}
+  .co-timeline-step.done .co-timeline-dot{background:var(--ok);border-color:var(--ok);color:#0a1524}
+  .co-timeline-step.current .co-timeline-dot{background:var(--gold);border-color:var(--gold);color:#1b2340;box-shadow:0 0 0 6px rgba(249,213,72,.15)}
+  .co-timeline-step .co-timeline-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;line-height:1.3}
+  .co-timeline-step.done .co-timeline-label,.co-timeline-step.current .co-timeline-label{color:var(--ink)}
+  .co-timeline-step .co-timeline-date{display:block;margin-top:4px;font-size:.68rem;color:var(--muted);letter-spacing:.04em;text-transform:none}
+  .co-success-body{display:grid;grid-template-columns:1.3fr 1fr;gap:36px;padding:36px 0}
+  .co-success-section h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0 0 14px;font-weight:600}
+  .co-success-items{display:flex;flex-direction:column;gap:14px;margin-bottom:22px}
+  .co-success-item{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding-bottom:14px;border-bottom:1px dashed var(--line)}
+  .co-success-item:last-child{border-bottom:none;padding-bottom:0}
+  .co-success-item-name{color:var(--ink);font-weight:600;font-size:.95rem;line-height:1.4}
+  .co-success-item-qty{display:block;color:var(--muted);font-size:.8rem;margin-top:3px;letter-spacing:.02em}
+  .co-success-item-price{color:var(--gold);font-weight:700;font-size:.95rem;white-space:nowrap}
+  .co-success-totals{display:flex;flex-direction:column;gap:9px;padding-top:18px;border-top:1px solid var(--line)}
+  .co-success-totalrow{display:flex;justify-content:space-between;font-size:.9rem;color:var(--soft)}
+  .co-success-totalrow.grand{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--ink);padding-top:10px;border-top:1px dashed var(--line);margin-top:6px}
+  .co-success-totalrow.grand strong{color:var(--gold)}
+  .co-success-infocard{background:rgba(9,18,35,.6);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-bottom:16px}
+  .co-success-infocard h5{font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:var(--gold);margin:0 0 10px;font-weight:600}
+  .co-success-infocard p{margin:0;color:var(--soft);line-height:1.6;font-size:.9rem}
+  .co-success-infocard p strong{color:var(--ink);font-weight:600;display:block;margin-bottom:4px}
+  .co-success-cta{display:flex;gap:12px;padding:28px 0 8px;border-top:1px solid var(--line);flex-wrap:wrap;justify-content:center}
+  .co-success-cta a,.co-success-cta button{padding:15px 26px;border-radius:14px;font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);background:transparent;color:var(--soft);text-decoration:none;cursor:pointer;transition:transform .15s ease}
+  .co-success-cta a:hover,.co-success-cta button:hover{transform:translateY(-1px)}
+  .co-success-cta a.primary{background:var(--gold);border-color:var(--gold);color:#1b2340;box-shadow:0 10px 30px rgba(249,213,72,.25)}
+  .co-success-help{margin-top:24px;text-align:center;color:var(--muted);font-size:.85rem;line-height:1.7}
+  .co-success-help a{color:var(--gold);text-decoration:none;font-weight:600}
+  .co-success-help a:hover{text-decoration:underline}
+  @media(max-width:720px){
+    .co-success{padding:20px 12px}
+    .co-success-card{padding:30px 22px;border-radius:18px}
+    .co-success-hero h2{font-size:1.55rem}
+    .co-success-body{grid-template-columns:1fr;gap:24px;padding:26px 0}
+    .co-timeline{grid-template-columns:repeat(5,1fr);gap:4px}
+    .co-timeline-dot{width:28px;height:28px;font-size:.72rem}
+    .co-timeline-step .co-timeline-label{font-size:.6rem;letter-spacing:.06em}
+    .co-timeline-step .co-timeline-date{font-size:.58rem}
+    .co-success-chip{font-size:.72rem;padding:8px 12px}
+  }
 
   .co-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:#0d1b30;border:1px solid var(--line);color:var(--ink);padding:12px 18px;border-radius:14px;opacity:0;transition:opacity .2s,transform .2s;z-index:999;font-size:.88rem}
   .co-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -336,15 +386,101 @@
 </section>
 
 <!-- Success overlay -->
-<div class="co-success" id="coSuccess">
-  <div class="co-success-card">
-    <div class="co-success-check">&#10003;</div>
-    <h2>Order placed successfully</h2>
-    <p>Thank you! We've sent your order confirmation to your email and mobile.</p>
-    <div class="co-success-id" id="coSuccessId">KRIT0000</div>
-    <div class="co-success-actions">
-      <a href="/account.html" class="primary">View my orders</a>
-      <a href="/">Continue shopping</a>
+<div class="co-success" id="coSuccess" role="dialog" aria-modal="true" aria-labelledby="coSuccessTitle">
+  <div class="co-success-wrap">
+    <div class="co-success-brand">
+      <img src="https://res.cloudinary.com/djicyjlid/image/upload/v1774021620/ChatGPT_Image_Mar_20_2026_09_16_47_PM_byvdhf.png" alt="KRIT">
+      <span>KRIT</span>
+    </div>
+    <div class="co-success-card">
+      <!-- Hero -->
+      <div class="co-success-hero">
+        <div class="co-success-check" aria-hidden="true">&#10003;</div>
+        <h2 id="coSuccessTitle">Thank you for your order!</h2>
+        <p>Your order has been placed successfully. We've emailed and texted your confirmation. You'll get another update the moment it ships.</p>
+        <div class="co-success-chiprow">
+          <span class="co-success-chip">Order ID: <strong id="coSuccessId">KRIT0000</strong></span>
+          <span class="co-success-chip delivery">Expected by <strong id="coSuccessEta">—</strong></span>
+          <span class="co-success-chip">Payment: <strong id="coSuccessPayment">—</strong></span>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="co-success-timeline">
+        <h3>Order journey</h3>
+        <div class="co-timeline">
+          <div class="co-timeline-step current" id="coTlOrdered">
+            <div class="co-timeline-dot">&#10003;</div>
+            <div class="co-timeline-label">Ordered<span class="co-timeline-date" id="coTlOrderedDate">—</span></div>
+          </div>
+          <div class="co-timeline-step" id="coTlConfirmed">
+            <div class="co-timeline-dot">2</div>
+            <div class="co-timeline-label">Confirmed<span class="co-timeline-date">Within 24h</span></div>
+          </div>
+          <div class="co-timeline-step" id="coTlShipped">
+            <div class="co-timeline-dot">3</div>
+            <div class="co-timeline-label">Shipped<span class="co-timeline-date" id="coTlShippedDate">—</span></div>
+          </div>
+          <div class="co-timeline-step" id="coTlOut">
+            <div class="co-timeline-dot">4</div>
+            <div class="co-timeline-label">Out for delivery<span class="co-timeline-date" id="coTlOutDate">—</span></div>
+          </div>
+          <div class="co-timeline-step" id="coTlDelivered">
+            <div class="co-timeline-dot">5</div>
+            <div class="co-timeline-label">Delivered<span class="co-timeline-date" id="coTlDeliveredDate">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Body: items + customer info -->
+      <div class="co-success-body">
+        <div class="co-success-section">
+          <h4>Order summary</h4>
+          <div class="co-success-items" id="coSuccessItems"></div>
+          <div class="co-success-totals">
+            <div class="co-success-totalrow"><span>Subtotal</span><span id="coSuccessSubtotal">₹0</span></div>
+            <div class="co-success-totalrow" id="coSuccessDiscountRow" style="display:none"><span>Discount <em id="coSuccessCoupon" style="font-style:normal;color:var(--muted)"></em></span><span id="coSuccessDiscount">-₹0</span></div>
+            <div class="co-success-totalrow"><span>Shipping</span><span id="coSuccessShipping">Free</span></div>
+            <div class="co-success-totalrow" id="coSuccessPayAdjRow" style="display:none"><span id="coSuccessPayAdjLabel">Payment adjustment</span><span id="coSuccessPayAdj">₹0</span></div>
+            <div class="co-success-totalrow grand"><span>Total paid</span><strong id="coSuccessTotal">₹0</strong></div>
+          </div>
+        </div>
+        <div class="co-success-section">
+          <h4>Delivery details</h4>
+          <div class="co-success-infocard">
+            <h5>Shipping to</h5>
+            <p>
+              <strong id="coSuccessAddrName">—</strong>
+              <span id="coSuccessAddrLine">—</span>
+            </p>
+          </div>
+          <div class="co-success-infocard">
+            <h5>Contact</h5>
+            <p>
+              <strong id="coSuccessContactEmail">—</strong>
+              <span id="coSuccessContactPhone">—</span>
+            </p>
+          </div>
+          <div class="co-success-infocard">
+            <h5>Estimated delivery</h5>
+            <p>
+              <strong id="coSuccessEtaLong">—</strong>
+              <span>Standard shipping · 5–7 business days</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTAs -->
+      <div class="co-success-cta">
+        <a href="/account.html#orders" class="primary" id="coSuccessTrack">Track my order</a>
+        <a href="/account.html">View all orders</a>
+        <a href="/">Continue shopping</a>
+      </div>
+      <div class="co-success-help">
+        Need help? Email <a href="mailto:hello@kritsleep.in">hello@kritsleep.in</a> or WhatsApp <a href="https://wa.me/919611211121" target="_blank" rel="noopener">+91 96112 11121</a>.<br>
+        Kritniv Enterprises · GSTIN on invoice · Powered by KRIT
+      </div>
     </div>
   </div>
 </div>
@@ -677,6 +813,112 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     } catch(e){}
   }
 
+  function addBusinessDays(date, days){
+    var d = new Date(date.getTime());
+    var added = 0;
+    while(added < days){
+      d.setDate(d.getDate() + 1);
+      var dow = d.getDay();
+      if(dow !== 0) added++; // skip Sundays only
+    }
+    return d;
+  }
+  function fmtDate(d){
+    try {
+      return d.toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' });
+    } catch(e){
+      return d.toDateString();
+    }
+  }
+  function fmtDateLong(d){
+    try {
+      return d.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    } catch(e){
+      return d.toDateString();
+    }
+  }
+  function fmtINR(n){
+    try {
+      return '\u20B9' + Number(n||0).toLocaleString('en-IN');
+    } catch(e){
+      return '\u20B9' + (n||0);
+    }
+  }
+
+  function renderSuccess(order){
+    if(!order) return;
+    // Header chips
+    var setText = function(id, val){ var el = document.getElementById(id); if(el) el.textContent = val; };
+    var created = order.createdAt ? new Date(order.createdAt) : new Date();
+    var shipDate = addBusinessDays(created, 2);
+    var outDate = addBusinessDays(created, 5);
+    var delivered = addBusinessDays(created, 6);
+
+    setText('coSuccessId', order.id || '');
+    setText('coSuccessEta', fmtDate(delivered));
+    setText('coSuccessEtaLong', fmtDateLong(delivered));
+    setText('coSuccessPayment', order.paymentLabel || order.paymentMode || '—');
+
+    // Timeline dates
+    setText('coTlOrderedDate', fmtDate(created));
+    setText('coTlShippedDate', 'By ' + fmtDate(shipDate));
+    setText('coTlOutDate', 'By ' + fmtDate(outDate));
+    setText('coTlDeliveredDate', 'By ' + fmtDate(delivered));
+
+    // Items
+    var itemsWrap = document.getElementById('coSuccessItems');
+    if(itemsWrap){
+      itemsWrap.innerHTML = '';
+      (order.items || []).forEach(function(it){
+        var line = document.createElement('div');
+        line.className = 'co-success-item';
+        var left = document.createElement('div');
+        var name = document.createElement('div');
+        name.className = 'co-success-item-name';
+        name.textContent = it.name || 'Item';
+        var qty = document.createElement('span');
+        qty.className = 'co-success-item-qty';
+        qty.textContent = 'Qty ' + (it.qty || 1) + ' · ' + fmtINR(it.price) + ' each';
+        left.appendChild(name);
+        left.appendChild(qty);
+        var price = document.createElement('div');
+        price.className = 'co-success-item-price';
+        price.textContent = fmtINR((it.qty || 1) * (it.price || 0));
+        line.appendChild(left);
+        line.appendChild(price);
+        itemsWrap.appendChild(line);
+      });
+    }
+
+    // Totals
+    setText('coSuccessSubtotal', fmtINR(order.subtotal));
+    if(order.discount && order.discount > 0){
+      document.getElementById('coSuccessDiscountRow').style.display = 'flex';
+      setText('coSuccessDiscount', '-' + fmtINR(order.discount));
+      setText('coSuccessCoupon', order.couponCode ? '(' + order.couponCode + ')' : '');
+    }
+    var ship = order.shipping || 0;
+    setText('coSuccessShipping', ship > 0 ? fmtINR(ship) : 'Free');
+    if(order.paymentAdjust && order.paymentAdjust !== 0){
+      document.getElementById('coSuccessPayAdjRow').style.display = 'flex';
+      setText('coSuccessPayAdjLabel', order.paymentAdjust > 0 ? 'COD handling' : 'Prepaid discount');
+      setText('coSuccessPayAdj', (order.paymentAdjust > 0 ? '+' : '-') + fmtINR(Math.abs(order.paymentAdjust)));
+    }
+    setText('coSuccessTotal', fmtINR(order.total));
+
+    // Address + contact
+    var c = order.customer || {};
+    setText('coSuccessAddrName', c.name || '—');
+    var addrParts = [c.address, c.landmark, c.city, c.state, c.pincode].filter(function(x){ return x && String(x).trim(); });
+    setText('coSuccessAddrLine', addrParts.join(', ') || '—');
+    setText('coSuccessContactEmail', c.email || '—');
+    setText('coSuccessContactPhone', c.phone ? ('+91 ' + c.phone) : '—');
+
+    // Track link — pass order id via hash
+    var track = document.getElementById('coSuccessTrack');
+    if(track && order.id){ track.href = '/account.html#order-' + encodeURIComponent(order.id); }
+  }
+
   function isBuyNowSource(){
     try {
       var raw = sessionStorage.getItem('krit_checkout_payload');
@@ -721,8 +963,9 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
 
     clearCheckoutCart(wasBuyNow);
 
-    $('coSuccessId').textContent = payload.id;
+    renderSuccess(payload);
     $('coSuccess').classList.add('show');
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e){ window.scrollTo(0,0); }
     try { if(window.gtag) window.gtag('event', 'purchase', { transaction_id: payload.id, value: payload.total, currency: 'INR' }); } catch(e){}
     if(!erp.ok){
       try { console.warn('KRIT: ERP order sync failed', erp); } catch(e){}
