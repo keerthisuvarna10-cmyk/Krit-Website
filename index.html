@@ -824,6 +824,218 @@ footer{background:#1A2332;border-top:none;position:relative;z-index:1}
   .kd-stats{grid-template-columns:1fr 1fr}
 }
 </style>
+<script>
+// Tag body early when user lands on account view (via /account.html → /?view=account redirect),
+// so we can re-skin the auth overlay with a stylish luxe-cream palette only for that flow.
+(function(){
+  try{
+    var params = new URLSearchParams(window.location.search);
+    if(params.get('view') === 'account'){
+      var apply = function(){ document.body.classList.add('krit-view-account'); };
+      if(document.body){ apply(); }
+      else{ document.addEventListener('DOMContentLoaded', apply, {once:true}); }
+    }
+  }catch(e){}
+})();
+</script>
+<style id="krit-cream-auth-overlay">
+/* ── Luxe Cream Auth Overlay (only when ?view=account) ── */
+body.krit-view-account #krit-auth-overlay{
+  background:radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.18) 0%, rgba(201,168,76,0) 55%),
+             radial-gradient(ellipse at 85% 95%, rgba(27,35,64,.12) 0%, rgba(27,35,64,0) 55%),
+             linear-gradient(135deg, #FBF7EE 0%, #F5EFE0 50%, #EFE6D1 100%) !important;
+  backdrop-filter:none !important;
+}
+body.krit-view-account .krit-auth-card{
+  background:linear-gradient(180deg, #FFFFFF 0%, #FBF7EE 100%) !important;
+  border:1px solid rgba(201,168,76,.35) !important;
+  box-shadow:0 40px 90px rgba(27,35,64,.18),
+             0 0 0 1px rgba(201,168,76,.15) inset,
+             0 -4px 0 0 #C9A84C inset !important;
+  border-radius:20px !important;
+  overflow:hidden !important;
+  padding:40px 32px 32px !important;
+}
+body.krit-view-account .krit-auth-card::before{
+  content:"" !important;
+  position:absolute !important;
+  top:0 !important;left:0 !important;right:0 !important;
+  height:4px !important;
+  background:linear-gradient(90deg, #C9A84C 0%, #E8C96E 50%, #1B2340 100%) !important;
+  border-radius:20px 20px 0 0 !important;
+}
+body.krit-view-account .krit-auth-close{
+  background:rgba(27,35,64,.06) !important;
+  border:1px solid rgba(27,35,64,.15) !important;
+  color:#1B2340 !important;
+}
+body.krit-view-account .krit-auth-close:hover{
+  border-color:#C9A84C !important;
+  color:#C9A84C !important;
+  background:rgba(201,168,76,.08) !important;
+}
+/* Logo pop — navy pill with gold glow */
+body.krit-view-account .krit-auth-logo{
+  text-align:center !important;
+  margin-bottom:22px !important;
+}
+body.krit-view-account .krit-auth-logo img{
+  height:46px !important;
+  padding:12px 20px !important;
+  background:linear-gradient(135deg, #1B2340 0%, #0f1829 100%) !important;
+  border-radius:14px !important;
+  box-shadow:0 10px 26px rgba(27,35,64,.28),
+             0 0 0 2px rgba(201,168,76,.35),
+             0 0 30px rgba(201,168,76,.15) !important;
+  filter:drop-shadow(0 2px 6px rgba(201,168,76,.35)) brightness(1.12) saturate(1.2) !important;
+}
+body.krit-view-account .krit-auth-title{
+  color:#1B2340 !important;
+  font-family:'Playfair Display', serif !important;
+  font-size:1.6rem !important;
+  font-weight:700 !important;
+  letter-spacing:.01em !important;
+}
+body.krit-view-account .krit-auth-sub{
+  color:#6B7280 !important;
+}
+/* Tabs */
+body.krit-view-account .krit-tabs{
+  background:rgba(27,35,64,.04) !important;
+  border:1px solid rgba(27,35,64,.1) !important;
+}
+body.krit-view-account .krit-tab{color:#6B7280 !important}
+body.krit-view-account .krit-tab.active{
+  background:linear-gradient(135deg, #1B2340 0%, #2a3555 100%) !important;
+  color:#F9E8B8 !important;
+  box-shadow:0 4px 12px rgba(27,35,64,.25) !important;
+}
+/* Inputs */
+body.krit-view-account .krit-label{color:#1B2340 !important;opacity:.75}
+body.krit-view-account .krit-input,
+body.krit-view-account .krit-phone,
+body.krit-view-account .krit-otp-digit{
+  background:#FFFFFF !important;
+  border:1px solid rgba(27,35,64,.18) !important;
+  color:#1B2340 !important;
+}
+body.krit-view-account .krit-input:focus,
+body.krit-view-account .krit-otp-digit:focus{
+  border-color:#C9A84C !important;
+  box-shadow:0 0 0 3px rgba(201,168,76,.18) !important;
+}
+body.krit-view-account .krit-input::placeholder{color:#9CA3AF !important;opacity:.8}
+body.krit-view-account .krit-phone span{
+  background:rgba(27,35,64,.04) !important;
+  color:#1B2340 !important;
+  border-right:1px solid rgba(27,35,64,.15) !important;
+}
+body.krit-view-account .krit-phone input{
+  background:transparent !important;
+  color:#1B2340 !important;
+}
+body.krit-view-account .krit-phone input::placeholder{color:#9CA3AF !important}
+/* Buttons */
+body.krit-view-account .krit-btn-primary{
+  background:linear-gradient(135deg, #C9A84C 0%, #E8C96E 50%, #b68f31 100%) !important;
+  color:#1B2340 !important;
+  box-shadow:0 6px 18px rgba(201,168,76,.4), 0 0 0 1px rgba(201,168,76,.3) inset !important;
+  text-shadow:0 1px 0 rgba(255,255,255,.2) !important;
+}
+body.krit-view-account .krit-btn-primary:hover{
+  transform:translateY(-1px) !important;
+  box-shadow:0 10px 24px rgba(201,168,76,.5), 0 0 0 1px rgba(201,168,76,.4) inset !important;
+}
+body.krit-view-account .krit-btn-google{
+  background:#FFFFFF !important;
+  color:#1B2340 !important;
+  border:1px solid rgba(27,35,64,.2) !important;
+  box-shadow:0 2px 8px rgba(27,35,64,.08) !important;
+}
+body.krit-view-account .krit-btn-google:hover{
+  background:#FBF7EE !important;
+  border-color:#C9A84C !important;
+}
+body.krit-view-account .krit-btn-otp{
+  background:rgba(37,211,102,.1) !important;
+  color:#15803d !important;
+  border:1px solid rgba(37,211,102,.35) !important;
+}
+body.krit-view-account .krit-btn-secondary{
+  background:transparent !important;
+  color:#1B2340 !important;
+  border:1px solid rgba(27,35,64,.2) !important;
+}
+body.krit-view-account .krit-btn-secondary:hover{
+  border-color:#C9A84C !important;
+  color:#C9A84C !important;
+}
+/* Divider */
+body.krit-view-account .krit-or::before,
+body.krit-view-account .krit-or::after{background:rgba(27,35,64,.15) !important}
+body.krit-view-account .krit-or span{color:#9CA3AF !important;opacity:1}
+/* OTP timer */
+body.krit-view-account .krit-otp-timer{color:#6B7280 !important;opacity:1}
+/* Message banners */
+body.krit-view-account .krit-msg.ok{background:rgba(21,128,61,.08) !important;border-color:rgba(21,128,61,.3) !important;color:#15803d !important}
+body.krit-view-account .krit-msg.err{background:rgba(185,28,28,.08) !important;border-color:rgba(185,28,28,.3) !important;color:#b91c1c !important}
+body.krit-view-account .krit-msg.info{background:rgba(27,35,64,.06) !important;border-color:rgba(27,35,64,.2) !important;color:#1B2340 !important}
+
+/* Dashboard drawer — match cream palette when in account view */
+body.krit-view-account #krit-dash{
+  background:linear-gradient(180deg, #FBF7EE 0%, #F5EFE0 100%) !important;
+  border-left:1px solid rgba(201,168,76,.3) !important;
+}
+body.krit-view-account .kd-header{
+  background:linear-gradient(135deg, #1B2340 0%, #0f1829 100%) !important;
+  border-bottom:3px solid #C9A84C !important;
+}
+body.krit-view-account .kd-user-name{color:#F9E8B8 !important}
+body.krit-view-account .kd-user-sub{color:rgba(249,232,184,.7) !important}
+body.krit-view-account .kd-close{color:#F9E8B8 !important}
+body.krit-view-account .kd-stat{
+  background:#FFFFFF !important;
+  border:1px solid rgba(201,168,76,.25) !important;
+  box-shadow:0 2px 8px rgba(27,35,64,.05) !important;
+}
+body.krit-view-account .kd-stat-v{color:#1B2340 !important}
+body.krit-view-account .kd-stat-l{color:#6B7280 !important;opacity:1}
+body.krit-view-account .kd-tabs{border-bottom:1px solid rgba(27,35,64,.12) !important}
+body.krit-view-account .kd-tab{color:#6B7280 !important}
+body.krit-view-account .kd-tab.active{color:#1B2340 !important;border-bottom-color:#C9A84C !important}
+body.krit-view-account .kd-order{
+  background:#FFFFFF !important;
+  border:1px solid rgba(201,168,76,.2) !important;
+}
+body.krit-view-account .kd-order-name{color:#1B2340 !important}
+body.krit-view-account .kd-order-price{color:#b68f31 !important}
+body.krit-view-account .kd-order-meta{color:#6B7280 !important;opacity:1}
+body.krit-view-account .kd-activity{border-bottom:1px solid rgba(27,35,64,.06) !important}
+body.krit-view-account .kd-activity-text{color:#374151 !important}
+body.krit-view-account .kd-activity-text strong{color:#1B2340 !important}
+body.krit-view-account .kd-activity-time{color:#9CA3AF !important;opacity:1}
+body.krit-view-account .kd-profile-field{
+  background:#FFFFFF !important;
+  border:1px solid rgba(201,168,76,.2) !important;
+}
+body.krit-view-account .kd-profile-field label{color:#6B7280 !important;opacity:1}
+body.krit-view-account .kd-profile-field span{color:#1B2340 !important}
+body.krit-view-account .kd-logout{
+  background:linear-gradient(135deg, rgba(185,28,28,.08) 0%, rgba(185,28,28,.12) 100%) !important;
+  border:1px solid rgba(185,28,28,.35) !important;
+  color:#b91c1c !important;
+  font-weight:700 !important;
+}
+body.krit-view-account .kd-logout:hover{
+  background:linear-gradient(135deg, rgba(185,28,28,.15) 0%, rgba(185,28,28,.2) 100%) !important;
+  border-color:#b91c1c !important;
+}
+body.krit-view-account .kd-empty{color:#6B7280 !important;opacity:1}
+body.krit-view-account #krit-dash-bg{
+  background:rgba(27,35,64,.35) !important;
+  backdrop-filter:blur(4px) !important;
+}
+</style>
 
 <style id="faq-styles">
 #faq-trigger{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:600;background:#1a4a8a;color:#fff;border:none;cursor:pointer;padding:14px 10px;border-radius:0 8px 8px 0;writing-mode:vertical-rl;text-orientation:mixed;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;transition:all .25s;box-shadow:3px 0 16px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px;line-height:1}
@@ -4656,7 +4868,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
   }
 };
 </script>
-<script src="./assets/krit-commerce.js?v=20260420a"></script>
+<script src="./assets/krit-commerce.js?v=20260420b"></script>
 <script src="./assets/krit-ui.js?v=20260416b"></script>
 <script src="./assets/krit-pages.js?v=20260416b"></script>
 <script src="./assets/krit-enhancements.js?v=20260416b"></script>

@@ -3095,71 +3095,86 @@ window.openQuiz=openQuiz;
 </style>
 <style id="krit-cream-theme">
 /* ============================================================
-   CREAM THEME OVERRIDE — account.html
-   Softer off-white (#FAF7F1) palette with dark text.
-   Keeps gold #C9A84C and navy #2F5DA8 as accents.
+   LUXE CREAM THEME — account.html
+   Stylish off-white with bold gold accents + navy depth.
+   Uses body.krit-page-account prefix to beat krit-pages.js rules.
    ============================================================ */
-html,body{background:#FAF7F1 !important;color:#1B2340 !important}
-body::before,body::after{background:transparent !important}
-main,section,article,header,footer{background:transparent}
-/* Auth overlay — the dominant view on account.html */
-#krit-auth-overlay{background:rgba(250,247,241,.92) !important}
-.krit-auth-card{background:#ffffff !important;border:1px solid rgba(27,35,64,.08) !important;box-shadow:0 30px 80px rgba(27,35,64,.08) !important}
-.krit-auth-card .side,.krit-auth-card .main{background:#ffffff !important;color:#1B2340 !important}
-.krit-auth-card .side{background:linear-gradient(180deg,#FAF7F1 0%,#fffaf0 100%) !important;border-right:1px solid rgba(27,35,64,.08) !important}
-.krit-auth-title,.krit-auth-sub,.krit-auth-eyebrow,.krit-label,.krit-account-greeting{color:#1B2340 !important}
-.krit-auth-sub{color:#5a6687 !important}
-.krit-auth-benefit{background:#FAF7F1 !important;border:1px solid rgba(27,35,64,.08) !important;color:#1B2340 !important;box-shadow:0 4px 14px rgba(27,35,64,.04)}
-.krit-auth-benefit strong{color:#C9A84C !important}
-.krit-input{background:#FAF7F1 !important;color:#1B2340 !important;border:1px solid rgba(27,35,64,.16) !important}
-.krit-input:focus{background:#ffffff !important;border-color:#2F5DA8 !important;box-shadow:0 0 0 3px rgba(47,93,168,.12) !important}
-.krit-input::placeholder{color:#8899b0 !important}
-.krit-tabs{background:#FAF7F1 !important;border:1px solid rgba(27,35,64,.08) !important}
-.krit-tab{color:#5a6687 !important;background:transparent !important}
-.krit-tab.active{background:#ffffff !important;color:#1B2340 !important;box-shadow:0 2px 8px rgba(27,35,64,.08) !important}
-.krit-btn-primary,#auth-email-btn{background:linear-gradient(135deg,#C9A84C,#b68f31) !important;color:#ffffff !important;border:none !important;box-shadow:0 10px 22px rgba(201,168,76,.28) !important}
-.krit-auth-close{background:#FAF7F1 !important;color:#1B2340 !important;border:1px solid rgba(27,35,64,.12) !important}
-.krit-auth-otp-copy,.krit-auth-otp-sub{color:#5a6687 !important}
+html, body.krit-page-account{background:linear-gradient(180deg,#FBF7EE 0%,#F7F0E0 100%) !important;color:#1B2340 !important;min-height:100vh}
+body.krit-page-account::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 15% 10%,rgba(201,168,76,.12),transparent 40%),radial-gradient(circle at 85% 90%,rgba(47,93,168,.08),transparent 40%);pointer-events:none;z-index:0}
+body.krit-page-account main,body.krit-page-account section,body.krit-page-account article{background:transparent !important}
+/* Auth overlay (dominant view) */
+body.krit-page-account #krit-auth-overlay{background:transparent !important}
+body.krit-page-account #krit-auth-overlay .krit-auth-card{background:linear-gradient(180deg,#ffffff 0%,#FBF7EE 100%) !important;border:1px solid rgba(201,168,76,.18) !important;box-shadow:0 24px 70px rgba(27,35,64,.12),0 0 0 1px rgba(201,168,76,.05) inset !important;border-radius:28px !important;position:relative;overflow:hidden}
+body.krit-page-account #krit-auth-overlay .krit-auth-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#C9A84C 0%,#E8C96E 40%,#2F5DA8 100%);z-index:2}
+body.krit-page-account .krit-auth-card .side,body.krit-page-account .krit-auth-card .main{background:transparent !important;color:#1B2340 !important}
+body.krit-page-account .krit-auth-card .side{background:linear-gradient(165deg,rgba(251,247,238,.6) 0%,rgba(247,240,224,.9) 100%) !important;border-right:1px solid rgba(201,168,76,.18) !important}
+body.krit-page-account .krit-auth-title{color:#1B2340 !important;font-family:'Playfair Display',serif !important}
+body.krit-page-account .krit-auth-sub{color:#5a6687 !important}
+body.krit-page-account .krit-auth-eyebrow,body.krit-page-account .krit-label{color:#b68f31 !important;font-weight:700 !important;letter-spacing:.18em !important}
+/* Logo - make it pop */
+body.krit-page-account .krit-auth-logo{background:linear-gradient(135deg,#1B2340 0%,#0f1829 100%) !important;border-radius:20px !important;padding:16px 20px !important;box-shadow:0 12px 30px rgba(27,35,64,.28),0 0 0 3px rgba(201,168,76,.25) !important;display:inline-block !important;margin-bottom:18px !important}
+body.krit-page-account .krit-auth-logo img{filter:drop-shadow(0 2px 8px rgba(201,168,76,.4)) brightness(1.1) saturate(1.15) !important;height:42px !important}
+/* Benefit cards */
+body.krit-page-account .krit-auth-benefit{background:linear-gradient(135deg,#ffffff 0%,#FBF7EE 100%) !important;border:1px solid rgba(201,168,76,.22) !important;color:#1B2340 !important;box-shadow:0 8px 22px rgba(27,35,64,.06) !important;border-radius:14px !important}
+body.krit-page-account .krit-auth-benefit strong{color:#b68f31 !important}
+/* Inputs */
+body.krit-page-account .krit-input{background:#ffffff !important;color:#1B2340 !important;border:1.5px solid rgba(27,35,64,.14) !important;border-radius:12px !important;font-weight:500 !important}
+body.krit-page-account .krit-input:focus{background:#ffffff !important;border-color:#C9A84C !important;box-shadow:0 0 0 4px rgba(201,168,76,.15) !important}
+body.krit-page-account .krit-input::placeholder{color:#8899b0 !important}
+/* Tabs */
+body.krit-page-account .krit-tabs{background:rgba(27,35,64,.04) !important;border:1px solid rgba(27,35,64,.08) !important;border-radius:14px !important;padding:4px !important}
+body.krit-page-account .krit-tab{color:#5a6687 !important;background:transparent !important}
+body.krit-page-account .krit-tab.active{background:linear-gradient(135deg,#1B2340,#2F5DA8) !important;color:#ffffff !important;box-shadow:0 4px 14px rgba(27,35,64,.2) !important}
+/* Buttons */
+body.krit-page-account .krit-btn-primary,body.krit-page-account #auth-email-btn{background:linear-gradient(135deg,#C9A84C 0%,#E8C96E 50%,#b68f31 100%) !important;color:#1B2340 !important;border:none !important;box-shadow:0 14px 30px rgba(201,168,76,.34),0 0 0 1px rgba(201,168,76,.4) inset !important;font-weight:800 !important;letter-spacing:.14em !important}
+body.krit-page-account .krit-btn-primary:hover,body.krit-page-account #auth-email-btn:hover{transform:translateY(-1px);box-shadow:0 18px 38px rgba(201,168,76,.42) !important}
+body.krit-page-account .krit-auth-close{background:#ffffff !important;color:#1B2340 !important;border:1px solid rgba(27,35,64,.12) !important;box-shadow:0 4px 12px rgba(27,35,64,.08) !important}
+body.krit-page-account .krit-auth-otp-copy,body.krit-page-account .krit-auth-otp-sub{color:#5a6687 !important}
+/* Google button */
+body.krit-page-account #auth-google-btn{background:#ffffff !important;color:#1B2340 !important;border:1.5px solid rgba(27,35,64,.14) !important;box-shadow:0 6px 18px rgba(27,35,64,.08) !important}
+body.krit-page-account #auth-google-btn:hover{border-color:#C9A84C !important;box-shadow:0 10px 26px rgba(27,35,64,.12) !important}
 /* Logged-in account card */
-.krit-auth-account-card{background:#ffffff !important}
-.krit-account-shell{background:transparent !important}
-.krit-account-sidebar{background:#FAF7F1 !important;border:1px solid rgba(27,35,64,.08) !important;color:#1B2340 !important}
-.krit-account-content{background:transparent !important;color:#1B2340 !important}
-.krit-account-avatar{background:linear-gradient(135deg,#2F5DA8,#1e4079) !important;color:#fff !important}
-.krit-account-greeting{color:#5a6687 !important}
-.krit-account-provider{color:#8899b0 !important}
-.krit-auth-account-meta{background:#ffffff !important;border:1px solid rgba(27,35,64,.08) !important;color:#1B2340 !important}
-.krit-auth-account-meta .label{color:#8899b0 !important}
-.krit-auth-account-meta .value{color:#1B2340 !important}
-.krit-account-stat{background:#ffffff !important;border:1px solid rgba(27,35,64,.08) !important;color:#1B2340 !important}
-.krit-account-stat span{color:#8899b0 !important}
-.krit-account-stat strong{color:#1B2340 !important}
-.krit-account-nav-btn{background:transparent !important;color:#5a6687 !important;border:1px solid transparent !important}
-.krit-account-nav-btn:hover{background:#FAF7F1 !important;color:#1B2340 !important}
-.krit-account-nav-btn.active{background:#ffffff !important;color:#1B2340 !important;border:1px solid rgba(27,35,64,.1) !important;box-shadow:0 2px 8px rgba(27,35,64,.06) !important}
-.krit-account-panel{background:transparent !important;color:#1B2340 !important}
-.krit-account-panel-head{border-bottom:1px solid rgba(27,35,64,.08) !important}
-.krit-account-orders-list>*{background:#ffffff !important;border:1px solid rgba(27,35,64,.08) !important;color:#1B2340 !important;box-shadow:0 4px 14px rgba(27,35,64,.04)}
-.krit-account-order-meta span{color:#8899b0 !important}
-.krit-account-order-meta strong{color:#1B2340 !important}
-.krit-account-order-meta em{color:#5a6687 !important;font-style:normal}
-/* Toasts stay dark for contrast */
-/* Footer on cream pages */
-footer,.footer{background:#FAF7F1 !important;color:#5a6687 !important;border-top:1px solid rgba(27,35,64,.08) !important}
-footer a,.footer a{color:#2F5DA8 !important}
-.fhead,.fcp,.fi,.fleg a{color:#5a6687 !important}
-.fi h4,.fb strong{color:#1B2340 !important}
-.fi .fb{background:rgba(47,93,168,.04) !important;border:1px solid rgba(27,35,64,.06) !important}
-.fb form input{background:#ffffff !important;color:#1B2340 !important;border:1px solid rgba(27,35,64,.14) !important}
-/* Info modals readability on cream */
-.info-modal{background:#ffffff !important;color:#1B2340 !important;border:1px solid rgba(27,35,64,.08) !important}
-.im-title,.im-section-title{color:#1B2340 !important}
-.im-text,.im-sub{color:#5a6687 !important}
-/* Mobile: keep sidebar compact & stacked on small screens */
+body.krit-page-account .krit-auth-account-card{background:transparent !important}
+body.krit-page-account .krit-account-shell{background:transparent !important;gap:22px !important}
+body.krit-page-account .krit-account-sidebar{background:linear-gradient(180deg,#ffffff 0%,#FBF7EE 100%) !important;border:1px solid rgba(201,168,76,.2) !important;color:#1B2340 !important;border-radius:20px !important;box-shadow:0 10px 30px rgba(27,35,64,.06) !important}
+body.krit-page-account .krit-account-content{background:transparent !important;color:#1B2340 !important}
+body.krit-page-account .krit-account-avatar{background:linear-gradient(135deg,#1B2340 0%,#2F5DA8 100%) !important;color:#C9A84C !important;box-shadow:0 8px 20px rgba(27,35,64,.2),0 0 0 3px rgba(201,168,76,.3) !important;font-weight:800 !important}
+body.krit-page-account .krit-account-greeting{color:#b68f31 !important;font-weight:700 !important;letter-spacing:.14em !important;text-transform:uppercase !important;font-size:.72rem !important}
+body.krit-page-account #auth-account-name{color:#1B2340 !important;font-family:'Playfair Display',serif !important}
+body.krit-page-account .krit-account-provider{color:#8899b0 !important}
+body.krit-page-account .krit-auth-account-meta{background:#ffffff !important;border:1px solid rgba(27,35,64,.08) !important;color:#1B2340 !important;border-radius:14px !important;box-shadow:0 4px 14px rgba(27,35,64,.04) !important}
+body.krit-page-account .krit-auth-account-meta .label{color:#b68f31 !important;font-weight:700 !important;letter-spacing:.14em !important}
+body.krit-page-account .krit-auth-account-meta .value{color:#1B2340 !important;font-weight:600 !important}
+body.krit-page-account .krit-account-stat{background:linear-gradient(135deg,#ffffff 0%,#FBF7EE 100%) !important;border:1px solid rgba(201,168,76,.2) !important;color:#1B2340 !important;border-radius:14px !important;box-shadow:0 4px 14px rgba(27,35,64,.04) !important}
+body.krit-page-account .krit-account-stat span{color:#8899b0 !important}
+body.krit-page-account .krit-account-stat strong{color:#1B2340 !important;font-family:'Playfair Display',serif !important;font-size:1.4rem !important}
+body.krit-page-account .krit-account-nav-btn{background:transparent !important;color:#5a6687 !important;border:1px solid transparent !important;font-weight:600 !important}
+body.krit-page-account .krit-account-nav-btn:hover{background:rgba(201,168,76,.08) !important;color:#b68f31 !important}
+body.krit-page-account .krit-account-nav-btn.active{background:linear-gradient(135deg,#1B2340,#2F5DA8) !important;color:#ffffff !important;border:1px solid #2F5DA8 !important;box-shadow:0 6px 18px rgba(27,35,64,.18) !important}
+body.krit-page-account .krit-account-panel{background:transparent !important;color:#1B2340 !important}
+body.krit-page-account .krit-account-panel-head{border-bottom:1px solid rgba(201,168,76,.2) !important;padding-bottom:14px !important;margin-bottom:16px !important}
+body.krit-page-account .krit-account-panel-head .krit-auth-title{font-family:'Playfair Display',serif !important;color:#1B2340 !important}
+body.krit-page-account .krit-account-orders-list>*{background:linear-gradient(135deg,#ffffff 0%,#fffdf7 100%) !important;border:1px solid rgba(201,168,76,.22) !important;color:#1B2340 !important;box-shadow:0 8px 22px rgba(27,35,64,.05) !important;border-radius:16px !important}
+body.krit-page-account .krit-account-order-meta span{color:#b68f31 !important;font-weight:700 !important}
+body.krit-page-account .krit-account-order-meta strong{color:#1B2340 !important}
+body.krit-page-account .krit-account-order-meta em{color:#5a6687 !important;font-style:normal}
+/* Footer */
+body.krit-page-account footer{background:rgba(251,247,238,.6) !important;color:#5a6687 !important;border-top:1px solid rgba(201,168,76,.18) !important}
+body.krit-page-account footer a{color:#2F5DA8 !important}
+body.krit-page-account .fhead,body.krit-page-account .fcp,body.krit-page-account .fleg a{color:#5a6687 !important}
+body.krit-page-account .fi h4,body.krit-page-account .fb strong{color:#1B2340 !important}
+body.krit-page-account .fi .fb{background:rgba(201,168,76,.06) !important;border:1px solid rgba(201,168,76,.18) !important}
+body.krit-page-account .fb form input{background:#ffffff !important;color:#1B2340 !important;border:1px solid rgba(27,35,64,.14) !important}
+/* Info modals */
+body.krit-page-account .info-modal{background:#ffffff !important;color:#1B2340 !important;border:1px solid rgba(201,168,76,.2) !important;box-shadow:0 24px 60px rgba(27,35,64,.16) !important}
+body.krit-page-account .im-title,body.krit-page-account .im-section-title{color:#1B2340 !important;font-family:'Playfair Display',serif !important}
+body.krit-page-account .im-text,body.krit-page-account .im-sub{color:#5a6687 !important}
+/* Mobile */
 @media(max-width:860px){
-  .krit-account-shell{grid-template-columns:1fr !important}
-  .krit-account-sidebar{padding:18px !important}
-  .krit-auth-card .side,.krit-auth-card .main{padding:22px 18px !important}
+  body.krit-page-account .krit-account-shell{grid-template-columns:1fr !important}
+  body.krit-page-account .krit-account-sidebar{padding:18px !important}
+  body.krit-page-account .krit-auth-card .side,body.krit-page-account .krit-auth-card .main{padding:22px 18px !important}
+  body.krit-page-account .krit-auth-logo{margin:0 auto 18px !important}
 }
 </style>
 
@@ -4311,7 +4326,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
   }
 };
 </script>
-<script src="./assets/krit-commerce.js?v=20260420a"></script>
+<script src="./assets/krit-commerce.js?v=20260420b"></script>
 <script src="./assets/krit-ui.js?v=20260416b"></script>
 <script src="./assets/krit-pages.js?v=20260416b"></script>
 <script src="./assets/krit-enhancements.js?v=20260416b"></script>

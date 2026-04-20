@@ -208,42 +208,80 @@
   @keyframes spin{to{transform:rotate(360deg)}}
 
   /* =======================================================
-     CREAM THEME — checkout.html
-     Redefine palette via CSS variables + surface overrides
+     LUXE CREAM THEME — checkout.html
+     Warm off-white canvas with bold gold + navy pop.
      ======================================================= */
   :root{
-    --bg:#FAF7F1;--panel:#ffffff;--panel-2:#fffaf0;--line:rgba(27,35,64,.08);
+    --bg:#FBF7EE;--panel:#ffffff;--panel-2:#fffaf0;--line:rgba(27,35,64,.08);
     --ink:#1B2340;--muted:#5a6687;--soft:#3a4466;
-    --gold:#C9A84C;--gold-deep:#b68f31;--blue:#2F5DA8;--blue-glow:#2F5DA8;
+    --gold:#C9A84C;--gold-deep:#b68f31;--gold-light:#E8C96E;
+    --blue:#2F5DA8;--blue-glow:#2F5DA8;--blue-deep:#1B2340;
     --ok:#1a7f4f;--ok-bg:rgba(26,127,79,.08);--ok-line:rgba(26,127,79,.24);
     --warn:#C9A84C;--danger:#c83838;
   }
-  html,body{background:radial-gradient(circle at top left,rgba(201,168,76,.06),transparent 30%),radial-gradient(circle at bottom right,rgba(47,93,168,.05),transparent 28%),var(--bg) !important;color:var(--ink) !important}
-  .co-top{background:rgba(255,255,255,.85) !important;border-bottom:1px solid rgba(27,35,64,.06) !important}
-  .co-trust{color:var(--soft) !important}
-  .co-brand img{filter:drop-shadow(0 2px 6px rgba(27,35,64,.08)) !important}
-  .co-section{background:#ffffff !important;box-shadow:0 8px 28px rgba(27,35,64,.06) !important;border:1px solid var(--line) !important}
-  .co-input,.co-select,.co-textarea{background:#FAF7F1 !important;border:1px solid rgba(27,35,64,.14) !important;color:var(--ink) !important}
-  .co-input:focus,.co-select:focus,.co-textarea:focus{background:#ffffff !important;border-color:var(--blue) !important;box-shadow:0 0 0 3px rgba(47,93,168,.12) !important}
+  html,body{background:linear-gradient(180deg,#FBF7EE 0%,#F7F0E0 100%) !important;color:var(--ink) !important;min-height:100vh !important}
+  body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 15% 10%,rgba(201,168,76,.14),transparent 42%),radial-gradient(circle at 85% 90%,rgba(47,93,168,.08),transparent 42%);pointer-events:none;z-index:0}
+  .co-shell,.co-top,footer{position:relative;z-index:1}
+
+  /* Top header bar — stylish gradient accent strip + bold brand pill */
+  .co-top{background:#ffffff !important;border-bottom:none !important;box-shadow:0 4px 20px rgba(27,35,64,.06) !important;position:sticky;top:0;z-index:30;padding:14px 24px !important}
+  .co-top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--gold) 0%,var(--gold-light) 40%,var(--blue) 100%)}
+  .co-brand{gap:12px !important}
+  .co-brand img{height:40px !important;width:auto !important;padding:8px 14px !important;background:linear-gradient(135deg,#1B2340 0%,#0f1829 100%) !important;border-radius:12px !important;box-shadow:0 8px 22px rgba(27,35,64,.22),0 0 0 2px rgba(201,168,76,.28) !important;filter:drop-shadow(0 0 4px rgba(201,168,76,.3)) brightness(1.1) saturate(1.2) !important}
+  .co-brand .name{display:inline-block !important;font-family:'Playfair Display',serif !important;font-size:1.3rem !important;font-weight:700 !important;color:var(--ink) !important;letter-spacing:.02em !important}
+  .co-trust{color:var(--gold-deep) !important;font-weight:700 !important;background:rgba(201,168,76,.1) !important;padding:8px 16px !important;border-radius:999px !important;border:1px solid rgba(201,168,76,.25) !important}
+  .co-trust svg{stroke:var(--gold-deep) !important}
+  .co-back{background:#ffffff !important;border:1.5px solid rgba(27,35,64,.12) !important;color:var(--soft) !important;font-weight:700 !important;border-radius:999px !important;padding:10px 18px !important}
+  .co-back:hover{border-color:var(--gold) !important;color:var(--ink) !important;background:rgba(201,168,76,.04) !important}
+
+  /* Section cards — crisp white with gold-accented numbers */
+  .co-section{background:#ffffff !important;box-shadow:0 10px 36px rgba(27,35,64,.07),0 0 0 1px rgba(201,168,76,.06) inset !important;border:1px solid rgba(201,168,76,.14) !important;border-radius:20px !important;padding:26px 24px 26px !important}
+  .co-section-title{color:var(--ink) !important;font-family:'Playfair Display',serif !important;font-size:1.25rem !important;font-weight:700 !important}
+  .co-step{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 50%,var(--gold-deep) 100%) !important;color:#1B2340 !important;font-weight:800 !important;box-shadow:0 4px 12px rgba(201,168,76,.35) !important;width:30px !important;height:30px !important;font-size:.88rem !important}
+  .co-section-sub{color:var(--muted) !important}
+  .co-section-edit{color:var(--gold-deep) !important;font-weight:700 !important}
+  .co-section-edit:hover{color:var(--ink) !important}
+
+  /* Inputs — crisp white, gold focus */
+  .co-input,.co-select,.co-textarea{background:#ffffff !important;border:1.5px solid rgba(27,35,64,.12) !important;color:var(--ink) !important;font-weight:500 !important;border-radius:12px !important;padding:13px 15px !important}
+  .co-input:focus,.co-select:focus,.co-textarea:focus{background:#ffffff !important;border-color:var(--gold) !important;box-shadow:0 0 0 4px rgba(201,168,76,.14) !important}
   .co-input::placeholder{color:#8899b0 !important}
-  .co-auth-bar{background:rgba(201,168,76,.06) !important;border:1px dashed rgba(201,168,76,.35) !important;color:var(--soft) !important}
-  .co-pay{background:#FAF7F1 !important;border:1px solid rgba(27,35,64,.08) !important;color:var(--ink) !important}
-  .co-pay:hover{background:#ffffff !important;border-color:var(--blue) !important}
+  .co-field label{color:var(--gold-deep) !important;font-weight:700 !important;letter-spacing:.14em !important}
+
+  /* Auth bar */
+  .co-auth-bar{background:linear-gradient(135deg,rgba(201,168,76,.08) 0%,rgba(232,201,110,.04) 100%) !important;border:1.5px dashed rgba(201,168,76,.4) !important;color:var(--soft) !important;border-radius:14px !important}
+  .co-auth-bar strong{color:var(--ink) !important}
+  .co-auth-bar .co-mini-btn{border:1.5px solid var(--gold) !important;background:linear-gradient(135deg,var(--gold),var(--gold-deep)) !important;color:#1B2340 !important;font-weight:800 !important;box-shadow:0 6px 14px rgba(201,168,76,.3) !important}
+
+  /* Payment options */
+  .co-pay{background:#ffffff !important;border:1.5px solid rgba(27,35,64,.08) !important;color:var(--ink) !important;border-radius:14px !important;transition:all .2s}
+  .co-pay:hover{background:linear-gradient(135deg,#fffdf7 0%,#FBF7EE 100%) !important;border-color:var(--gold) !important;transform:translateY(-1px);box-shadow:0 8px 20px rgba(27,35,64,.06)}
   .co-pay input[type=radio]{border:1.5px solid rgba(27,35,64,.2) !important}
   .co-pay input[type=radio]:checked{border-color:var(--gold) !important}
-  .co-step{background:rgba(201,168,76,.14) !important;color:var(--gold-deep) !important}
-  .co-toast{background:#1B2340 !important;color:#fff !important;border:none !important}
-  .co-loading{border:2px solid rgba(27,35,64,.18) !important;border-top-color:var(--ink) !important}
-  /* Order summary side panel */
-  .co-side,.co-summary{background:#ffffff !important;border:1px solid var(--line) !important;color:var(--ink) !important}
+  .co-pay input[type=radio]:checked::after{background:var(--gold) !important}
+
+  /* Order summary — luxurious */
+  .co-side,.co-summary{background:linear-gradient(180deg,#ffffff 0%,#fffdf7 100%) !important;border:1px solid rgba(201,168,76,.2) !important;color:var(--ink) !important;border-radius:20px !important;box-shadow:0 14px 40px rgba(27,35,64,.08),0 0 0 1px rgba(201,168,76,.05) inset !important}
   .co-summary-row{color:var(--muted) !important}
   .co-summary-row strong{color:var(--ink) !important}
-  /* Links & buttons */
-  .co-back{background:#ffffff !important;border:1px solid rgba(27,35,64,.12) !important;color:var(--soft) !important}
-  .co-back:hover{border-color:var(--blue) !important;color:var(--ink) !important}
+
+  /* Pay button — the hero */
+  button[id="co-place"],button[id^="co-place"],.co-pay-btn,button.co-place,#co-place-order{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 50%,var(--gold-deep) 100%) !important;color:#1B2340 !important;border:none !important;box-shadow:0 16px 38px rgba(201,168,76,.42),0 0 0 1px rgba(201,168,76,.6) inset !important;font-weight:800 !important;letter-spacing:.16em !important;border-radius:14px !important}
+  button[id="co-place"]:hover,#co-place-order:hover{transform:translateY(-1px);box-shadow:0 20px 46px rgba(201,168,76,.5) !important}
+
+  /* Coupon chips */
+  button[onclick*="applyCoupon"],.coupon-chip,[class*="coupon"]{background:rgba(201,168,76,.1) !important;color:var(--gold-deep) !important;border:1px solid rgba(201,168,76,.35) !important;font-weight:700 !important}
+
+  /* Toast & loading */
+  .co-toast{background:#1B2340 !important;color:#fff !important;border:none !important;box-shadow:0 12px 32px rgba(27,35,64,.3) !important}
+  .co-loading{border:2px solid rgba(27,35,64,.18) !important;border-top-color:var(--gold) !important}
+
   /* Footer */
-  footer{color:var(--muted) !important;border-top:1px solid rgba(27,35,64,.08) !important}
-  footer a{color:var(--blue) !important}
+  footer{color:var(--muted) !important;border-top:1px solid rgba(201,168,76,.2) !important;background:rgba(251,247,238,.6) !important}
+  footer a{color:var(--blue) !important;font-weight:600}
+
+  /* Typography pop */
+  h1,h2,h3,.co-section-title{font-family:'Playfair Display',serif !important;color:var(--ink) !important}
 </style>
 </head>
 <body>
