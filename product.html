@@ -517,23 +517,25 @@ body.clk
 
 .wa-tx{font-size:.84rem;letter-spacing:.12em;text-transform:uppercase;font-weight:500;color:white;white-space:nowrap}
 
-/* FOOTER */
+/* FOOTER (compact) */
 footer{background:#1A2332;border-top:none;position:relative;z-index:1}
-.fi{max-width:1180px;margin:0 auto;padding:52px 60px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px}
-.fb-logo{display:flex;flex-direction:column;align-items:flex-start;margin-bottom:14px}
-.fb-logo-text{font-family:'Playfair Display',serif;font-size:2rem;font-weight:400;letter-spacing:.2em;color:var(--white);text-shadow:0 0 20px rgba(47,93,168,.3)}
-.fb-domain{font-size:.94rem;letter-spacing:.3em;text-transform:uppercase;color:var(--silver);opacity:.35;margin-top:2px}
-.fb p{font-size:.88rem;line-height:1.5;color:var(--silver);opacity:.44;max-width:250px}
-.fc h5{font-size:.94rem;letter-spacing:.34em;text-transform:uppercase;color:var(--glow);margin-bottom:14px}
-.fc a{display:block;font-size:.88rem;line-height:1.35;color:var(--silver);opacity:.46;margin-bottom:6px;transition:opacity .2s,color .2s}
+.fi{max-width:1180px;margin:0 auto;padding:22px 40px 10px;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:22px}
+.fb-logo{display:flex;flex-direction:column;align-items:flex-start;margin-bottom:4px}
+.fb-logo-text{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:400;letter-spacing:.18em;color:var(--white);text-shadow:0 0 18px rgba(47,93,168,.3)}
+.fb-logo-img{height:38px!important}
+.fb-domain{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--silver);opacity:.35;margin-top:2px}
+.fb-logo-tag{font-family:'Playfair Display',serif;font-style:italic;font-size:.74rem;letter-spacing:.08em;color:var(--gold);opacity:.6;margin-top:4px}
+.fb p{font-size:.74rem;line-height:1.4;color:var(--silver);opacity:.44;max-width:220px}
+.fc h5{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--glow);margin-bottom:6px}
+.fc a{display:block;font-size:.74rem;line-height:1.28;color:var(--silver);opacity:.5;margin-bottom:2px;transition:opacity .2s,color .2s}
 .fc a:hover{opacity:1;color:var(--white)}
-.fbot{border-top:1px solid rgba(47,93,168,.08);padding:16px 60px;max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
-.fcp{font-size:.96rem;color:var(--silver);opacity:.28;letter-spacing:.14em;text-transform:uppercase}
-.fleg{display:flex;gap:18px}
-.fleg a{font-size:.96rem;color:var(--silver);opacity:.28;transition:opacity .2s}
-.fleg a:hover{opacity:.75}
-.f-kritniv{max-width:1180px;margin:0 auto;padding:12px 60px 18px;border-top:1px solid rgba(47,93,168,.05);text-align:center}
-.f-kritniv p{font-family:'Playfair Display',serif;font-style:italic;font-size:.85rem;color:var(--silver);opacity:.45;letter-spacing:.06em}
+.fbot{border-top:1px solid rgba(47,93,168,.08);padding:8px 40px 12px;max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.fcp{font-size:.7rem;color:var(--silver);opacity:.35;letter-spacing:.1em;text-transform:uppercase}
+.fleg{display:flex;gap:14px}
+.fleg a{font-size:.7rem;color:var(--silver);opacity:.35;transition:opacity .2s}
+.fleg a:hover{opacity:.8}
+.f-kritniv{max-width:1180px;margin:0 auto;padding:8px 40px 10px;border-top:1px solid rgba(47,93,168,.05);text-align:center}
+.f-kritniv p{font-family:'Playfair Display',serif;font-style:italic;font-size:.72rem;color:var(--silver);opacity:.4;letter-spacing:.05em}
 
 /* MODAL */
 #ov{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.86);backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s}
@@ -566,8 +568,8 @@ footer{background:#1A2332;border-top:none;position:relative;z-index:1}
 
 /* RESPONSIVE */
 @media(max-width:1060px){.pg{grid-template-columns:repeat(2,1fr)}.bc2{grid-template-columns:1fr}.lg{grid-template-columns:1fr 1fr}.lca{grid-column:1/3;grid-row:1;min-height:280px}.lcb,.lcc2,.lcd,.lce{grid-column:auto;grid-row:auto}}
-@media(max-width:900px){.nls{display:none}.hbg{display:flex}.tg{grid-template-columns:1fr}.tbi{grid-template-columns:1fr 1fr}.ti:nth-child(2){border-right:none}.fi{grid-template-columns:1fr 1fr;gap:32px}.fbot{flex-direction:column;gap:12px;text-align:center}.guar{padding:30px 24px}.blg{grid-template-columns:1fr}.lg{grid-template-columns:1fr}.lca{grid-column:1;min-height:260px}#nav{padding:0 18px;height:84px}.nl{width:148px;gap:4px}.nl-logo{width:136px}.nl-tag{font-size:.74rem;width:136px}.nav-icons{padding:4px 6px}}
-@media(max-width:560px){.pg{grid-template-columns:1fr}.tbi{grid-template-columns:1fr}.ti{border-right:none;border-bottom:1px solid rgba(47,93,168,.08)}.fi{grid-template-columns:1fr}.sca,.scb{display:none}.h-ctas{flex-direction:column;align-items:center}.wa-tx{display:none}.wa{padding:14px}.f-kritniv{padding:12px 24px 16px}.nl{width:126px}.nl-logo{width:118px}.nl-tag{font-size:.64rem;letter-spacing:.03em;width:118px}}
+@media(max-width:900px){.nls{display:none}.hbg{display:flex}.tg{grid-template-columns:1fr}.tbi{grid-template-columns:1fr 1fr}.ti:nth-child(2){border-right:none}.fi{grid-template-columns:1fr 1fr;gap:18px;padding:18px 22px 8px}.fbot{flex-direction:column;gap:6px;text-align:center;padding:8px 22px 12px}.guar{padding:30px 24px}.blg{grid-template-columns:1fr}.lg{grid-template-columns:1fr}.lca{grid-column:1;min-height:260px}#nav{padding:0 18px;height:84px}.nl{width:148px;gap:4px}.nl-logo{width:136px}.nl-tag{font-size:.74rem;width:136px}.nav-icons{padding:4px 6px}}
+@media(max-width:560px){.pg{grid-template-columns:1fr}.tbi{grid-template-columns:1fr}.ti{border-right:none;border-bottom:1px solid rgba(47,93,168,.08)}.fi{grid-template-columns:repeat(3,1fr);gap:12px;padding:14px 14px 6px}.fi .fb{grid-column:1 / -1;margin-bottom:4px}.fc h5{font-size:.66rem;letter-spacing:.18em;margin-bottom:4px}.fc a{font-size:.68rem}.fb-logo-img{height:32px!important}.fb-logo-tag{font-size:.68rem}.sca,.scb{display:none}.h-ctas{flex-direction:column;align-items:center}.wa-tx{display:none}.wa{padding:14px}.f-kritniv{padding:6px 14px 10px}.nl{width:126px}.nl-logo{width:118px}.nl-tag{font-size:.64rem;letter-spacing:.03em;width:118px}}
 
 
 
@@ -3971,7 +3973,7 @@ function openCart(){
       +   '<div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#A9B8D4"><span>Subtotal</span><span>' + kritFormatINR(subtotal) + '</span></div>'
       +   '<div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#A9B8D4"><span>Shipping</span><span>' + (shipping === 0 ? "Free" : kritFormatINR(shipping)) + '</span></div>'
       +   '<div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(47,93,168,.12)"><span style="color:#F0F4FF;font-weight:700">Total</span><span style="font-family:\'Playfair Display\',serif;font-size:1.3rem;color:#F0F4FF;font-weight:700">' + kritFormatINR(subtotal + shipping) + '</span></div>'
-      +   '<button type="button" onclick="kritOpenCheckout(_cart)" style="width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;background:#F9D548;color:#1B2340;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Checkout</button>'
+      +   '<button type="button" onclick="kritGoToCheckout()" style="width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;background:#F9D548;color:#1B2340;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Checkout</button>'
       +   '<button type="button" onclick="kritCloseDrawer()" style="width:100%;margin-top:10px;padding:13px;border:none;border-radius:12px;background:#2F5DA8;color:#fff;font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Continue Shopping</button>'
       + '</div>'
     : '<div style="text-align:center;padding:32px 8px;color:#93A8CC">Your cart is empty.</div>';
@@ -4229,7 +4231,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
   }
 };
 </script>
-<script src="./assets/krit-commerce.js?v=20260416c"></script>
+<script src="./assets/krit-commerce.js?v=20260420a"></script>
 <script src="./assets/krit-ui.js?v=20260416b"></script>
 <script src="./assets/krit-pages.js?v=20260416b"></script>
 <script src="./assets/krit-enhancements.js?v=20260416b"></script>

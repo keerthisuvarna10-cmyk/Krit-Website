@@ -470,6 +470,38 @@
       return true;
     };
 
+    window.kritGoToCheckout = function(){
+      var items = Array.isArray(window._cart) ? window._cart.slice() : getStoredCartItems();
+      if(!items || !items.length){
+        if(typeof window.kritToast === 'function') window.kritToast('Your cart is empty.');
+        return false;
+      }
+      if(typeof window.kritCloseDrawer === 'function'){
+        try { window.kritCloseDrawer(); } catch(e){}
+      }
+      if(typeof window.kritGoToCheckoutPage === 'function'){
+        return window.kritGoToCheckoutPage(items, 'cart');
+      }
+      try {
+        var payload = {
+          items: items.map(function(i){
+            return {
+              id: i.id || '',
+              name: i.name || '',
+              price: Number(i.price || 0),
+              qty: Math.max(1, Number(i.qty || 1)),
+              image: i.image || ''
+            };
+          }),
+          source: 'cart',
+          ts: Date.now()
+        };
+        sessionStorage.setItem('krit_checkout_payload', JSON.stringify(payload));
+      } catch(e){}
+      window.location.href = '/checkout.html';
+      return true;
+    };
+
     window.__kritSafeAddWishlistItemToCart = function(name, price, productId){
       safeAddToCart(name, price, 1, productId);
       safeOpenWishlist();

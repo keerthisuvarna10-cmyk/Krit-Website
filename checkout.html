@@ -1042,13 +1042,13 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     payload.razorpayOrderId = rzp.order.id;
     payload.status = 'payment_pending';
 
-    var methodPref = {
-      upi: { upi: true },
-      card: { card: true },
-      netbanking: { netbanking: true },
-      wallet: { wallet: true }
-    }[state.payment] || {};
-
+    // We intentionally do NOT pass a `method` restriction — Razorpay will
+    // show every payment method enabled on the merchant account:
+    //   • UPI (Collect via VPA, Intent to open GPay/PhonePe/Paytm, QR scan)
+    //   • Cards (Credit / Debit / Prepaid — Visa, Mastercard, RuPay, Maestro)
+    //   • Netbanking (58+ banks)
+    //   • Wallets (Paytm, Mobikwik, Freecharge, JioMoney, Airtel, Ola, etc.)
+    //   • EMI, Pay Later (LazyPay, Simpl, Paytm Postpaid)
     var rzpInstance = new window.Razorpay({
       key: rzp.order.key_id,
       amount: rzp.order.amount,
@@ -1064,8 +1064,17 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       },
       notes: { receipt: payload.id },
       theme: { color: '#F9D548' },
-      method: methodPref,
+      // Show every Razorpay-supported payment block by default.
+      config: {
+        display: {
+          preferences: { show_default_blocks: true }
+        }
+      },
+      // UPI: allow both Collect (enter VPA) and Intent (open UPI app on mobile).
+      upi: { flow: 'collect' },
+      retry: { enabled: true, max_count: 2 },
       modal: {
+        confirm_close: true,
         ondismiss: function(){
           state.placing = false;
           btn.disabled = false;
