@@ -13,6 +13,8 @@ const ACCESS_CONFIGURED = Boolean(ADMIN_USERNAME && ADMIN_PASSWORD);
 const ACCESS_GATE_ENABLED = String(process.env.ACCESS_GATE_ENABLED || 'false').toLowerCase() === 'true';
 const ERP_BASE_URL = String(process.env.ERP_BASE_URL || '').replace(/\/$/, '');
 const ERP_WEBHOOK_SECRET = process.env.ERP_WEBHOOK_SECRET || '';
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
 const ORDER_ALERT_EMAIL = process.env.ORDER_ALERT_EMAIL || 'hello@kritsleep.in';
 const ORDER_ALERT_PHONE = normalizeIndianPhone(process.env.ORDER_ALERT_PHONE || '9611211121');
 const SMTP_HOST = process.env.SMTP_HOST || '';
@@ -517,6 +519,78 @@ app.post('/api/erp/customer-orders', requireAuth, async (req, res) => {
 app.post('/api/erp/visit', requireAuth, async (req, res) => {
   const result = await postToErp('/api/webhook/visit', req.body);
   res.status(result.status).json(result.body);
+});
+
+// ──────────────── Razorpay ────────────────
+// Creates a Razorpay Order (server-side, using the secret key). Client
+// then opens Razorpay Checkout with the returned order_id. After payment
+// the client POSTs back to /api/razorpay/verify where we HMAC-verify the
+// signature before marking the order paid.
+app.post('/api/razorpay/order', requireAuth, async (req, res) => {
+  if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+    return res.status(503).json({ error: 'Payment gateway is not configured. Please try again shortly.' });
+  }
+  const amount = Number(req.body && req.body.amount);
+  const receipt = String(req.body && req.body.receipt || '').slice(0, 40);
+  if (!amount || amount <= 0 || !receipt) {
+    return res.status(400).json({ error: 'Invalid amount or receipt.' });
+  }
+  try {
+    const auth = Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString('base64');
+    const response = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${auth}`
+      },
+      body: JSON.stringify({
+        amount: Math.round(amount * 100), // paise
+        currency: 'INR',
+        receipt: receipt,
+        payment_capture: 1,
+        notes: { source: 'kritsleep.in', receipt: receipt }
+      })
+    });
+    const text = await response.text();
+    let body = {};
+    try { body = text ? JSON.parse(text) : {}; } catch (_e) { body = { raw: text }; }
+    if (!response.ok) {
+      const message = (body && body.error && body.error.description) || 'Could not start payment. Please try again.';
+      return res.status(response.status).json({ error: message });
+    }
+    return res.json({
+      id: body.id,
+      amount: body.amount,
+      currency: body.currency,
+      receipt: body.receipt,
+      key_id: RAZORPAY_KEY_ID
+    });
+  } catch (error) {
+    return res.status(502).json({ error: error.message || 'Payment gateway request failed.' });
+  }
+});
+
+app.post('/api/razorpay/verify', requireAuth, (req, res) => {
+  if (!RAZORPAY_KEY_SECRET) {
+    return res.status(503).json({ ok: false, error: 'Payment gateway is not configured.' });
+  }
+  const orderId = String(req.body && req.body.razorpay_order_id || '');
+  const paymentId = String(req.body && req.body.razorpay_payment_id || '');
+  const signature = String(req.body && req.body.razorpay_signature || '');
+  if (!orderId || !paymentId || !signature) {
+    return res.status(400).json({ ok: false, error: 'Missing payment parameters.' });
+  }
+  const expected = crypto
+    .createHmac('sha256', RAZORPAY_KEY_SECRET)
+    .update(`${orderId}|${paymentId}`)
+    .digest('hex');
+  const a = Buffer.from(expected, 'utf8');
+  const b = Buffer.from(signature, 'utf8');
+  const verified = a.length === b.length && crypto.timingSafeEqual(a, b);
+  if (!verified) {
+    return res.status(400).json({ ok: false, error: 'Payment signature mismatch.' });
+  }
+  return res.json({ ok: true, razorpay_order_id: orderId, razorpay_payment_id: paymentId });
 });
 
 app.post('/api/notify/order', requireAuth, async (req, res) => {

@@ -8,7 +8,9 @@
 <link rel="icon" type="image/png" href="https://res.cloudinary.com/djicyjlid/image/upload/v1774021620/ChatGPT_Image_Mar_20_2026_09_16_47_PM_byvdhf.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://checkout.razorpay.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 <style>
   :root{
     --bg:#050b14;--panel:#0a1524;--panel-2:#0d1b2f;--line:rgba(112,150,210,.14);
@@ -934,6 +936,62 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     }
   }
 
+  async function createRazorpayOrder(amount, receipt){
+    try {
+      var r = await fetch('/api/razorpay/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: amount, receipt: receipt })
+      });
+      var body = {};
+      try { body = await r.json(); } catch(e){ body = {}; }
+      if(!r.ok) return { ok: false, error: body.error || 'Could not start payment. Please try again.' };
+      return { ok: true, order: body };
+    } catch(e){
+      return { ok: false, error: (e && e.message) || 'Payment gateway is unreachable.' };
+    }
+  }
+
+  async function verifyRazorpaySignature(resp){
+    try {
+      var r = await fetch('/api/razorpay/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          razorpay_order_id: resp.razorpay_order_id,
+          razorpay_payment_id: resp.razorpay_payment_id,
+          razorpay_signature: resp.razorpay_signature
+        })
+      });
+      var body = {};
+      try { body = await r.json(); } catch(e){ body = {}; }
+      return { ok: !!body.ok, body: body };
+    } catch(e){
+      return { ok: false, body: { error: (e && e.message) || 'Verification failed.' } };
+    }
+  }
+
+  // Runs the post-payment flow: store locally, push to ERP, notify, show success.
+  async function finalizeOrder(payload, wasBuyNow){
+    storeOrderLocally(payload);
+    var erp = await postErpOrder(payload);
+    postNotify(payload);
+    clearCheckoutCart(wasBuyNow);
+    renderSuccess(payload);
+    $('coSuccess').classList.add('show');
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e){ window.scrollTo(0,0); }
+    try {
+      if(window.gtag) window.gtag('event', 'purchase', {
+        transaction_id: payload.id,
+        value: payload.total,
+        currency: 'INR'
+      });
+    } catch(e){}
+    if(!erp.ok){
+      try { console.warn('KRIT: ERP order sync failed', erp); } catch(e){}
+    }
+  }
+
   async function placeOrder(){
     if(state.placing) return;
     if(!validateAll()){
@@ -951,24 +1009,99 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     btn.innerHTML = '<span class="co-loading"></span> Placing order...';
 
     var wasBuyNow = isBuyNowSource();
-    storeOrderLocally(payload);
+    var isCod = state.payment === 'cod';
 
-    var erp = await postErpOrder(payload);
-    postNotify(payload);
-
-    state.placing = false;
-    btn.disabled = false;
-    btn.innerHTML = originalLabel;
-
-    clearCheckoutCart(wasBuyNow);
-
-    renderSuccess(payload);
-    $('coSuccess').classList.add('show');
-    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e){ window.scrollTo(0,0); }
-    try { if(window.gtag) window.gtag('event', 'purchase', { transaction_id: payload.id, value: payload.total, currency: 'INR' }); } catch(e){}
-    if(!erp.ok){
-      try { console.warn('KRIT: ERP order sync failed', erp); } catch(e){}
+    // COD: no gateway, status = confirmed, straight to finalize.
+    if(isCod){
+      payload.status = 'confirmed';
+      await finalizeOrder(payload, wasBuyNow);
+      state.placing = false;
+      btn.disabled = false;
+      btn.innerHTML = originalLabel;
+      return;
     }
+
+    // Online payment via Razorpay.
+    if(typeof window.Razorpay !== 'function'){
+      showToast('Payment window did not load. Please refresh and try again.');
+      state.placing = false;
+      btn.disabled = false;
+      btn.innerHTML = originalLabel;
+      return;
+    }
+
+    var rzp = await createRazorpayOrder(payload.total, payload.id);
+    if(!rzp.ok){
+      showToast(rzp.error || 'Could not start payment. Please try again.');
+      state.placing = false;
+      btn.disabled = false;
+      btn.innerHTML = originalLabel;
+      return;
+    }
+
+    payload.razorpayOrderId = rzp.order.id;
+    payload.status = 'payment_pending';
+
+    var methodPref = {
+      upi: { upi: true },
+      card: { card: true },
+      netbanking: { netbanking: true },
+      wallet: { wallet: true }
+    }[state.payment] || {};
+
+    var rzpInstance = new window.Razorpay({
+      key: rzp.order.key_id,
+      amount: rzp.order.amount,
+      currency: rzp.order.currency || 'INR',
+      order_id: rzp.order.id,
+      name: 'KRIT',
+      description: 'KRIT Sleep · Order ' + payload.id,
+      image: 'https://res.cloudinary.com/djicyjlid/image/upload/v1773595575/Transparent_Primary_Logo-removebg-preview_atpk6x.png',
+      prefill: {
+        name: payload.customer.name || '',
+        email: payload.customer.email || '',
+        contact: payload.customer.phone ? ('+91' + payload.customer.phone) : ''
+      },
+      notes: { receipt: payload.id },
+      theme: { color: '#F9D548' },
+      method: methodPref,
+      modal: {
+        ondismiss: function(){
+          state.placing = false;
+          btn.disabled = false;
+          btn.innerHTML = originalLabel;
+          showToast('Payment cancelled. You can try again any time.');
+        }
+      },
+      handler: async function(resp){
+        var v = await verifyRazorpaySignature(resp);
+        if(!v.ok){
+          state.placing = false;
+          btn.disabled = false;
+          btn.innerHTML = originalLabel;
+          showToast((v.body && v.body.error) || 'Payment verification failed. Please contact support with this order id: ' + payload.id);
+          return;
+        }
+        payload.status = 'paid';
+        payload.razorpayPaymentId = resp.razorpay_payment_id;
+        payload.razorpaySignature = resp.razorpay_signature;
+        await finalizeOrder(payload, wasBuyNow);
+        state.placing = false;
+        btn.disabled = false;
+        btn.innerHTML = originalLabel;
+      }
+    });
+
+    rzpInstance.on('payment.failed', function(response){
+      try { console.warn('Razorpay payment.failed', response); } catch(e){}
+      state.placing = false;
+      btn.disabled = false;
+      btn.innerHTML = originalLabel;
+      var desc = (response && response.error && response.error.description) || 'Payment failed. Please try again.';
+      showToast(desc);
+    });
+
+    rzpInstance.open();
   }
 
   function wire(){
