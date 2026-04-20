@@ -2447,7 +2447,7 @@ setTimeout(_kritInit, 600);
   </form>
 </div>
 <div class="fbot">
-    <div class="fcp">&copy; 2026 KRIT&trade;. All rights reserved.</div>
+    <div class="fcp">&copy; 2026 KRIT&trade;. All rights reserved. <span style="display:inline-block;margin-left:10px;opacity:.6">Powered by Kritniv Enterprises</span></div>
     <div class="fleg"><a href="#" onclick="openInfoModal('privacy-modal');return false">Privacy Policy</a><a href="#" onclick="openInfoModal('terms-modal');return false">Terms of Use</a></div>
   </div>
 </footer>
@@ -3092,6 +3092,75 @@ window.openQuiz=openQuiz;
 .exit-btn-primary{display:block;width:100%;padding:13px;background:linear-gradient(135deg,#1a4a8a,#2b7de9);border:none;border-radius:8px;color:#fff;font-size:.94rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;margin-bottom:10px;transition:all .2s}
 .exit-btn-primary:hover{transform:translateY(-1px)}
 .exit-btn-skip{background:none;border:none;color:#8899BB;font-size:.87rem;cursor:pointer;opacity:.6;text-decoration:underline}
+</style>
+<style id="krit-cream-theme">
+/* ============================================================
+   CREAM THEME OVERRIDE — account.html
+   Softer off-white (#FAF7F1) palette with dark text.
+   Keeps gold #C9A84C and navy #2F5DA8 as accents.
+   ============================================================ */
+html,body{background:#FAF7F1 !important;color:#1B2340 !important}
+body::before,body::after{background:transparent !important}
+main,section,article,header,footer{background:transparent}
+/* Auth overlay — the dominant view on account.html */
+#krit-auth-overlay{background:rgba(250,247,241,.92) !important}
+.krit-auth-card{background:#ffffff !important;border:1px solid rgba(27,35,64,.08) !important;box-shadow:0 30px 80px rgba(27,35,64,.08) !important}
+.krit-auth-card .side,.krit-auth-card .main{background:#ffffff !important;color:#1B2340 !important}
+.krit-auth-card .side{background:linear-gradient(180deg,#FAF7F1 0%,#fffaf0 100%) !important;border-right:1px solid rgba(27,35,64,.08) !important}
+.krit-auth-title,.krit-auth-sub,.krit-auth-eyebrow,.krit-label,.krit-account-greeting{color:#1B2340 !important}
+.krit-auth-sub{color:#5a6687 !important}
+.krit-auth-benefit{background:#FAF7F1 !important;border:1px solid rgba(27,35,64,.08) !important;color:#1B2340 !important;box-shadow:0 4px 14px rgba(27,35,64,.04)}
+.krit-auth-benefit strong{color:#C9A84C !important}
+.krit-input{background:#FAF7F1 !important;color:#1B2340 !important;border:1px solid rgba(27,35,64,.16) !important}
+.krit-input:focus{background:#ffffff !important;border-color:#2F5DA8 !important;box-shadow:0 0 0 3px rgba(47,93,168,.12) !important}
+.krit-input::placeholder{color:#8899b0 !important}
+.krit-tabs{background:#FAF7F1 !important;border:1px solid rgba(27,35,64,.08) !important}
+.krit-tab{color:#5a6687 !important;background:transparent !important}
+.krit-tab.active{background:#ffffff !important;color:#1B2340 !important;box-shadow:0 2px 8px rgba(27,35,64,.08) !important}
+.krit-btn-primary,#auth-email-btn{background:linear-gradient(135deg,#C9A84C,#b68f31) !important;color:#ffffff !important;border:none !important;box-shadow:0 10px 22px rgba(201,168,76,.28) !important}
+.krit-auth-close{background:#FAF7F1 !important;color:#1B2340 !important;border:1px solid rgba(27,35,64,.12) !important}
+.krit-auth-otp-copy,.krit-auth-otp-sub{color:#5a6687 !important}
+/* Logged-in account card */
+.krit-auth-account-card{background:#ffffff !important}
+.krit-account-shell{background:transparent !important}
+.krit-account-sidebar{background:#FAF7F1 !important;border:1px solid rgba(27,35,64,.08) !important;color:#1B2340 !important}
+.krit-account-content{background:transparent !important;color:#1B2340 !important}
+.krit-account-avatar{background:linear-gradient(135deg,#2F5DA8,#1e4079) !important;color:#fff !important}
+.krit-account-greeting{color:#5a6687 !important}
+.krit-account-provider{color:#8899b0 !important}
+.krit-auth-account-meta{background:#ffffff !important;border:1px solid rgba(27,35,64,.08) !important;color:#1B2340 !important}
+.krit-auth-account-meta .label{color:#8899b0 !important}
+.krit-auth-account-meta .value{color:#1B2340 !important}
+.krit-account-stat{background:#ffffff !important;border:1px solid rgba(27,35,64,.08) !important;color:#1B2340 !important}
+.krit-account-stat span{color:#8899b0 !important}
+.krit-account-stat strong{color:#1B2340 !important}
+.krit-account-nav-btn{background:transparent !important;color:#5a6687 !important;border:1px solid transparent !important}
+.krit-account-nav-btn:hover{background:#FAF7F1 !important;color:#1B2340 !important}
+.krit-account-nav-btn.active{background:#ffffff !important;color:#1B2340 !important;border:1px solid rgba(27,35,64,.1) !important;box-shadow:0 2px 8px rgba(27,35,64,.06) !important}
+.krit-account-panel{background:transparent !important;color:#1B2340 !important}
+.krit-account-panel-head{border-bottom:1px solid rgba(27,35,64,.08) !important}
+.krit-account-orders-list>*{background:#ffffff !important;border:1px solid rgba(27,35,64,.08) !important;color:#1B2340 !important;box-shadow:0 4px 14px rgba(27,35,64,.04)}
+.krit-account-order-meta span{color:#8899b0 !important}
+.krit-account-order-meta strong{color:#1B2340 !important}
+.krit-account-order-meta em{color:#5a6687 !important;font-style:normal}
+/* Toasts stay dark for contrast */
+/* Footer on cream pages */
+footer,.footer{background:#FAF7F1 !important;color:#5a6687 !important;border-top:1px solid rgba(27,35,64,.08) !important}
+footer a,.footer a{color:#2F5DA8 !important}
+.fhead,.fcp,.fi,.fleg a{color:#5a6687 !important}
+.fi h4,.fb strong{color:#1B2340 !important}
+.fi .fb{background:rgba(47,93,168,.04) !important;border:1px solid rgba(27,35,64,.06) !important}
+.fb form input{background:#ffffff !important;color:#1B2340 !important;border:1px solid rgba(27,35,64,.14) !important}
+/* Info modals readability on cream */
+.info-modal{background:#ffffff !important;color:#1B2340 !important;border:1px solid rgba(27,35,64,.08) !important}
+.im-title,.im-section-title{color:#1B2340 !important}
+.im-text,.im-sub{color:#5a6687 !important}
+/* Mobile: keep sidebar compact & stacked on small screens */
+@media(max-width:860px){
+  .krit-account-shell{grid-template-columns:1fr !important}
+  .krit-account-sidebar{padding:18px !important}
+  .krit-auth-card .side,.krit-auth-card .main{padding:22px 18px !important}
+}
 </style>
 
 <div id="exit-overlay" onclick="if(event.target===this)closeExitPopup()">

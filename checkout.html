@@ -206,6 +206,44 @@
 
   .co-loading{display:inline-block;width:14px;height:14px;margin-right:8px;border:2px solid rgba(27,35,64,.25);border-top-color:#1b2340;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle}
   @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* =======================================================
+     CREAM THEME — checkout.html
+     Redefine palette via CSS variables + surface overrides
+     ======================================================= */
+  :root{
+    --bg:#FAF7F1;--panel:#ffffff;--panel-2:#fffaf0;--line:rgba(27,35,64,.08);
+    --ink:#1B2340;--muted:#5a6687;--soft:#3a4466;
+    --gold:#C9A84C;--gold-deep:#b68f31;--blue:#2F5DA8;--blue-glow:#2F5DA8;
+    --ok:#1a7f4f;--ok-bg:rgba(26,127,79,.08);--ok-line:rgba(26,127,79,.24);
+    --warn:#C9A84C;--danger:#c83838;
+  }
+  html,body{background:radial-gradient(circle at top left,rgba(201,168,76,.06),transparent 30%),radial-gradient(circle at bottom right,rgba(47,93,168,.05),transparent 28%),var(--bg) !important;color:var(--ink) !important}
+  .co-top{background:rgba(255,255,255,.85) !important;border-bottom:1px solid rgba(27,35,64,.06) !important}
+  .co-trust{color:var(--soft) !important}
+  .co-brand img{filter:drop-shadow(0 2px 6px rgba(27,35,64,.08)) !important}
+  .co-section{background:#ffffff !important;box-shadow:0 8px 28px rgba(27,35,64,.06) !important;border:1px solid var(--line) !important}
+  .co-input,.co-select,.co-textarea{background:#FAF7F1 !important;border:1px solid rgba(27,35,64,.14) !important;color:var(--ink) !important}
+  .co-input:focus,.co-select:focus,.co-textarea:focus{background:#ffffff !important;border-color:var(--blue) !important;box-shadow:0 0 0 3px rgba(47,93,168,.12) !important}
+  .co-input::placeholder{color:#8899b0 !important}
+  .co-auth-bar{background:rgba(201,168,76,.06) !important;border:1px dashed rgba(201,168,76,.35) !important;color:var(--soft) !important}
+  .co-pay{background:#FAF7F1 !important;border:1px solid rgba(27,35,64,.08) !important;color:var(--ink) !important}
+  .co-pay:hover{background:#ffffff !important;border-color:var(--blue) !important}
+  .co-pay input[type=radio]{border:1.5px solid rgba(27,35,64,.2) !important}
+  .co-pay input[type=radio]:checked{border-color:var(--gold) !important}
+  .co-step{background:rgba(201,168,76,.14) !important;color:var(--gold-deep) !important}
+  .co-toast{background:#1B2340 !important;color:#fff !important;border:none !important}
+  .co-loading{border:2px solid rgba(27,35,64,.18) !important;border-top-color:var(--ink) !important}
+  /* Order summary side panel */
+  .co-side,.co-summary{background:#ffffff !important;border:1px solid var(--line) !important;color:var(--ink) !important}
+  .co-summary-row{color:var(--muted) !important}
+  .co-summary-row strong{color:var(--ink) !important}
+  /* Links & buttons */
+  .co-back{background:#ffffff !important;border:1px solid rgba(27,35,64,.12) !important;color:var(--soft) !important}
+  .co-back:hover{border-color:var(--blue) !important;color:var(--ink) !important}
+  /* Footer */
+  footer{color:var(--muted) !important;border-top:1px solid rgba(27,35,64,.08) !important}
+  footer a{color:var(--blue) !important}
 </style>
 </head>
 <body>
@@ -1180,7 +1218,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
 -->
 
 <footer style="max-width:1180px;margin:0 auto;padding:28px 24px 40px;border-top:1px solid rgba(112,150,210,.10);text-align:center;color:#9bb0d2">
-  <div style="font-size:.82rem;letter-spacing:.04em">&copy; 2026 KRIT&trade;. All rights reserved.</div>
+  <div style="font-size:.82rem;letter-spacing:.04em">&copy; 2026 KRIT&trade;. All rights reserved. <span style="margin-left:10px;opacity:.6">Powered by Kritniv Enterprises</span></div>
   <div style="margin-top:10px;font-size:.74rem;color:#7185a9">
     <a href="./index.html#privacy" style="color:#9bb0d2;margin:0 8px">Privacy Policy</a>
     <span style="opacity:.4">|</span>
