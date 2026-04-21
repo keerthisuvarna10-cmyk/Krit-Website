@@ -388,7 +388,7 @@
   /* ── Clean URL: /product/:id  →  auto-open product detail ── */
   (function(){
     var m = window.location.pathname.match(/^\/product\/([^/?#]+)/);
-    if(\!m) return;
+    if(!m) return;
     var productId = decodeURIComponent(m[1]);
 
     function tryOpen(attemptsLeft){

@@ -1382,9 +1382,9 @@ button, .bp, .bs, .nc {
 .nav-track-btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.02);color:#C7D6EF;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
 .nav-track-btn:hover{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.2);color:#FFFFFF}
 </style>
-<link rel="stylesheet" href="./assets/krit-mobile.css?v=20260416a">
-<link rel="stylesheet" href="./assets/krit-commerce.css?v=20260416a">
-<link rel="stylesheet" href="./assets/krit-enhancements.css?v=20260416a">
+<link rel="stylesheet" href="./assets/krit-mobile.css?v=20260421d">
+<link rel="stylesheet" href="./assets/krit-commerce.css?v=20260421d">
+<link rel="stylesheet" href="./assets/krit-enhancements.css?v=20260421d">
 </head>
 <body data-krit-page="index">
 <!-- ── TOP BAR ── -->
@@ -1852,6 +1852,26 @@ button, .bp, .bs, .nc {
 </div>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+/* Firebase + site config — must come before krit-commerce.js */
+window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
+  siteUrl: window.location.protocol === "file:" ? "https://kritsleep.in" : window.location.origin,
+  instagramUrl: "https://www.instagram.com/kritsleep",
+  supportEmail: "hello@kritsleep.in",
+  supportPhone: "9611211121",
+  facebookPageUrl: "",
+  facebookPixelId: "",
+  firebase: {
+    apiKey: "AIzaSyDHDCv4zEmSAiO6vr8pz733aON7cTeYg8I",
+    authDomain: "krit-7fa79.firebaseapp.com",
+    projectId: "krit-7fa79",
+    storageBucket: "krit-7fa79.firebasestorage.app",
+    messagingSenderId: "122215309182",
+    appId: "1:122215309182:web:41ba4fe6081193d5aa5d2f",
+    measurementId: "G-GNLGKSJTTJ"
+  }
+};
+</script>
 <script>
 var KRIT_PRODUCTS = [
   {
@@ -4860,31 +4880,4 @@ function kritCheckoutPayload(customer){
     customer: customer,
     items: _kritCheckoutItems,
     amount: pricing.total,
-    currency: KRIT_RAZORPAY.currency || "INR"
-  };
-}
-
-async function kritCreateRazorpayOrder(payload){
-  if(!KRIT_RAZORPAY.createOrderUrl) return null;
-  var response = await fetch(KRIT_RAZORPAY.createOrderUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  if(!response.ok) throw new Error("Could not create Razorpay order");
-  return response.json();
-}
-
-async function kritProceedCheckout(mode){
-  mode = mode || _kritSelectedPaymentMode || "upi";
-  var customer = kritCollectCustomer();
-  if(!kritValidateCustomer(customer)) return;
-
-  if(mode === "cod"){
-    kritShowCodNudge(customer);
-    return;
-  }
-
-  var payload = kritCheckoutPayload(customer);
-  try {
-    var orderData = await 
+    currency: KRIT_RA
