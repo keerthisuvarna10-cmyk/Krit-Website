@@ -4296,4 +4296,9 @@ async function kritCreateRazorpayOrder(payload){
 }
 
 async function kritProceedCheckout(mode){
-  mode = mode || _kritSelectedPaymen
+  mode = mode || _kritSelectedPaymentMode || "upi";
+  var customer = kritCollectCustomer();
+  if(!kritValidateCustomer(customer)) return;
+
+  if(mode === "cod"
+<script src="./assets/krit-tracking.js?v=20260421a"></script>

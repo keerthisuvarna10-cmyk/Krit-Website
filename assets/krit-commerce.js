@@ -2761,4 +2761,22 @@
   function enhance(){
     ensureKritOverlayStyles();
     mobilePanel();
-    patchStore
+    patchStoreActions();
+    installStoreActionDelegates();
+    patchCheckoutOpen();
+    patchOrderSync();
+    patchPersistAccount();
+    patchOrderConfirmation();
+    enhanceCheckoutOverlay();
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance);
+  else enhance();
+  window.addEventListener('load', enhance);
+  setTimeout(enhance, 300);
+  setTimeout(enhance, 900);
+})();
+
+
+
+

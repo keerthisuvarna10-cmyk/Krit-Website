@@ -983,4 +983,33 @@
 }
 #track-close:hover{background:#F9D548 !important;color:#1b2340 !important}
 
-/* Dashb
+/* Dashboard drawer close (Kritniv drawer) */
+.kd-close{
+  width:42px !important;
+  height:42px !important;
+  font-size:1.3rem !important;
+  border-radius:50% !important;
+  border:1px solid rgba(255,255,255,.2) !important;
+  background:rgba(255,255,255,.04) !important;
+  color:#F0F4FF !important;
+}
+.kd-close:hover{background:rgba(249,213,72,.2) !important;color:#F9D548 !important}
+
+/* FAQ side panel close */
+.faq-close{
+  width:42px !important;
+  height:42px !important;
+  font-size:1.2rem !important;
+  color:#F0F4FF !important;
+}
+.faq-close:hover{background:rgba(255,255,255,.08) !important}
+
+/* Image lightbox close */
+#krit-image-lightbox-close{
+  width:56px !important;
+  height:56px !important;
+  font-size:1.6rem !important;
+  top:24px !important;
+  right:24px !important;
+}
+/* === end overlay fixes === */
