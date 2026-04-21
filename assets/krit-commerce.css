@@ -130,8 +130,8 @@
 .krit-account-order-date{font-size:.82rem;color:#9FB1D1;margin-top:6px}
 .krit-account-order-chip{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border:1px solid rgba(255,255,255,.1)}
 .krit-account-order-chip.new,.krit-account-order-chip.pending{color:#F9D548;border-color:rgba(249,213,72,.28);background:rgba(249,213,72,.08)}
-.krit-account-order-chip.confirmed,.krit-account-order-chip.shipped{color:#8DB8FF;border-color:rgba(47,93,168,.3);background:rgba(47,93,168,.12)}
-.krit-account-order-chip.delivered{color:#7EE39D;border-color:rgba(37,211,102,.28);background:rgba(37,211,102,.08)}
+.krit-account-order-chip.confirmed,.krit-account-order-chip.shipped,.krit-account-order-chip.cod_confirmed{color:#22c55e;border-color:rgba(34,197,94,.32);background:rgba(34,197,94,.1)}
+.krit-account-order-chip.delivered{color:#16a34a;border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.12)}
 .krit-account-order-chip.cancelled{color:#FF8E8E;border-color:rgba(255,124,124,.26);background:rgba(255,124,124,.08)}
 .krit-account-order-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start}
 .krit-account-order-name{font-size:1rem;color:#F5F8FF;font-weight:700;line-height:1.45}
@@ -624,6 +624,12 @@
 .krit-account-empty{padding:24px 20px;border-radius:18px;background:rgba(255,255,255,.035);border:1px dashed rgba(255,255,255,.12)}
 .krit-account-empty-title{font-size:1.04rem;font-weight:700;color:#F5F8FF;margin-bottom:6px}
 .krit-account-empty-copy{font-size:.88rem;line-height:1.7;color:#AFC0DE}
+/* Side panel logout button — hidden until account-mode */
+.krit-side-logout{display:none;width:100%;margin-top:auto;padding:10px 14px;border-radius:10px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.07);color:#f87171;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.krit-side-logout:hover{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.55)}
+.krit-auth-card.krit-auth-premium.krit-account-mode .krit-side-logout{display:block}
+/* Green chips for confirmed/delivered/shipped orders */
+.krit-account-order-chip.confirmed,.krit-account-order-chip.delivered,.krit-account-order-chip.shipped{color:#22c55e !important;border-color:rgba(34,197,94,.32) !important;background:rgba(34,197,94,.1) !important}
 .krit-auth-card.krit-auth-premium.krit-account-mode{
   max-width:1320px;
   width:min(1320px,calc(100vw - 32px));
@@ -977,33 +983,4 @@
 }
 #track-close:hover{background:#F9D548 !important;color:#1b2340 !important}
 
-/* Dashboard drawer close (Kritniv drawer) */
-.kd-close{
-  width:42px !important;
-  height:42px !important;
-  font-size:1.3rem !important;
-  border-radius:50% !important;
-  border:1px solid rgba(255,255,255,.2) !important;
-  background:rgba(255,255,255,.04) !important;
-  color:#F0F4FF !important;
-}
-.kd-close:hover{background:rgba(249,213,72,.2) !important;color:#F9D548 !important}
-
-/* FAQ side panel close */
-.faq-close{
-  width:42px !important;
-  height:42px !important;
-  font-size:1.2rem !important;
-  color:#F0F4FF !important;
-}
-.faq-close:hover{background:rgba(255,255,255,.08) !important}
-
-/* Image lightbox close */
-#krit-image-lightbox-close{
-  width:56px !important;
-  height:56px !important;
-  font-size:1.6rem !important;
-  top:24px !important;
-  right:24px !important;
-}
-/* === end overlay fixes === */
+/* Dashb

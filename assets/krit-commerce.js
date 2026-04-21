@@ -1400,9 +1400,18 @@
       '<div class="krit-auth-benefit"><strong>Google and email login</strong>Use Google or your email and password, then sync the customer profile into KRIT.</div>'
     ].join('');
 
+    var sideLogout = document.createElement('button');
+    sideLogout.type = 'button';
+    sideLogout.id = 'krit-side-logout-btn';
+    sideLogout.className = 'krit-side-logout';
+    sideLogout.textContent = 'Logout';
+    sideLogout.setAttribute('aria-label', 'Log out of your KRIT account');
+    sideLogout.onclick = function(){ window.kritLogout && window.kritLogout(); };
+
     side.appendChild(logo);
     side.appendChild(welcome);
     side.appendChild(benefits);
+    side.appendChild(sideLogout);
 
     var message = document.createElement('div');
     message.id = 'krit-auth-message';
@@ -2752,22 +2761,4 @@
   function enhance(){
     ensureKritOverlayStyles();
     mobilePanel();
-    patchStoreActions();
-    installStoreActionDelegates();
-    patchCheckoutOpen();
-    patchOrderSync();
-    patchPersistAccount();
-    patchOrderConfirmation();
-    enhanceCheckoutOverlay();
-  }
-
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance);
-  else enhance();
-  window.addEventListener('load', enhance);
-  setTimeout(enhance, 300);
-  setTimeout(enhance, 900);
-})();
-
-
-
-
+    patchStore
