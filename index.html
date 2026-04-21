@@ -3620,8 +3620,8 @@ function switchAuthTab(tab){
   var passWrap = document.getElementById('auth-password-wrap');
   if(passWrap) passWrap.style.display = 'none';    // password field not used in this auth flow
   actionBtn.textContent = isLogin ? 'Login with Email' : 'Create Account';
-  welcome.querySelector('.krit-auth-title').textContent = isLogin ? 'Welcome back' : 'Create your KRIT account';
-  welcome.querySelector('.krit-auth-sub').textContent = isLogin ? 'Use your saved email and mobile number to continue.' : 'Save your details for faster checkout and order tracking.';
+  welcome.querySelector('.krit-auth-title').textContent = isLogin ? 'Welcome back' : 'Join KRIT';
+  welcome.querySelector('.krit-auth-sub').textContent = isLogin ? 'Sign in to access your orders and saved details.' : 'Create an account for faster checkout and order tracking.';
 }
 function kritSubmitAuth(){
   var nameEl = document.getElementById('auth-name');

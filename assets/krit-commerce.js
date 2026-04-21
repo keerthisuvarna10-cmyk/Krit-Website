@@ -1395,9 +1395,8 @@
     var benefits = document.createElement('div');
     benefits.className = 'krit-auth-benefits';
     benefits.innerHTML = [
-      '<div class="krit-auth-benefit"><strong>Faster checkout</strong>Save your delivery details and move through checkout in a few taps.</div>',
-      '<div class="krit-auth-benefit"><strong>Order visibility</strong>Keep your purchases, payments, and tracking in one clean KRIT account.</div>',
-      '<div class="krit-auth-benefit"><strong>Google and email login</strong>Use Google or your email and password, then sync the customer profile into KRIT.</div>'
+      '<div class="krit-auth-benefit"><strong>Faster checkout</strong>Details saved — skip the form every time.</div>',
+      '<div class="krit-auth-benefit"><strong>Order tracking</strong>All your orders, payments, and delivery in one place.</div>'
     ].join('');
 
     var sideLogout = document.createElement('button');
@@ -1697,8 +1696,8 @@
       actionBtn.className = 'krit-btn krit-btn-primary';
     }
     if(welcome){
-      welcome.querySelector('.krit-auth-title').textContent = isLogin ? 'Welcome back to KRIT' : 'Create your KRIT account';
-      welcome.querySelector('.krit-auth-sub').textContent = isLogin ? 'Continue with your email and password, or use Google if it is connected.' : 'Create a customer profile for faster checkout, saved wishlists, and order tracking.';
+      welcome.querySelector('.krit-auth-title').textContent = isLogin ? 'Welcome back' : 'Join KRIT';
+      welcome.querySelector('.krit-auth-sub').textContent = isLogin ? 'Sign in to access your orders and saved details.' : 'Create an account for faster checkout and order tracking.';
     }
     clearAuthMessage();
   }
