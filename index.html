@@ -1383,7 +1383,7 @@ button, .bp, .bs, .nc {
 .nav-track-btn:hover{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.2);color:#FFFFFF}
 </style>
 <link rel="stylesheet" href="./assets/krit-mobile.css?v=20260421d">
-<link rel="stylesheet" href="./assets/krit-commerce.css?v=20260421d">
+<link rel="stylesheet" href="./assets/krit-commerce.css?v=20260421e">
 <link rel="stylesheet" href="./assets/krit-enhancements.css?v=20260421d">
 </head>
 <body data-krit-page="index">
@@ -4880,4 +4880,130 @@ function kritCheckoutPayload(customer){
     customer: customer,
     items: _kritCheckoutItems,
     amount: pricing.total,
-    currency: KRIT_RA
+    currency: KRIT_RAZORPAY.currency || "INR"
+  };
+}
+
+async function kritCreateRazorpayOrder(payload){
+  if(!KRIT_RAZORPAY.createOrderUrl) return null;
+  var response = await fetch(KRIT_RAZORPAY.createOrderUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if(!response.ok) throw new Error("Could not create Razorpay order");
+  return response.json();
+}
+
+async function kritProceedCheckout(mode){
+  mode = mode || _kritSelectedPaymentMode || "upi";
+  var customer = kritCollectCustomer();
+  if(!kritValidateCustomer(customer)) return;
+
+  if(mode === "cod"){
+    kritShowCodNudge(customer);
+    return;
+  }
+
+  var payload = kritCheckoutPayload(customer);
+  try {
+    var orderData = await kritCreateRazorpayOrder(payload);
+    var amountPaise = Math.round(payload.amount * 100);
+    if(!window.Razorpay || !KRIT_RAZORPAY.key || KRIT_RAZORPAY.key.indexOf("replace_with_your_key") !== -1){
+      var pendingOrder = kritCreateOrderRecord(customer, mode, "pending");
+      kritToast("Online payment is not live yet. This order is saved as payment pending.");
+      _cart = [];
+      kritSaveCart();
+      kritShowOrderConfirmation(pendingOrder);
+      return;
+    }
+
+    var options = {
+      key: KRIT_RAZORPAY.key,
+      amount: orderData && orderData.amount ? orderData.amount : amountPaise,
+      currency: orderData && orderData.currency ? orderData.currency : payload.currency,
+      name: KRIT_RAZORPAY.merchantName,
+      description: KRIT_RAZORPAY.description,
+      image: KRIT_RAZORPAY.image,
+      order_id: orderData && orderData.id ? orderData.id : undefined,
+      prefill: {
+        name: customer.name,
+        email: customer.email,
+        contact: customer.phone
+      },
+      notes: {
+        address: customer.address,
+        city: customer.city,
+        pincode: customer.pincode,
+        items: _kritCheckoutItems.map(function(item){ return item.qty + " x " + item.name; }).join(", "),
+        extra_notes: customer.notes,
+        payment_choice: mode
+      },
+      config: kritRazorpayDisplayConfig(mode),
+      theme: { color: KRIT_RAZORPAY.themeColor || "#2F5DA8" },
+      handler: function(response){
+        var paidOrder = kritCreateOrderRecord(customer, mode, "paid", {
+          omsRef: response.razorpay_order_id || "",
+          trackingNumber: response.razorpay_payment_id || ""
+        });
+        paidOrder.status = "confirmed";
+        paidOrder.timeline.push({
+          status: "confirmed",
+          note: "Payment captured successfully via Razorpay.",
+          time: new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
+        });
+        kritSaveOrders();
+        _cart = [];
+        kritSaveCart();
+        kritShowOrderConfirmation(paidOrder);
+      }
+    };
+
+    var rzp = new Razorpay(options);
+    rzp.on("payment.failed", function(){
+      kritToast("Payment failed or was cancelled");
+    });
+    rzp.open();
+  } catch (error) {
+    kritToast(error.message || "Checkout could not start");
+  }
+}
+
+window.addToCart = addToCart;
+window.addToWishlist = addToWishlist;
+window.openCart = openCart;
+window.openWishlist = openWishlist;
+window.kritDetailWishlist = kritDetailWishlist;
+window.kritOpenCheckout = kritOpenCheckout;
+window.kritCloseDrawer = kritCloseDrawer;
+
+document.addEventListener("DOMContentLoaded", kritUpdateBadges);
+setTimeout(kritUpdateBadges, 300);
+</script>
+<script>
+window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
+  siteUrl: window.location.protocol === "file:" ? "https://kritsleep.in" : window.location.origin,
+  instagramUrl: "https://www.instagram.com/kritsleep",
+  supportEmail: "hello@kritsleep.in",
+  supportPhone: "9611211121",
+  facebookPageUrl: "",
+  facebookPixelId: "",
+  firebase: {
+    apiKey: "AIzaSyDHDCv4zEmSAiO6vr8pz733aON7cTeYg8I",
+    authDomain: "krit-7fa79.firebaseapp.com",
+    projectId: "krit-7fa79",
+    storageBucket: "krit-7fa79.firebasestorage.app",
+    messagingSenderId: "122215309182",
+    appId: "1:122215309182:web:41ba4fe6081193d5aa5d2f",
+    measurementId: "G-GNLGKSJTTJ"
+  }
+};
+</script>
+<script src="./assets/krit-commerce.js?v=20260421e"></script>
+<script src="./assets/krit-ui.js?v=20260416b"></script>
+<script src="./assets/krit-pages.js?v=20260416b"></script>
+<script src="./assets/krit-enhancements.js?v=20260421d"></script>
+<script src="./assets/krit-storefix.js?v=20260421e"></script>
+<script src="./assets/krit-tracking.js?v=20260421a"></script>
+</body>
+</html>

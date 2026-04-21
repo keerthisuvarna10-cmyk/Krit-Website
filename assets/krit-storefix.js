@@ -226,7 +226,7 @@
 
   function openCheckoutSafe(items){
     var sourceItems = Array.isArray(items) && items.length ? items.slice() : getCart().slice();
-    if(\!sourceItems.length){
+    if(!sourceItems.length){
       toast('Add an item before checkout');
       return;
     }
