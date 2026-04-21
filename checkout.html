@@ -189,11 +189,41 @@
   .co-success-help{margin-top:24px;text-align:center;color:var(--muted);font-size:.85rem;line-height:1.7}
   .co-success-help a{color:var(--gold);text-decoration:none;font-weight:600}
   .co-success-help a:hover{text-decoration:underline}
+  .co-review{position:fixed;inset:0;background:rgba(3,8,18,.86);backdrop-filter:blur(16px);display:none;align-items:center;justify-content:center;overflow-y:auto;padding:24px 16px;z-index:98}
+  .co-review.show{display:flex}
+  .co-review-card{width:min(760px,100%);background:linear-gradient(180deg,#101c31,#0b1425);border:1px solid var(--line);border-radius:24px;box-shadow:0 34px 90px rgba(0,0,0,.56);overflow:hidden}
+  .co-review-head{padding:24px 26px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+  .co-review-kicker{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:800;margin-bottom:6px}
+  .co-review-title{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--ink);margin:0}
+  .co-review-sub{margin:8px 0 0;color:var(--soft);font-size:.9rem;line-height:1.6}
+  .co-review-close{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--soft);cursor:pointer;font-size:1.1rem}
+  .co-review-body{padding:24px 26px;display:grid;gap:16px}
+  .co-review-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .co-review-box{background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .co-review-label{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:8px}
+  .co-review-value{color:var(--ink);font-weight:700;line-height:1.55}
+  .co-review-copy{color:var(--soft);font-size:.86rem;line-height:1.65}
+  .co-review-items{display:grid;gap:10px}
+  .co-review-item{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px dashed rgba(255,255,255,.1)}
+  .co-review-item:last-child{border-bottom:none}
+  .co-review-total{display:grid;gap:8px}
+  .co-review-totalrow{display:flex;justify-content:space-between;gap:14px;color:var(--soft);font-size:.9rem}
+  .co-review-totalrow.grand{margin-top:6px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink);font-family:'Playfair Display',serif;font-size:1.2rem}
+  .co-review-totalrow.grand strong{color:var(--gold)}
+  .co-review-actions{padding:20px 26px 24px;border-top:1px solid var(--line);display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap}
+  .co-review-actions button{padding:14px 20px;border-radius:14px;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+  .co-review-edit{background:transparent;border:1px solid var(--line);color:var(--soft)}
+  .co-review-confirm{background:linear-gradient(135deg,var(--gold),var(--gold-deep));border:none;color:#1b2340;box-shadow:0 16px 34px rgba(249,213,72,.2)}
   @media(max-width:720px){
     .co-success{padding:20px 12px}
     .co-success-card{padding:30px 22px;border-radius:18px}
     .co-success-hero h2{font-size:1.55rem}
     .co-success-body{grid-template-columns:1fr;gap:24px;padding:26px 0}
+    .co-review{align-items:flex-start;padding:12px}
+    .co-review-card{border-radius:18px}
+    .co-review-head,.co-review-body,.co-review-actions{padding-left:18px;padding-right:18px}
+    .co-review-grid{grid-template-columns:1fr}
+    .co-review-actions button{width:100%}
     .co-timeline{grid-template-columns:repeat(5,1fr);gap:4px}
     .co-timeline-dot{width:28px;height:28px;font-size:.72rem}
     .co-timeline-step .co-timeline-label{font-size:.6rem;letter-spacing:.06em}
@@ -463,6 +493,25 @@
   <a href="/">Continue shopping</a>
 </section>
 
+<!-- Review before payment -->
+<div class="co-review" id="coReview" role="dialog" aria-modal="true" aria-labelledby="coReviewTitle">
+  <div class="co-review-card">
+    <div class="co-review-head">
+      <div>
+        <div class="co-review-kicker">Review order</div>
+        <h2 class="co-review-title" id="coReviewTitle">Confirm before payment</h2>
+        <p class="co-review-sub">Please check your products, delivery details, payment method, and total before we open Razorpay or confirm COD.</p>
+      </div>
+      <button class="co-review-close" type="button" id="coReviewClose" aria-label="Close review">×</button>
+    </div>
+    <div class="co-review-body" id="coReviewBody"></div>
+    <div class="co-review-actions">
+      <button class="co-review-edit" type="button" id="coReviewEdit">Edit details</button>
+      <button class="co-review-confirm" type="button" id="coReviewConfirm">Confirm & continue</button>
+    </div>
+  </div>
+</div>
+
 <!-- Success overlay -->
 <div class="co-success" id="coSuccess" role="dialog" aria-modal="true" aria-labelledby="coSuccessTitle">
   <div class="co-success-wrap">
@@ -601,7 +650,8 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     items: [],
     payment: 'upi',
     coupon: null,
-    placing: false
+    placing: false,
+    reviewConfirmed: false
   };
 
   function formatINR(n){
@@ -740,8 +790,8 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     var btn = $('coPlace');
     if(btn){
       btn.innerHTML = state.payment === 'cod'
-        ? 'Place order &middot; ' + formatINR(total)
-        : 'Pay ' + formatINR(total) + ' securely';
+        ? 'Review COD order &middot; ' + formatINR(total)
+        : 'Review order &middot; ' + formatINR(total);
     }
     return total;
   }
@@ -854,6 +904,65 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
         notes: $('coNotes').value.trim()
       }
     };
+  }
+
+  function reviewTotalRow(label, value, cls){
+    return '<div class="co-review-totalrow' + (cls ? ' ' + cls : '') + '"><span>' + escapeHtml(label) + '</span><span>' + value + '</span></div>';
+  }
+
+  function renderReview(payload){
+    var body = $('coReviewBody');
+    if(!body || !payload) return;
+    var c = payload.customer || {};
+    var address = [c.address, c.landmark, c.city, c.state, c.pincode].filter(function(part){
+      return part && String(part).trim();
+    }).join(', ');
+    var itemHtml = payload.items.map(function(item){
+      return ''
+        + '<div class="co-review-item">'
+        +   '<div><div class="co-review-value">' + escapeHtml(item.name) + '</div><div class="co-review-copy">Qty ' + item.qty + ' x ' + formatINR(item.price) + '</div></div>'
+        +   '<strong>' + formatINR(item.qty * item.price) + '</strong>'
+        + '</div>';
+    }).join('');
+    var paymentText = payload.paymentMode === 'cod'
+      ? 'COD order will be confirmed after this review.'
+      : 'Razorpay will open only after you confirm this review.';
+    body.innerHTML = ''
+      + '<div class="co-review-grid">'
+      +   '<div class="co-review-box"><div class="co-review-label">Customer</div><div class="co-review-value">' + escapeHtml(c.name) + '</div><div class="co-review-copy">' + escapeHtml(c.email) + '<br>+91 ' + escapeHtml(c.phone) + '</div></div>'
+      +   '<div class="co-review-box"><div class="co-review-label">Payment</div><div class="co-review-value">' + escapeHtml(payload.paymentLabel) + '</div><div class="co-review-copy">' + escapeHtml(paymentText) + '</div></div>'
+      + '</div>'
+      + '<div class="co-review-box"><div class="co-review-label">Deliver to</div><div class="co-review-value">' + escapeHtml(address || 'Address not available') + '</div>' + (c.notes ? '<div class="co-review-copy">Notes: ' + escapeHtml(c.notes) + '</div>' : '') + '</div>'
+      + '<div class="co-review-box"><div class="co-review-label">Items</div><div class="co-review-items">' + itemHtml + '</div></div>'
+      + '<div class="co-review-box"><div class="co-review-label">Final total</div><div class="co-review-total">'
+      +   reviewTotalRow('Subtotal', formatINR(payload.subtotal))
+      +   (payload.discount > 0 ? reviewTotalRow('Coupon ' + payload.couponCode, '- ' + formatINR(payload.discount)) : '')
+      +   reviewTotalRow(payload.paymentAdjust > 0 ? 'COD handling fee' : 'Online payment discount', (payload.paymentAdjust > 0 ? '+ ' : '- ') + formatINR(Math.abs(payload.paymentAdjust)))
+      +   reviewTotalRow('Shipping', payload.shipping ? formatINR(payload.shipping) : 'Free')
+      +   reviewTotalRow('Total payable', '<strong>' + formatINR(payload.total) + '</strong>', 'grand')
+      + '</div></div>';
+    var confirm = $('coReviewConfirm');
+    if(confirm){
+      confirm.textContent = payload.paymentMode === 'cod' ? 'Confirm COD order' : 'Confirm & pay with Razorpay';
+    }
+  }
+
+  function openReview(payload){
+    renderReview(payload);
+    var overlay = $('coReview');
+    if(overlay){
+      overlay.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeReview(){
+    var overlay = $('coReview');
+    if(overlay) overlay.classList.remove('show');
+    if(!$('coSuccess') || !$('coSuccess').classList.contains('show')){
+      document.body.style.overflow = '';
+    }
+    state.reviewConfirmed = false;
   }
 
   async function postErpOrder(order){
@@ -1079,6 +1188,13 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     var btn = $('coPlace');
     var total = renderTotals();
     var payload = buildOrderPayload(total);
+
+    if(!state.reviewConfirmed){
+      openReview(payload);
+      return;
+    }
+    state.reviewConfirmed = false;
+
     state.placing = true;
     btn.disabled = true;
     var originalLabel = btn.innerHTML;
@@ -1210,6 +1326,21 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       applyCoupon(code);
     });
     $('coPlace').addEventListener('click', placeOrder);
+    $('coReviewClose').addEventListener('click', closeReview);
+    $('coReviewEdit').addEventListener('click', closeReview);
+    $('coReview').addEventListener('click', function(e){
+      if(e.target === $('coReview')) closeReview();
+    });
+    $('coReviewConfirm').addEventListener('click', function(){
+      var overlay = $('coReview');
+      if(overlay) overlay.classList.remove('show');
+      document.body.style.overflow = '';
+      state.reviewConfirmed = true;
+      placeOrder();
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && $('coReview') && $('coReview').classList.contains('show')) closeReview();
+    });
 
     var errMap = { coEmail:'errEmail', coPhone:'errPhone', coName:'errName', coPincode:'errPincode', coAddress:'errAddress' };
     Object.keys(errMap).forEach(function(id){
