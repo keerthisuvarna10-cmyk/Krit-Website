@@ -650,7 +650,7 @@ footer{background:#1A2332;border-top:none;position:relative;z-index:1}
 }
 #krit-auth-overlay.open{display:flex}
 .krit-auth-card{
-  width:100%;max-width:400px;
+  width:100%;max-width:480px;
   background:#0a1628;
   border:1px solid rgba(47,93,168,.25);
   border-radius:16px;padding:36px 32px;
@@ -669,7 +669,7 @@ footer{background:#1A2332;border-top:none;position:relative;z-index:1}
 }
 .krit-auth-close:hover{border-color:rgba(255,255,255,.3);color:#fff}
 .krit-auth-logo{text-align:center;margin-bottom:20px}
-.krit-auth-logo img{height:40px;object-fit:contain}
+.krit-auth-logo img{height:68px;object-fit:contain;filter:drop-shadow(0 4px 16px rgba(47,93,168,.25))}
 .krit-auth-title{font-size:1.25rem;font-weight:700;color:#F0F4FF;text-align:center;margin-bottom:4px}
 .krit-auth-sub{font-size:.94rem;color:#8899BB;text-align:center;margin-bottom:22px;line-height:1.5}
 /* Tabs */
@@ -1097,6 +1097,46 @@ button, .bp, .bs, .nc {
 .nl-logo,.nl-tag{transition:filter .22s ease,transform .22s ease,color .22s ease}
 .nav-account-btn{color:#8FB5E8}
 .nav-account-btn:hover{color:#DDEBFF;background:rgba(111,161,226,.12)}
+.nav-account-wrap{position:relative;display:inline-flex}
+.nav-account-dropdown{
+  position:absolute;top:calc(100% + 12px);right:-8px;
+  width:220px;
+  background:linear-gradient(135deg,#0c1930 0%,#081420 100%);
+  border:1px solid rgba(47,93,168,.28);
+  border-radius:14px;
+  box-shadow:0 20px 50px rgba(0,0,0,.55),0 0 0 1px rgba(201,168,76,.06) inset;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transform:translateY(-6px);
+  transition:opacity .18s ease,transform .18s ease,visibility .18s;
+  z-index:9000;
+}
+.nav-account-wrap:hover .nav-account-dropdown,
+.nav-account-dropdown.show{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
+.nad-arrow{
+  position:absolute;top:-6px;right:18px;
+  width:12px;height:12px;
+  background:#0c1930;
+  border-top:1px solid rgba(47,93,168,.28);
+  border-left:1px solid rgba(47,93,168,.28);
+  transform:rotate(45deg);
+}
+.nad-header{padding:14px 16px 10px}
+.nad-name{font-size:.9rem;font-weight:700;color:#F0F4FF;margin-bottom:2px}
+.nad-email{font-size:.78rem;color:#8899BB;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nad-divider{height:1px;background:rgba(47,93,168,.18);margin:4px 0}
+.nad-item{
+  display:flex;align-items:center;gap:10px;
+  width:100%;padding:11px 16px;
+  background:none;border:none;
+  color:#AFC0DE;font-size:.84rem;font-weight:500;
+  text-align:left;cursor:pointer;
+  transition:background .15s,color .15s;
+}
+.nad-item:hover{background:rgba(47,93,168,.12);color:#F0F4FF}
+.nad-item svg{flex-shrink:0;opacity:.7}
+.nad-item:hover svg{opacity:1}
+.nad-logout{color:#f87171 \!important}
+.nad-logout:hover{background:rgba(239,68,68,.08) \!important;color:#fca5a5 \!important}
 .nav-wishlist-btn{color:#C8A9D9}
 .nav-wishlist-btn:hover{color:#F3D8FF;background:rgba(200,169,217,.12)}
 .nav-cart-btn{color:#D9BC67}
@@ -1198,14 +1238,40 @@ button, .bp, .bs, .nc {
   <!-- Right icons: Account + Wishlist + Cart -->
   <div class="nav-icons">
     
-    <!-- Account icon -->
-    <button class="nav-icon-btn nav-account-btn" onclick="openAuthModal()" title="Account">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-        <circle cx="12" cy="7" r="4"/>
-      </svg>
-      <span id="nav-account-label"></span>
-    </button>
+     <\!-- Account icon + hover dropdown -->
+    <div class="nav-account-wrap" id="nav-account-wrap">
+      <button class="nav-icon-btn nav-account-btn" onclick="openAuthModal()" title="Account">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <span id="nav-account-label"></span>
+      </button>
+      <div class="nav-account-dropdown" id="nav-account-dropdown">
+        <div class="nad-arrow"></div>
+        <div id="nad-loggedin" style="display:none">
+          <div class="nad-header">
+            <div class="nad-name" id="nad-user-name">KRIT Customer</div>
+            <div class="nad-email" id="nad-user-email">hello@kritsleep.in</div>
+          </div>
+          <div class="nad-divider"></div>
+          <button class="nad-item" onclick="openAuthModal();closeNavDropdown()">Your Profile</button>
+          <button class="nad-item" onclick="openAuthModal();closeNavDropdown()">Your Orders</button>
+          <div class="nad-divider"></div>
+          <button class="nad-item nad-logout" onclick="kritLogout();closeNavDropdown()">Logout</button>
+        </div>
+        <div id="nad-loggedout">
+          <div class="nad-header">
+            <div class="nad-name">Welcome to KRIT</div>
+            <div class="nad-email">Sign in to track orders</div>
+          </div>
+          <div class="nad-divider"></div>
+          <button class="nad-item" onclick="switchAuthTab('login');openAuthModal();closeNavDropdown()">Login</button>
+          <button class="nad-item" onclick="switchAuthTab('signup');openAuthModal();closeNavDropdown()">Create Account</button>
+          <button class="nad-item" onclick="openTrackModal();closeNavDropdown()">Track Order</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Wishlist icon -->
     <button class="nav-icon-btn nav-wishlist-btn" onclick="openWishlist()" title="Wishlist" style="position:relative">
@@ -3415,6 +3481,20 @@ function kritUpdateAccountUI(){
   var phoneNode = document.getElementById('auth-account-phone');
   var navLabel = document.getElementById('nav-account-label');
   if(navLabel){ navLabel.textContent = ''; }
+  /* Sync nav hover dropdown */
+  var nadLoggedIn = document.getElementById('nad-loggedin');
+  var nadLoggedOut = document.getElementById('nad-loggedout');
+  var nadUserName = document.getElementById('nad-user-name');
+  var nadUserEmail = document.getElementById('nad-user-email');
+  if(_kritAccount && _kritAccount.email){
+    if(nadLoggedIn) nadLoggedIn.style.display = 'block';
+    if(nadLoggedOut) nadLoggedOut.style.display = 'none';
+    if(nadUserName) nadUserName.textContent = _kritAccount.name || 'KRIT Customer';
+    if(nadUserEmail) nadUserEmail.textContent = _kritAccount.email;
+  } else {
+    if(nadLoggedIn) nadLoggedIn.style.display = 'none';
+    if(nadLoggedOut) nadLoggedOut.style.display = 'block';
+  }
   if(formWrap && accountWrap && welcome){
     if(_kritAccount && _kritAccount.email && _kritAccount.phone){
       formWrap.style.display = 'none';
@@ -3447,6 +3527,10 @@ function switchAuthTab(tab){
   tabSignup.style.background = !isLogin ? '#2F5DA8' : 'transparent';
   tabSignup.style.color = !isLogin ? '#fff' : 'rgba(255,255,255,.55)';
   nameWrap.style.display = isLogin ? 'none' : 'block';
+  var phoneWrap = document.getElementById('auth-phone-wrap');
+  if(phoneWrap) phoneWrap.style.display = 'block';
+  var passWrap = document.getElementById('auth-password-wrap');
+  if(passWrap) passWrap.style.display = 'none';
   actionBtn.textContent = isLogin ? 'Login with Email' : 'Create Account';
   welcome.querySelector('.krit-auth-title').textContent = isLogin ? 'Welcome back' : 'Create your KRIT account';
   welcome.querySelector('.krit-auth-sub').textContent = isLogin ? 'Use your saved email and mobile number to continue.' : 'Save your details for faster checkout and order tracking.';
@@ -3523,6 +3607,10 @@ function closeAuthModal(){
     el.style.display = 'none';
     document.body.style.overflow = '';
   }
+}
+function closeNavDropdown(){
+  var d = document.getElementById('nav-account-dropdown');
+  if(d){ d.classList.remove('show'); }
 }
 function kritLogout(){
   localStorage.removeItem('krit_account_profile');

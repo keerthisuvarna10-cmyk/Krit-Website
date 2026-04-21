@@ -226,7 +226,7 @@
 
   function openCheckoutSafe(items){
     var sourceItems = Array.isArray(items) && items.length ? items.slice() : getCart().slice();
-    if(!sourceItems.length){
+    if(\!sourceItems.length){
       toast('Add an item before checkout');
       return;
     }
@@ -239,17 +239,25 @@
       };
     });
     saveCart();
-    try {
-      sessionStorage.setItem('krit_storefix_checkout', '1');
-    } catch(_error){}
+
+    /* Prefer the inline slide-up modal captured before storefix loaded */
+    if(typeof legacyOpenCheckout === 'function'){
+      try {
+        closeDrawer();
+        return legacyOpenCheckout(window._cart);
+      } catch(_error){}
+    }
+
+    /* Already on checkout.html — open native checkout directly */
     if(location.pathname && /checkout\.html$/i.test(location.pathname)){
-      if(typeof legacyOpenCheckout === 'function'){
-        try { return legacyOpenCheckout(window._cart); } catch(_error){}
-      }
       if(typeof window.__kritOpenCheckoutOriginal === 'function'){
         try { return window.__kritOpenCheckoutOriginal(window._cart); } catch(_error){}
       }
+      return;
     }
+
+    /* Last resort: navigate to checkout.html */
+    try { sessionStorage.setItem('krit_storefix_checkout', '1'); } catch(_error){}
     window.location.href = '/checkout.html';
   }
 
@@ -376,4 +384,25 @@
   } else {
     bind();
   }
+
+  /* ── Clean URL: /product/:id  →  auto-open product detail ── */
+  (function(){
+    var m = window.location.pathname.match(/^\/product\/([^/?#]+)/);
+    if(\!m) return;
+    var productId = decodeURIComponent(m[1]);
+
+    function tryOpen(attemptsLeft){
+      if(typeof window.kritOpenDetail === 'function'){
+        window.kritOpenDetail(productId);
+      } else if(attemptsLeft > 0){
+        setTimeout(function(){ tryOpen(attemptsLeft - 1); }, 300);
+      }
+    }
+
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ tryOpen(15); }, 400); });
+    } else {
+      setTimeout(function(){ tryOpen(15); }, 400);
+    }
+  })();
 })();

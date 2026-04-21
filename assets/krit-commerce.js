@@ -74,7 +74,7 @@
     var imageMeta = document.querySelector('meta[property="og:image"]');
     if(imageMeta && product.images && product.images[0]) imageMeta.setAttribute('content', product.images[0]);
     try {
-      history.replaceState(null, '', '#product=' + product.id);
+      history.replaceState(null, '', '/product/' + product.id);
     } catch(e){}
   }
 
@@ -2761,22 +2761,4 @@
   function enhance(){
     ensureKritOverlayStyles();
     mobilePanel();
-    patchStoreActions();
-    installStoreActionDelegates();
-    patchCheckoutOpen();
-    patchOrderSync();
-    patchPersistAccount();
-    patchOrderConfirmation();
-    enhanceCheckoutOverlay();
-  }
-
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance);
-  else enhance();
-  window.addEventListener('load', enhance);
-  setTimeout(enhance, 300);
-  setTimeout(enhance, 900);
-})();
-
-
-
-
+    patchStore

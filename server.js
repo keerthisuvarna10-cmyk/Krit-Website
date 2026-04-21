@@ -632,6 +632,10 @@ app.get('/checkout.html', requireAuth, sendProtectedPage('checkout.html'));
 app.get('/KRIT_website_final%20(53).html', requireAuth, (_req, res) => res.redirect('/index.html'));
 app.get('/KRIT_website_final (53).html', requireAuth, (_req, res) => res.redirect('/index.html'));
 
+// ── Clean URLs ──
+app.get('/home', (_req, res) => res.redirect(301, '/'));
+app.get('/product/:id', requireAuth, (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
 
 // ── SEO: robots.txt ──
 app.get('/robots.txt', (_req, res) => {
@@ -652,10 +656,12 @@ app.get('/sitemap.xml', (_req, res) => {
   const base = 'https://www.kritsleep.in';
   const now = new Date().toISOString().split('T')[0];
   const urls = [
-    { loc: base + '/',              priority: '1.0', freq: 'weekly'  },
-    { loc: base + '/product.html',  priority: '0.9', freq: 'weekly'  },
-    { loc: base + '/account.html',  priority: '0.6', freq: 'monthly' },
-    { loc: base + '/checkout.html', priority: '0.5', freq: 'monthly' }
+    { loc: base + '/',                    priority: '1.0', freq: 'weekly'  },
+    { loc: base + '/product/contour-3',   priority: '0.9', freq: 'weekly'  },
+    { loc: base + '/product/half-3',      priority: '0.9', freq: 'weekly'  },
+    { loc: base + '/product/half-2',      priority: '0.8', freq: 'weekly'  },
+    { loc: base + '/product/soap-2',      priority: '0.8', freq: 'weekly'  },
+    { loc: base + '/account.html',        priority: '0.5', freq: 'monthly' },
   ];
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',
