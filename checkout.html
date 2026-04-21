@@ -30,18 +30,18 @@
   body{
     margin:0;padding:0;
     background:
-      url('https://res.cloudinary.com/djicyjlid/image/upload/e_blur:1200,q_10/v1775066290/Contour_Main_itrbg7.png') center/cover no-repeat fixed,
+      url('https://res.cloudinary.com/djicyjlid/image/upload/e_blur:600,q_20/v1775066290/Contour_Main_itrbg7.png') center/cover no-repeat fixed,
       linear-gradient(135deg,#0d1528 0%,#1B2340 50%,#0a1020 100%);
     color:var(--ink);
     font-family:'DM Sans',sans-serif;
     min-height:100vh;
     -webkit-font-smoothing:antialiased;
   }
-  /* Dark tinted overlay on sides so checkout floats over site */
+  /* Subtle tinted overlay — lets blurred pillow show through on sides */
   body::before{
     content:"";
     position:fixed;inset:0;
-    background:rgba(10,16,32,.72);
+    background:rgba(10,16,32,.40);
     pointer-events:none;z-index:0;
   }
   a{color:inherit;text-decoration:none}
@@ -50,15 +50,15 @@
   .hide{display:none !important}
 
   /* ── Top bar ── */
-  .co-top{display:flex;align-items:center;justify-content:space-between;padding:10px 28px;border-bottom:1px solid rgba(201,168,76,.2);background:rgba(255,255,255,.97);backdrop-filter:blur(12px);position:sticky;top:0;z-index:30;box-shadow:0 2px 16px rgba(10,16,32,.35)}
+  .co-top{display:flex;align-items:center;justify-content:space-between;padding:10px 28px;border-bottom:1px solid rgba(201,168,76,.18);background:rgba(232,234,240,.96);backdrop-filter:blur(16px);position:sticky;top:0;z-index:30;box-shadow:0 2px 12px rgba(10,16,32,.18)}
   .co-top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold-light),var(--blue))}
   .co-brand{display:flex;align-items:center}
   .co-brand img{height:72px;width:auto;filter:none}
   .co-brand .name{display:none}
   .co-trust{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--gold-deep);font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(201,168,76,.08);padding:8px 14px;border-radius:999px;border:1px solid rgba(201,168,76,.22)}
   .co-trust svg{width:15px;height:15px;stroke:var(--gold-deep)}
-  .co-back{padding:9px 18px;border-radius:999px;border:1.5px solid rgba(27,35,64,.15);background:#ffffff;color:var(--soft);font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
-  .co-back:hover{border-color:var(--gold);color:var(--ink)}
+  .co-back{padding:9px 18px;border-radius:999px;border:1.5px solid rgba(27,35,64,.15);background:rgba(255,255,255,.75);color:var(--soft);font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+  .co-back:hover{border-color:var(--gold);color:var(--ink);background:#ffffff}
 
   /* ── Shell — floats as white island over dark site bg ── */
   .co-shell{
@@ -1217,14 +1217,14 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       order_id: rzp.order.id,
       name: 'KRIT',
       description: 'KRIT Sleep · Order ' + payload.id,
-      image: 'https://res.cloudinary.com/djicyjlid/image/upload/v1773595575/Transparent_Primary_Logo-removebg-preview_atpk6x.png',
+      image: 'https://res.cloudinary.com/djicyjlid/image/upload/b_rgb:1B2340,c_pad,w_240,h_240,r_20/v1773595575/Transparent_Primary_Logo-removebg-preview_atpk6x.png',
       prefill: {
         name: payload.customer.name || '',
         email: payload.customer.email || '',
         contact: payload.customer.phone ? ('+91' + payload.customer.phone) : ''
       },
       notes: { receipt: payload.id },
-      theme: { color: '#F9D548' },
+      theme: { color: '#1B2340' },
       // Show every Razorpay-supported payment block by default.
       config: {
         display: {
