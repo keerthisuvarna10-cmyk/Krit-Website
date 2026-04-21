@@ -555,7 +555,7 @@
             <div class="co-success-totalrow" id="coSuccessDiscountRow" style="display:none"><span>Discount <em id="coSuccessCoupon" style="font-style:normal;color:var(--muted)"></em></span><span id="coSuccessDiscount">-₹0</span></div>
             <div class="co-success-totalrow"><span>Shipping</span><span id="coSuccessShipping">Free</span></div>
             <div class="co-success-totalrow" id="coSuccessPayAdjRow" style="display:none"><span id="coSuccessPayAdjLabel">Payment adjustment</span><span id="coSuccessPayAdj">₹0</span></div>
-            <div class="co-success-totalrow grand"><span>Total paid</span><strong id="coSuccessTotal">₹0</strong></div>
+            <div class="co-success-totalrow grand"><span id="coSuccessTotalLabel">Total paid</span><strong id="coSuccessTotal">₹0</strong></div>
           </div>
         </div>
         <div class="co-success-section">
@@ -1084,6 +1084,10 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       setText('coSuccessPayAdj', (order.paymentAdjust > 0 ? '+' : '-') + fmtINR(Math.abs(order.paymentAdjust)));
     }
     setText('coSuccessTotal', fmtINR(order.total));
+    var isCod = order.paymentMode === 'cod';
+    setText('coSuccessTotalLabel', isCod ? 'To be paid at delivery' : 'Total paid');
+    var totalEl = document.getElementById('coSuccessTotal');
+    if(totalEl) totalEl.style.color = isCod ? '#b68f31' : 'var(--gold-deep)';
 
     // Address + contact
     var c = order.customer || {};
