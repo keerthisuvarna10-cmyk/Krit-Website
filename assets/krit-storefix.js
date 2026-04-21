@@ -122,7 +122,9 @@
     if(existing){
       existing.qty = Math.max(1, Number(existing.qty || 0) + safeQty);
     } else {
-      cart.push({ id: productId || '', name: name, price: Number(price || 0), qty: safeQty });
+      var itemImage = '';
+      try { if(typeof window.kritGetCartItemImage === 'function') itemImage = window.kritGetCartItemImage({ id: productId || '', name: name }) || ''; } catch(_){}
+      cart.push({ id: productId || '', name: name, price: Number(price || 0), qty: safeQty, image: itemImage });
     }
     saveCart();
     toast(name + ' added to cart');
@@ -229,13 +231,17 @@
     if(!sourceItems.length){
       toast('Add an item before checkout');
       return;
+
     }
     window._cart = sourceItems.map(function(item){
+      var img = item.image || '';
+      if(!img){ try{ if(typeof window.kritGetCartItemImage === 'function') img = window.kritGetCartItemImage(item) || ''; }catch(_){} }
       return {
         id: item.id || '',
         name: item.name || 'KRIT Product',
         price: Number(item.price || 0),
-        qty: Math.max(1, Number(item.qty || 1))
+        qty: Math.max(1, Number(item.qty || 1)),
+        image: img
       };
     });
     saveCart();
