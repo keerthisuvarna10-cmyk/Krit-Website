@@ -1098,8 +1098,9 @@ button, .bp, .bs, .nc {
 .nav-account-btn{color:#8FB5E8}
 .nav-account-btn:hover{color:#DDEBFF;background:rgba(111,161,226,.12)}
 .nav-account-wrap{position:relative;display:inline-flex}
+.nav-account-wrap::after{content:'';position:absolute;left:-14px;right:-14px;top:100%;height:18px}
 .nav-account-dropdown{
-  position:absolute;top:calc(100% + 12px);right:-8px;
+  position:absolute;top:calc(100% + 10px);right:-8px;
   width:220px;
   background:linear-gradient(135deg,#0c1930 0%,#081420 100%);
   border:1px solid rgba(47,93,168,.28);
@@ -1240,7 +1241,7 @@ button, .bp, .bs, .nc {
     
      <\!-- Account icon + hover dropdown -->
     <div class="nav-account-wrap" id="nav-account-wrap">
-      <button class="nav-icon-btn nav-account-btn" onclick="openAuthModal()" title="Account">
+      <button class="nav-icon-btn nav-account-btn" onclick="toggleNavDropdown(event)" title="Account">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
           <circle cx="12" cy="7" r="4"/>
@@ -1268,7 +1269,6 @@ button, .bp, .bs, .nc {
           <div class="nad-divider"></div>
           <button class="nad-item" onclick="switchAuthTab('login');openAuthModal();closeNavDropdown()">Login</button>
           <button class="nad-item" onclick="switchAuthTab('signup');openAuthModal();closeNavDropdown()">Create Account</button>
-          <button class="nad-item" onclick="openTrackModal();closeNavDropdown()">Track Order</button>
         </div>
       </div>
     </div>
@@ -3612,6 +3612,21 @@ function closeNavDropdown(){
   var d = document.getElementById('nav-account-dropdown');
   if(d){ d.classList.remove('show'); }
 }
+function toggleNavDropdown(event){
+  if(event){
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  var d = document.getElementById('nav-account-dropdown');
+  if(d){ d.classList.toggle('show'); }
+}
+document.addEventListener('click', function(event){
+  var wrap = document.getElementById('nav-account-wrap');
+  if(wrap && !wrap.contains(event.target)) closeNavDropdown();
+});
+document.addEventListener('keydown', function(event){
+  if(event.key === 'Escape') closeNavDropdown();
+});
 function kritLogout(){
   localStorage.removeItem('krit_account_profile');
   _kritAccount = null;
@@ -4491,7 +4506,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
 <script src="./assets/krit-ui.js?v=20260416b"></script>
 <script src="./assets/krit-pages.js?v=20260416b"></script>
 <script src="./assets/krit-enhancements.js?v=20260421d"></script>
-<script src="./assets/krit-storefix.js?v=20260421e"></script>
+<script src="./assets/krit-storefix.js?v=20260421f"></script>
 <script src="./assets/krit-tracking.js?v=20260421a"></script>
 </body>
 </html>

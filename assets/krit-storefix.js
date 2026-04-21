@@ -240,11 +240,12 @@
     });
     saveCart();
 
-    /* Prefer the inline slide-up modal captured before storefix loaded */
-    if(typeof legacyOpenCheckout === 'function'){
+    /* Prefer the real checkout page. It creates Razorpay orders through
+       /api/razorpay/order, so Railway env keys stay server-side. */
+    if(typeof window.kritGoToCheckoutPage === 'function'){
       try {
         closeDrawer();
-        return legacyOpenCheckout(window._cart);
+        return window.kritGoToCheckoutPage(window._cart, sourceItems.length === 1 ? 'buy-now' : 'cart');
       } catch(_error){}
     }
 
@@ -256,7 +257,14 @@
       return;
     }
 
-    /* Last resort: navigate to checkout.html */
+    /* Last resort: navigate to checkout.html with the cart payload. */
+    try {
+      sessionStorage.setItem('krit_checkout_payload', JSON.stringify({
+        items: window._cart,
+        source: sourceItems.length === 1 ? 'buy-now' : 'cart',
+        createdAt: new Date().toISOString()
+      }));
+    } catch(_error){}
     try { sessionStorage.setItem('krit_storefix_checkout', '1'); } catch(_error){}
     window.location.href = '/checkout.html';
   }
