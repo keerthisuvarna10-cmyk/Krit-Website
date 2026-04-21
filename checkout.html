@@ -14,7 +14,7 @@
 <style>
   /* ── Single clean white theme ── */
   :root{
-    --bg:#F5F6F7;
+    --bg:#1B2340;
     --panel:#ffffff;
     --line:rgba(27,35,64,.09);
     --ink:#1B2340;
@@ -26,25 +26,47 @@
     --danger:#c83838;
   }
   *,*::before,*::after{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100%;-webkit-font-smoothing:antialiased}
+  html{min-height:100%}
+  body{
+    margin:0;padding:0;
+    background:
+      url('https://res.cloudinary.com/djicyjlid/image/upload/e_blur:1200,q_10/v1775066290/Contour_Main_itrbg7.png') center/cover no-repeat fixed,
+      linear-gradient(135deg,#0d1528 0%,#1B2340 50%,#0a1020 100%);
+    color:var(--ink);
+    font-family:'DM Sans',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* Dark tinted overlay on sides so checkout floats over site */
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    background:rgba(10,16,32,.72);
+    pointer-events:none;z-index:0;
+  }
   a{color:inherit;text-decoration:none}
   img{display:block;max-width:100%}
   button{font:inherit;cursor:pointer}
   .hide{display:none !important}
 
   /* ── Top bar ── */
-  .co-top{display:flex;align-items:center;justify-content:space-between;padding:12px 28px;border-bottom:1px solid var(--line);background:#ffffff;position:sticky;top:0;z-index:30;box-shadow:0 1px 8px rgba(27,35,64,.06)}
+  .co-top{display:flex;align-items:center;justify-content:space-between;padding:10px 28px;border-bottom:1px solid rgba(201,168,76,.2);background:rgba(255,255,255,.97);backdrop-filter:blur(12px);position:sticky;top:0;z-index:30;box-shadow:0 2px 16px rgba(10,16,32,.35)}
   .co-top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold-light),var(--blue))}
   .co-brand{display:flex;align-items:center}
-  .co-brand img{height:54px;width:auto;filter:none}
+  .co-brand img{height:72px;width:auto;filter:none}
   .co-brand .name{display:none}
   .co-trust{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--gold-deep);font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(201,168,76,.08);padding:8px 14px;border-radius:999px;border:1px solid rgba(201,168,76,.22)}
   .co-trust svg{width:15px;height:15px;stroke:var(--gold-deep)}
-  .co-back{padding:9px 18px;border-radius:999px;border:1.5px solid var(--line);background:#ffffff;color:var(--soft);font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+  .co-back{padding:9px 18px;border-radius:999px;border:1.5px solid rgba(27,35,64,.15);background:#ffffff;color:var(--soft);font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
   .co-back:hover{border-color:var(--gold);color:var(--ink)}
 
-  /* ── Shell ── */
-  .co-shell{max-width:1160px;margin:0 auto;padding:28px 20px 60px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:24px}
+  /* ── Shell — floats as white island over dark site bg ── */
+  .co-shell{
+    position:relative;z-index:1;
+    max-width:1100px;margin:0 auto;
+    padding:28px 20px 60px;
+    display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:24px;
+  }
   @media(max-width:960px){.co-shell{grid-template-columns:1fr;padding:20px 16px 48px}}
 
   /* ── Left column ── */
@@ -1162,7 +1184,16 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
 
     var rzp = await createRazorpayOrder(payload.total, payload.id);
     if(!rzp.ok){
-      showToast(rzp.error || 'Could not start payment. Please try again.');
+      var errMsg = rzp.error || 'Could not start payment. Please try again.';
+      // If Razorpay isn't configured yet, steer user to COD
+      if(errMsg.toLowerCase().indexOf('not configured') !== -1 || errMsg.toLowerCase().indexOf('503') !== -1){
+        showToast('Online payments are being activated. Please use Cash on Delivery for now.');
+        // Highlight COD option
+        var codLabel = document.querySelector('.co-pay[data-pay="cod"]');
+        if(codLabel){ codLabel.scrollIntoView({behavior:'smooth',block:'center'}); codLabel.style.outline='2.5px solid #C9A84C'; setTimeout(function(){codLabel.style.outline='';},3000); }
+      } else {
+        showToast(errMsg);
+      }
       state.placing = false;
       btn.disabled = false;
       btn.innerHTML = originalLabel;
