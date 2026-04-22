@@ -4,6 +4,7 @@ body{overflow-x:hidden;max-width:100vw}
 #detail-thumbs{overflow:auto;flex-wrap:nowrap;scrollbar-width:thin}
 #detail-thumbs > button{flex:0 0 auto}
 
+
 @media (max-width:1200px){
   #nav{padding-left:20px!important;padding-right:20px!important}
   .nls{gap:18px!important}
