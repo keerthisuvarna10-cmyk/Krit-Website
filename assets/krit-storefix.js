@@ -201,7 +201,7 @@
         +   '<div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#A9B8D4"><span>Subtotal</span><span>' + formatINR(subtotal) + '</span></div>'
         +   '<div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#A9B8D4"><span>Shipping</span><span>Free</span></div>'
         +   '<div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(47,93,168,.12)"><span style="color:#F0F4FF;font-weight:700">Total</span><span style="font-family:\'Playfair Display\',serif;font-size:1.3rem;color:#F0F4FF;font-weight:700">' + formatINR(subtotal) + '</span></div>'
-        +   '<button type="button" onclick="window.kritOpenCheckout(window._cart)" style="width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;background:#F9D548;color:#1B2340;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Checkout</button>'
+        +   '<button type="button" onclick="window.__kritCartCheckout()" style="width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;background:#F9D548;color:#1B2340;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Checkout</button>'
         +   '<button type="button" onclick="window.kritCloseDrawer()" style="width:100%;margin-top:10px;padding:13px;border:none;border-radius:12px;background:#2F5DA8;color:#fff;font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Continue Shopping</button>'
         + '</div>'
       : '<div style="text-align:center;padding:32px 8px;color:#93A8CC">Your cart is empty.</div>';
@@ -322,6 +322,25 @@
     window.__kritStorefixRemoveCartItem = removeCartItem;
     window.__kritStorefixUpdateCartItem = updateCartItem;
     window.__kritStorefixRemoveWishlistItem = removeWishlistItem;
+
+    /* Direct cart checkout — bypasses all wrapper chains, always reads fresh cart */
+    window.__kritCartCheckout = function(){
+      var items = getCart().slice();
+      if(!items.length){ toast('Your cart is empty'); return; }
+      /* Enrich with images */
+      items = items.map(function(item){
+        var img = item.image || '';
+        if(!img){ try{ if(typeof window.kritGetCartItemImage === 'function') img = window.kritGetCartItemImage(item) || ''; }catch(_){} }
+        return { id: item.id || '', name: item.name || 'KRIT Product', price: Number(item.price || 0), qty: Math.max(1, Number(item.qty || 1)), image: img };
+      });
+      /* Save enriched cart + checkout payload */
+      try { localStorage.setItem('krit_cart', JSON.stringify(items)); } catch(_){}
+      try { sessionStorage.setItem('krit_checkout_payload', JSON.stringify({ items: items, source: 'cart', ts: Date.now() })); } catch(_){}
+      try { sessionStorage.setItem('krit_storefix_checkout', '1'); } catch(_){}
+      window._cart = items;
+      closeDrawer();
+      window.location.href = '/checkout.html';
+    };
   }
 
   function handleAction(node){
