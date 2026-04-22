@@ -60,6 +60,17 @@ app.use(session({
   }
 }));
 
+/* ── Redirect non-www → www in production ── */
+app.use((req, res, next) => {
+  if (IS_PRODUCTION) {
+    const host = req.headers.host || '';
+    if (host && !host.startsWith('www.') && !host.includes('railway.app') && !host.includes('localhost')) {
+      return res.redirect(301, `https://www.${host}${req.originalUrl}`);
+    }
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.setHeader('Pragma', 'no-cache');
