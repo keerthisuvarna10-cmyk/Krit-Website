@@ -293,6 +293,50 @@
     .co-timeline-step .co-timeline-label{font-size:.6rem;letter-spacing:.06em}
     .co-success-chip{font-size:.72rem;padding:8px 12px}
   }
+
+  /* ── Mobile — top bar & success bar ── */
+  @media(max-width:600px){
+    /* Compact top bar: shrink logo, hide trust text */
+    .co-top{padding:8px 12px;gap:8px}
+    .co-brand img{height:58px}
+    .co-trust span{display:none}
+    .co-trust{padding:7px 10px;gap:6px;font-size:.7rem}
+    .co-back{padding:7px 12px;font-size:.7rem;letter-spacing:.06em}
+
+    /* Success top bar: same treatment */
+    .co-success-topbar{padding:8px 12px;gap:8px}
+    .co-success-topbar img{height:58px}
+    .co-success-topbar-trust span{display:none}
+    .co-success-topbar-trust{padding:7px 10px;gap:6px;font-size:.7rem}
+    .co-success-topbar-back{padding:7px 12px;font-size:.7rem;letter-spacing:.06em}
+
+    /* Success card padding */
+    .co-success-card{padding:20px 14px;border-radius:16px}
+    .co-success-hero h2{font-size:1.35rem}
+    .co-success-wrap{padding:16px 12px 40px}
+
+    /* Checkout shell */
+    .co-shell{padding:14px 12px 40px}
+    .co-section{padding:16px 14px}
+    .co-badges{grid-template-columns:1fr 1fr 1fr}
+    .co-badge{font-size:.62rem}
+
+    /* Review modal */
+    .co-review{padding:8px}
+    .co-review-card{width:100%;border-radius:16px}
+
+    /* Timeline: make horizontally scrollable on small screens */
+    .co-timeline-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+    .co-timeline{min-width:460px}
+  }
+
+  @media(max-width:400px){
+    .co-top{padding:6px 10px}
+    .co-brand img{height:48px}
+    .co-back{display:none}
+    .co-success-topbar img{height:48px}
+    .co-success-topbar-back{padding:6px 10px;font-size:.66rem}
+  }
 </style>
 </head>
 <body>
@@ -500,6 +544,7 @@
       <!-- Timeline -->
       <div class="co-success-timeline">
         <h3>Order journey</h3>
+        <div class="co-timeline-wrap">
         <div class="co-timeline">
           <div class="co-timeline-step current" id="coTlOrdered">
             <div class="co-timeline-dot">&#10003;</div>
@@ -521,6 +566,7 @@
             <div class="co-timeline-dot">5</div>
             <div class="co-timeline-label">Delivered<span class="co-timeline-date" id="coTlDeliveredDate">—</span></div>
           </div>
+        </div>
         </div>
       </div>
 

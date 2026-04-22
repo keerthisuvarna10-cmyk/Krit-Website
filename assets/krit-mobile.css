@@ -1,6 +1,6 @@
 ﻿/* KRIT responsive + polish overrides */
-html{scroll-behavior:smooth}
-body{overflow-x:hidden}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{overflow-x:hidden;max-width:100vw}
 #detail-thumbs{overflow:auto;flex-wrap:nowrap;scrollbar-width:thin}
 #detail-thumbs > button{flex:0 0 auto}
 
@@ -69,6 +69,22 @@ body{overflow-x:hidden}
   .fc h5{margin-bottom:12px!important}
   .fbot{flex-direction:column!important;align-items:flex-start!important;gap:12px!important}
   .fleg{display:flex!important;gap:18px!important;flex-wrap:wrap!important}
+}
+
+@media (max-width:768px){
+  /* Section wrappers — prevent wide padding from causing overflow */
+  .wr{padding-left:16px!important;padding-right:16px!important}
+  /* Guarantee section */
+  .guar{padding:24px 16px!important}
+  .gi{flex-direction:column!important;gap:20px!important;align-items:flex-start!important}
+  /* About grid stat cards */
+  .sca,.scb{display:none!important}
+  /* Bundle inner padding */
+  .bin{padding:24px 18px!important}
+  .bnm{font-size:1.5rem!important}
+  .bv{min-height:200px!important}
+  /* Lifestyle grid */
+  .lca{min-height:240px!important}
 }
 
 @media (max-width:560px){
