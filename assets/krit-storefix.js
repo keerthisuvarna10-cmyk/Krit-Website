@@ -175,13 +175,14 @@
       ? cart.map(function(item){
           var safeName = String(item.name || '').replace(/'/g, "\\'");
           var itemImage = getCartItemImage(item);
+          var productHref = item.id ? '/product/' + String(item.id) : '/';
           return ''
             + '<div style="padding:14px 0;border-bottom:1px solid rgba(47,93,168,.1)">'
             +   '<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">'
             +     '<div style="display:flex;gap:12px;align-items:flex-start;min-width:0">'
-            +       (itemImage ? '<img src="' + itemImage + '" alt="' + String(item.name || '') + '" style="width:76px;height:76px;border-radius:14px;object-fit:cover;flex-shrink:0;border:1px solid rgba(47,93,168,.16);background:#06101d">' : '')
+            +       (itemImage ? '<a href="' + productHref + '" style="flex-shrink:0;display:block"><img src="' + itemImage + '" alt="' + String(item.name || '') + '" style="width:76px;height:76px;border-radius:14px;object-fit:cover;border:1px solid rgba(47,93,168,.16);background:#06101d"></a>' : '')
             +       '<div style="min-width:0">'
-            +         '<div style="font-size:.92rem;color:#F0F4FF;font-weight:600;line-height:1.5">' + String(item.name || '') + '</div>'
+            +         '<a href="' + productHref + '" style="font-size:.92rem;color:#F0F4FF;font-weight:600;line-height:1.5;text-decoration:none;display:block">' + String(item.name || '') + '</a>'
             +         '<div style="font-size:.76rem;color:#8EA4C9;margin-top:4px">' + formatINR(item.price) + ' each</div>'
             +       '</div>'
             +     '</div>'
@@ -201,7 +202,7 @@
         +   '<div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#A9B8D4"><span>Subtotal</span><span>' + formatINR(subtotal) + '</span></div>'
         +   '<div style="display:flex;justify-content:space-between;margin-bottom:8px;color:#A9B8D4"><span>Shipping</span><span>Free</span></div>'
         +   '<div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(47,93,168,.12)"><span style="color:#F0F4FF;font-weight:700">Total</span><span style="font-family:\'Playfair Display\',serif;font-size:1.3rem;color:#F0F4FF;font-weight:700">' + formatINR(subtotal) + '</span></div>'
-        +   '<button type="button" onclick="window.__kritCartCheckout()" style="width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;background:#F9D548;color:#1B2340;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Checkout</button>'
+        +   '<button type="button" onclick="window.kritGoToCheckout()" style="width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;background:#F9D548;color:#1B2340;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Checkout</button>'
         +   '<button type="button" onclick="window.kritCloseDrawer()" style="width:100%;margin-top:10px;padding:13px;border:none;border-radius:12px;background:#2F5DA8;color:#fff;font-size:.76rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Continue Shopping</button>'
         + '</div>'
       : '<div style="text-align:center;padding:32px 8px;color:#93A8CC">Your cart is empty.</div>';

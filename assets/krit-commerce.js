@@ -178,7 +178,7 @@
       var fallbackProfile = window._kritAccount || {};
       var profile = {
         uid: user.uid || '',
-        name: user.displayName || fallbackProfile.name || 'KRIT Customer',
+        name: user.displayName || fallbackProfile.name || '',
         email: (user.email || fallbackProfile.email || '').toLowerCase(),
         phone: fallbackProfile.phone || (user.phoneNumber ? String(user.phoneNumber).replace(/^\+91/, '') : ''),
         avatar: user.photoURL || fallbackProfile.avatar || '',
@@ -789,7 +789,7 @@
       try { stored = JSON.parse(localStorage.getItem('krit_account_profile') || 'null'); } catch(e) { stored = null; }
       var profile = {
         uid: user.uid || '',
-        name: (nameEl && nameEl.value.trim()) || (stored && stored.name) || 'KRIT Customer',
+        name: (nameEl && nameEl.value.trim()) || (stored && stored.name !== 'KRIT Customer' && stored.name) || '',
         email: (stored && stored.phone === phone && stored.email) || '',
         phone: phone,
         avatar: user.photoURL || '',

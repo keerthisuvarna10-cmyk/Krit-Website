@@ -726,7 +726,8 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
           (p.email ? ' (' + escapeHtml(p.email) + ')' : '') +
           ' <button type="button" class="co-mini-btn" onclick="window.location.href=\'/account.html\'">Manage</button>';
       }
-      if(p.name && !$('coName').value) $('coName').value = p.name;
+      var realName = p.name && p.name !== 'KRIT Customer' ? p.name : '';
+      if(realName && !$('coName').value) $('coName').value = realName;
       if(p.email && !$('coEmail').value) $('coEmail').value = p.email;
       if(p.phone && !$('coPhone').value) $('coPhone').value = String(p.phone).replace(/\D/g,'').slice(-10);
       if(p.address && !$('coAddress').value) $('coAddress').value = p.address;
@@ -1118,6 +1119,9 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
 
     // Address + contact
     var c = order.customer || {};
+    var custName = (c.name && c.name !== 'KRIT Customer') ? c.name : '';
+    var firstName = custName ? custName.split(' ')[0] : '';
+    setText('coSuccessTitle', firstName ? 'Thank you, ' + firstName + '!' : 'Thank you for your order!');
     setText('coSuccessAddrName', c.name || '—');
     var addrParts = [c.address, c.landmark, c.city, c.state, c.pincode].filter(function(x){ return x && String(x).trim(); });
     setText('coSuccessAddrLine', addrParts.join(', ') || '—');
