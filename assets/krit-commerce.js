@@ -73,9 +73,8 @@
     });
     var imageMeta = document.querySelector('meta[property="og:image"]');
     if(imageMeta && product.images && product.images[0]) imageMeta.setAttribute('content', product.images[0]);
-    try {
-      history.replaceState(null, '', '/product/' + product.id);
-    } catch(e){}
+    /* URL stays clean at kritsleep.in — no per-product URL hijack */
+    // history.replaceState(null, '', '/product/' + product.id);
   }
 
   function authMessage(text, type){
