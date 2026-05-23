@@ -178,65 +178,74 @@
 /* ── TOP ANNOUNCEMENT / TRACK ORDER BAR ──────────────────── */
 
 
-/* ── TRACK ORDER MODAL ──────────────────────────────────── */
+/* ── TRACK ORDER MODAL ────────────────────────────────────── */
 #track-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;
-  display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)
+  position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:900;
+  display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(10px);padding:16px
 }
 #track-overlay.open{display:flex}
 #track-box{
-  background:#FFFFFF;border-radius:12px;
-  width:min(520px,92vw);padding:36px;
-  position:relative;box-shadow:0 24px 80px rgba(0,0,0,.25)
+  background:linear-gradient(160deg,#0a1628 0%,#0d1f3a 100%);
+  border:1px solid rgba(47,93,168,.3);border-radius:20px;
+  width:min(460px,100%);padding:28px 24px 24px;
+  position:relative;box-shadow:0 32px 80px rgba(0,0,0,.7);
+  max-height:90vh;overflow-y:auto
 }
 #track-close{
-  position:absolute;top:14px;right:18px;
-  background:none;border:none;font-size:1.4rem;cursor:pointer;color:#888;line-height:1
+  position:absolute;top:12px;right:14px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:50%;width:30px;height:30px;font-size:.8rem;
+  cursor:pointer;color:#8899BB;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;line-height:1
 }
-#track-close:hover{color:#333}
+#track-close:hover{background:rgba(255,255,255,.12);color:#fff}
+.track-eyebrow{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:#4A7CC8;margin-bottom:5px;font-weight:700}
 .track-title{
-  font-family:'Playfair Display',serif;font-size:1.6rem;
-  color:#1A2332;margin-bottom:4px;font-weight:400
+  font-family:'Playfair Display',serif;font-size:1.35rem;
+  color:#F0F4FF;margin-bottom:3px;font-weight:700;line-height:1.2
 }
-.track-sub{font-size:.84rem;color:#6E6E6E;letter-spacing:.08em;margin-bottom:24px}
+.track-sub{font-size:.78rem;color:#6A84B0;margin-bottom:18px;line-height:1.5}
+.track-field{margin-bottom:12px}
 .track-field label{
-  display:block;font-size:.98rem;letter-spacing:.12em;text-transform:uppercase;
-  color:#6E6E6E;margin-bottom:6px;font-weight:600
+  display:block;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;
+  color:#5A72A0;margin-bottom:5px;font-weight:700
 }
 .track-field input,.track-field select{
-  width:100%;padding:11px 14px;
-  background:#F5F7FA;border:1.5px solid rgba(47,93,168,.15);
-  border-radius:6px;font-size:.94rem;color:#2B2B2B;
-  box-sizing:border-box;margin-bottom:16px;
-  transition:border-color .2s;outline:none
+  width:100%;padding:10px 13px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(47,93,168,.22);
+  border-radius:10px;font-size:.88rem;color:#D0E0FF;
+  box-sizing:border-box;outline:none;transition:border-color .2s;font-family:inherit
 }
-.track-field input:focus,.track-field select:focus{border-color:#2F5DA8}
+.track-field select option{background:#0d1f3a;color:#D0E0FF}
+.track-field input::placeholder{color:#3A5070}
+.track-field input:focus,.track-field select:focus{border-color:#4A7CC8;box-shadow:0 0 0 3px rgba(47,93,168,.12)}
 .track-submit{
-  width:100%;padding:13px;background:#2F5DA8;border:none;
-  border-radius:6px;color:#fff;font-size:.84rem;letter-spacing:.2em;
-  text-transform:uppercase;font-weight:700;cursor:pointer;
-  transition:background .2s;margin-top:4px
+  width:100%;padding:12px;background:linear-gradient(135deg,#2F5DA8,#1a4a8a);
+  border:none;border-radius:10px;color:#fff;font-size:.68rem;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:800;cursor:pointer;transition:all .2s;margin-top:4px;
+  box-shadow:0 6px 20px rgba(47,93,168,.3)
 }
-.track-submit:hover{background:#1E4A8A}
+.track-submit:hover{background:linear-gradient(135deg,#3a6ec0,#2255a0);transform:translateY(-1px)}
 #track-result{
-  margin-top:20px;padding:16px;background:#F0F4FA;
-  border-radius:8px;border-left:4px solid #2F5DA8;
-  display:none;font-size:.9rem;line-height:1.8;color:#2B2B2B
+  margin-top:14px;padding:12px 14px;background:rgba(47,93,168,.1);
+  border-radius:10px;border-left:3px solid #4A7CC8;
+  display:none;font-size:.85rem;line-height:1.7;color:#B0C8F0
 }
 #track-result.visible{display:block}
-#track-result.error{border-left-color:#E53935;background:#FFF5F5}
+#track-result.error{border-left-color:#E53935;background:rgba(229,57,53,.08);color:#ffb4b4}
+#track-result a{color:#6AABFF;text-decoration:none}
+#track-result a:hover{text-decoration:underline}
 .track-partners{
-  margin-top:20px;padding-top:16px;border-top:1px solid rgba(0,0,0,.07);
-  font-size:.94rem;letter-spacing:.12em;text-transform:uppercase;color:#aaa;
-  text-align:center
+  margin-top:14px;padding-top:12px;border-top:1px solid rgba(47,93,168,.12);
+  font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:#3A5070;text-align:center
 }
-.track-partner-list{
-  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px
-}
+.track-partner-list{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:7px}
 .tp-badge{
-  padding:3px 10px;border:1px solid rgba(0,0,0,.1);border-radius:20px;
-  font-size:.94rem;letter-spacing:.08em;color:#6E6E6E;background:#fff
+  padding:3px 9px;border:1px solid rgba(47,93,168,.18);border-radius:20px;
+  font-size:.66rem;letter-spacing:.04em;color:#4A6890;background:rgba(47,93,168,.06)
 }
+
 
 
 /* ── Make in India badge ─────────────────────────────────── */
@@ -1395,8 +1404,9 @@ button, .bp, .bs, .nc {
 <div id="track-overlay" onclick="if(event.target===this)closeTrackModal()">
   <div id="track-box">
     <button id="track-close" onclick="closeTrackModal()">×</button>
+    <div class="track-eyebrow">KRIT · Order Tracking</div>
     <div class="track-title">Track Your Order</div>
-    <div class="track-sub">Enter your KRIT order ID to view status, or use an AWB if you already have shipment details.</div>
+    <div class="track-sub">Enter your KRIT order ID or courier AWB number to view live delivery status.</div>
     <div class="track-field">
       <label>Courier Partner (optional)</label>
       <select id="track-courier">
@@ -4999,85 +5009,4 @@ async function kritProceedCheckout(mode){
       name: KRIT_RAZORPAY.merchantName,
       description: KRIT_RAZORPAY.description,
       image: KRIT_RAZORPAY.image,
-      order_id: orderData && orderData.id ? orderData.id : undefined,
-      prefill: {
-        name: customer.name,
-        email: customer.email,
-        contact: customer.phone
-      },
-      notes: {
-        address: customer.address,
-        city: customer.city,
-        pincode: customer.pincode,
-        items: _kritCheckoutItems.map(function(item){ return item.qty + " x " + item.name; }).join(", "),
-        extra_notes: customer.notes,
-        payment_choice: mode
-      },
-      config: kritRazorpayDisplayConfig(mode),
-      theme: { color: KRIT_RAZORPAY.themeColor || "#2F5DA8" },
-      handler: function(response){
-        var paidOrder = kritCreateOrderRecord(customer, mode, "paid", {
-          omsRef: response.razorpay_order_id || "",
-          trackingNumber: response.razorpay_payment_id || ""
-        });
-        paidOrder.status = "confirmed";
-        paidOrder.timeline.push({
-          status: "confirmed",
-          note: "Payment captured successfully via Razorpay.",
-          time: new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
-        });
-        kritSaveOrders();
-        _cart = [];
-        kritSaveCart();
-        kritShowOrderConfirmation(paidOrder);
-      }
-    };
-
-    var rzp = new Razorpay(options);
-    rzp.on("payment.failed", function(){
-      kritToast("Payment failed or was cancelled");
-    });
-    rzp.open();
-  } catch (error) {
-    kritToast(error.message || "Checkout could not start");
-  }
-}
-
-window.addToCart = addToCart;
-window.addToWishlist = addToWishlist;
-window.openCart = openCart;
-window.openWishlist = openWishlist;
-window.kritDetailWishlist = kritDetailWishlist;
-window.kritOpenCheckout = kritOpenCheckout;
-window.kritCloseDrawer = kritCloseDrawer;
-
-document.addEventListener("DOMContentLoaded", kritUpdateBadges);
-setTimeout(kritUpdateBadges, 300);
-</script>
-<script>
-window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
-  siteUrl: window.location.protocol === "file:" ? "https://kritsleep.in" : window.location.origin,
-  instagramUrl: "https://www.instagram.com/kritsleep",
-  supportEmail: "hello@kritsleep.in",
-  supportPhone: "9611211121",
-  facebookPageUrl: "",
-  facebookPixelId: "",
-  firebase: {
-    apiKey: "AIzaSyDHDCv4zEmSAiO6vr8pz733aON7cTeYg8I",
-    authDomain: "krit-7fa79.firebaseapp.com",
-    projectId: "krit-7fa79",
-    storageBucket: "krit-7fa79.firebasestorage.app",
-    messagingSenderId: "122215309182",
-    appId: "1:122215309182:web:41ba4fe6081193d5aa5d2f",
-    measurementId: "G-GNLGKSJTTJ"
-  }
-};
-</script>
-<script src="./assets/krit-commerce.js?v=20260423a"></script>
-<script src="./assets/krit-ui.js?v=20260416b"></script>
-<script src="./assets/krit-pages.js?v=20260416b"></script>
-<script src="./assets/krit-enhancements.js?v=20260421d"></script>
-<script src="./assets/krit-storefix.js?v=20260423a"></script>
-<script src="./assets/krit-tracking.js?v=20260421a"></script>
-</body>
-</html>
+      order_id: orderData && orderData.id ? order

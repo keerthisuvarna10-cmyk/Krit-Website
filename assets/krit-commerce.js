@@ -1076,43 +1076,26 @@
   }
 
   async function openTrackModal(){
-    var hasAccount = !!(window._kritAccount && (window._kritAccount.email || window._kritAccount.phone));
+    // Always use the compact dark-themed track overlay — never open full account dashboard
     var orders = mergeTransientOrders(Array.isArray(window._kritAccountOrders) ? window._kritAccountOrders.slice() : []);
     window._kritAccountOrders = orders;
-
-    if(hasAccount){
-      try{
-        if(typeof window.openAuthModal === 'function') window.openAuthModal();
-        await renderAccountDashboard();
-        switchAccountPanel('orders');
-        if(!orders.length){
-          if(window.kritToast) window.kritToast('No orders are available in your account yet.');
-          return;
-        }
-        setTimeout(function(){
-          openAccountOrderTracker(orders[0].id);
-        }, 120);
-        return;
-      }catch(trackErr){
-        console.warn('Track modal account flow failed, using fallback overlay.', trackErr);
-      }
-    }
 
     var legacyTrackOverlay = document.getElementById('track-overlay');
     if(legacyTrackOverlay){
       legacyTrackOverlay.classList.add('open');
       document.body.style.overflow = 'hidden';
       var trackInput = document.getElementById('track-awb');
-      if(trackInput) setTimeout(function(){ trackInput.focus(); }, 60);
+      if(trackInput){
+        // Pre-fill latest order ID if user has one
+        if(orders.length && !trackInput.value){
+          trackInput.value = orders[0].id || '';
+        }
+        setTimeout(function(){ trackInput.focus(); }, 60);
+      }
       return;
     }
 
-    if(orders.length){
-      openAccountOrderTracker(orders[0].id);
-      return;
-    }
-
-    if(window.kritToast) window.kritToast('No recent orders are available yet. Place an order first.');
+    if(window.kritToast) window.kritToast('Track order is not available on this page. Please visit the main site.');
   }
 
   function buildOrderTrackingTimeline(order){

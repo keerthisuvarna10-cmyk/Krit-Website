@@ -1291,16 +1291,12 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
         contact: payload.customer.phone ? ('+91' + payload.customer.phone) : ''
       },
       notes: { receipt: payload.id },
-      theme: { color: '#2f7d4f' },
-      // Show UPI/QR first, then other methods.
+      theme: { color: '#1B2340' },
+      // Show all payment methods — UPI first, then cards, netbanking, wallets, EMI, pay later.
       config: {
         display: {
-          blocks: {
-            utib: { name: 'Pay via UPI / QR', instruments: [{ method: 'upi' }] },
-            other: { name: 'Other Payment Methods', instruments: [{ method: 'card' }, { method: 'netbanking' }, { method: 'wallet' }, { method: 'emi' }, { method: 'paylater' }] }
-          },
-          sequence: ['block.utib', 'block.other'],
-          preferences: { show_default_blocks: false }
+          sequence: ['upi', 'card', 'netbanking', 'wallet', 'emi', 'paylater'],
+          preferences: { show_default_blocks: true }
         }
       },
       // UPI: allow both Collect (enter VPA) and Intent (open UPI app on mobile).
