@@ -1284,18 +1284,23 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       order_id: rzp.order.id,
       name: 'KRIT',
       description: 'Order ' + payload.id,
-      image: 'https://res.cloudinary.com/djicyjlid/image/upload/f_auto,q_auto,w_400,h_400,c_pad,b_white/v1776879169/ChatGPT_Image_Apr_22_2026_11_02_34_PM_bossql.png',
+      image: 'https://res.cloudinary.com/djicyjlid/image/upload/f_auto,q_auto,w_400,h_400,c_pad,b_rgb:1B2340/v1776879169/ChatGPT_Image_Apr_22_2026_11_02_34_PM_bossql.png',
       prefill: {
         name: payload.customer.name || '',
         email: payload.customer.email || '',
         contact: payload.customer.phone ? ('+91' + payload.customer.phone) : ''
       },
       notes: { receipt: payload.id },
-      theme: { color: '#1B2340' },
-      // Show every Razorpay-supported payment block by default.
+      theme: { color: '#2f7d4f' },
+      // Show UPI/QR first, then other methods.
       config: {
         display: {
-          preferences: { show_default_blocks: true }
+          blocks: {
+            utib: { name: 'Pay via UPI / QR', instruments: [{ method: 'upi' }] },
+            other: { name: 'Other Payment Methods', instruments: [{ method: 'card' }, { method: 'netbanking' }, { method: 'wallet' }, { method: 'emi' }, { method: 'paylater' }] }
+          },
+          sequence: ['block.utib', 'block.other'],
+          preferences: { show_default_blocks: false }
         }
       },
       // UPI: allow both Collect (enter VPA) and Intent (open UPI app on mobile).
