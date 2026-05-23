@@ -1,3 +1,4 @@
+// KRIT Website Server — v20260523
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
