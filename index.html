@@ -201,16 +201,10 @@
 }
 #track-close:hover{background:rgba(255,255,255,.12);color:#fff}
 .track-eyebrow{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:#4A7CC8;margin-bottom:5px;font-weight:700}
-.track-title{
-  font-family:'Playfair Display',serif;font-size:1.35rem;
-  color:#F0F4FF;margin-bottom:3px;font-weight:700;line-height:1.2
-}
+.track-title{font-family:'Playfair Display',serif;font-size:1.35rem;color:#F0F4FF;margin-bottom:3px;font-weight:700;line-height:1.2}
 .track-sub{font-size:.78rem;color:#6A84B0;margin-bottom:18px;line-height:1.5}
 .track-field{margin-bottom:12px}
-.track-field label{
-  display:block;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;
-  color:#5A72A0;margin-bottom:5px;font-weight:700
-}
+.track-field label{display:block;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:#5A72A0;margin-bottom:5px;font-weight:700}
 .track-field input,.track-field select{
   width:100%;padding:10px 13px;
   background:rgba(255,255,255,.05);border:1px solid rgba(47,93,168,.22);
@@ -236,16 +230,9 @@
 #track-result.error{border-left-color:#E53935;background:rgba(229,57,53,.08);color:#ffb4b4}
 #track-result a{color:#6AABFF;text-decoration:none}
 #track-result a:hover{text-decoration:underline}
-.track-partners{
-  margin-top:14px;padding-top:12px;border-top:1px solid rgba(47,93,168,.12);
-  font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:#3A5070;text-align:center
-}
+.track-partners{margin-top:14px;padding-top:12px;border-top:1px solid rgba(47,93,168,.12);font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:#3A5070;text-align:center}
 .track-partner-list{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:7px}
-.tp-badge{
-  padding:3px 9px;border:1px solid rgba(47,93,168,.18);border-radius:20px;
-  font-size:.66rem;letter-spacing:.04em;color:#4A6890;background:rgba(47,93,168,.06)
-}
-
+.tp-badge{padding:3px 9px;border:1px solid rgba(47,93,168,.18);border-radius:20px;font-size:.66rem;letter-spacing:.04em;color:#4A6890;background:rgba(47,93,168,.06)}
 
 
 /* ── Make in India badge ─────────────────────────────────── */
@@ -3183,66 +3170,30 @@ function closeInfoModal(id){ document.getElementById(id).classList.remove('open'
 window.openInfoModal = openInfoModal;
 window.closeInfoModal = closeInfoModal;
 
-/* ── Track Order modal helpers ── */
 function closeTrackModal(){
-  var ov = document.getElementById('track-overlay');
+  var ov=document.getElementById('track-overlay');
   if(ov) ov.classList.remove('open');
-  document.body.style.overflow = '';
-  var res = document.getElementById('track-result');
-  if(res) res.innerHTML = '';
+  document.body.style.overflow='';
+  var res=document.getElementById('track-result');
+  if(res) res.innerHTML='';
 }
-window.closeTrackModal = closeTrackModal;
-
-var COURIER_TRACK_URLS = {
-  shiprocket:  'https://shiprocket.co/tracking/',
-  delhivery:   'https://www.delhivery.com/track/package/',
-  dtdc:        'https://www.dtdc.in/tracking.asp?strCnno=',
-  bluedart:    'https://www.bluedart.com/tracking?tracknumbers=',
-  ecom:        'https://ecomexpress.in/tracking/?awb_field=',
-  xpressbees:  'https://www.xpressbees.com/shipment/tracking?awbNo=',
-  indiapost:   'https://www.indiapost.gov.in/vas/pages/trackconsignment.aspx?consNo=',
-  amazon:      'https://www.amazon.in/progress-tracker/package/?orderId=',
-  ekart:       'https://ekartlogistics.com/shipmenttrack/',
-  shadowfax:   'https://tracker.shadowfax.in/?awb='
-};
-
+window.closeTrackModal=closeTrackModal;
+var COURIER_TRACK_URLS={shiprocket:'https://shiprocket.co/tracking/',delhivery:'https://www.delhivery.com/track/package/',dtdc:'https://www.dtdc.in/tracking.asp?strCnno=',bluedart:'https://www.bluedart.com/tracking?tracknumbers=',ecom:'https://ecomexpress.in/tracking/?awb_field=',xpressbees:'https://www.xpressbees.com/shipment/tracking?awbNo=',indiapost:'https://www.indiapost.gov.in/vas/pages/trackconsignment.aspx?consNo=',amazon:'https://www.amazon.in/progress-tracker/package/?orderId=',ekart:'https://ekartlogistics.com/shipmenttrack/',shadowfax:'https://tracker.shadowfax.in/?awb='};
 function doTrack(){
-  var awb = (document.getElementById('track-awb') || {}).value || '';
-  var courier = (document.getElementById('track-courier') || {}).value || '';
-  var res = document.getElementById('track-result');
-  awb = awb.trim();
-  if(!awb){ if(res) res.innerHTML = '<p style="color:#c0392b;font-size:.9rem;margin:8px 0">Please enter your Order ID or AWB number.</p>'; return; }
-
-  /* If it looks like a KRIT order ID → try account order tracker */
-  if(awb.toUpperCase().startsWith('KRIT') && typeof window.openAccountOrderTracker === 'function'){
-    closeTrackModal();
-    window.openAccountOrderTracker(awb.toUpperCase());
-    return;
-  }
-
-  /* Courier AWB → open courier tracking page */
-  var baseUrl = courier && COURIER_TRACK_URLS[courier] ? COURIER_TRACK_URLS[courier] : null;
-  if(baseUrl){
-    window.open(baseUrl + encodeURIComponent(awb), '_blank');
-    if(res) res.innerHTML = '<p style="color:#2e7d32;font-size:.9rem;margin:8px 0">Opening courier tracking in a new tab…</p>';
-    return;
-  }
-
-  /* Generic — try Shiprocket as fallback */
-  if(res) res.innerHTML = '<p style="color:#1a4a8a;font-size:.9rem;margin:8px 0">Searching for <strong>' + awb + '</strong>…<br><a href="https://shiprocket.co/tracking/' + encodeURIComponent(awb) + '" target="_blank" style="color:#2F5DA8">Open on Shiprocket →</a></p>';
+  var awb=((document.getElementById('track-awb')||{}).value||'').trim();
+  var courier=((document.getElementById('track-courier')||{}).value||'');
+  var res=document.getElementById('track-result');
+  if(!awb){if(res)res.innerHTML='<p style="color:#ffb4b4;margin:6px 0">Please enter your Order ID or AWB.</p>';return;}
+  if(awb.toUpperCase().startsWith('KRIT')&&typeof window.openAccountOrderTracker==='function'){closeTrackModal();window.openAccountOrderTracker(awb.toUpperCase());return;}
+  var base=courier&&COURIER_TRACK_URLS[courier]?COURIER_TRACK_URLS[courier]:null;
+  if(base){window.open(base+encodeURIComponent(awb),'_blank');if(res)res.innerHTML='<p style="color:#6AABFF;margin:6px 0">Opening courier tracking in a new tab…</p>';return;}
+  if(res)res.innerHTML='<p style="color:#B0C8F0;margin:6px 0">Searching for <strong>'+awb+'</strong>…<br><a href="https://shiprocket.co/tracking/'+encodeURIComponent(awb)+'" target="_blank">Open on Shiprocket →</a></p>';
 }
-window.doTrack = doTrack;
-
-/* Allow Enter key in track AWB input */
-document.addEventListener('DOMContentLoaded', function(){
-  var inp = document.getElementById('track-awb');
-  if(inp) inp.addEventListener('keydown', function(e){ if(e.key === 'Enter') doTrack(); });
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape'){
-      var ov = document.getElementById('track-overlay');
-      if(ov && ov.classList.contains('open')) closeTrackModal();
-    }
-  });
+window.doTrack=doTrack;
+document.addEventListener('DOMContentLoaded',function(){
+  var inp=document.getElementById('track-awb');
+  if(inp)inp.addEventListener('keydown',function(e){if(e.key==='Enter')doTrack();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('track-overlay');if(ov&&ov.classList.contains('open'))closeTrackModal();}});
 });
 </script>
 
@@ -5009,4 +4960,85 @@ async function kritProceedCheckout(mode){
       name: KRIT_RAZORPAY.merchantName,
       description: KRIT_RAZORPAY.description,
       image: KRIT_RAZORPAY.image,
-      order_id: orderData && orderData.id ? order
+      order_id: orderData && orderData.id ? orderData.id : undefined,
+      prefill: {
+        name: customer.name,
+        email: customer.email,
+        contact: customer.phone
+      },
+      notes: {
+        address: customer.address,
+        city: customer.city,
+        pincode: customer.pincode,
+        items: _kritCheckoutItems.map(function(item){ return item.qty + " x " + item.name; }).join(", "),
+        extra_notes: customer.notes,
+        payment_choice: mode
+      },
+      config: kritRazorpayDisplayConfig(mode),
+      theme: { color: KRIT_RAZORPAY.themeColor || "#2F5DA8" },
+      handler: function(response){
+        var paidOrder = kritCreateOrderRecord(customer, mode, "paid", {
+          omsRef: response.razorpay_order_id || "",
+          trackingNumber: response.razorpay_payment_id || ""
+        });
+        paidOrder.status = "confirmed";
+        paidOrder.timeline.push({
+          status: "confirmed",
+          note: "Payment captured successfully via Razorpay.",
+          time: new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
+        });
+        kritSaveOrders();
+        _cart = [];
+        kritSaveCart();
+        kritShowOrderConfirmation(paidOrder);
+      }
+    };
+
+    var rzp = new Razorpay(options);
+    rzp.on("payment.failed", function(){
+      kritToast("Payment failed or was cancelled");
+    });
+    rzp.open();
+  } catch (error) {
+    kritToast(error.message || "Checkout could not start");
+  }
+}
+
+window.addToCart = addToCart;
+window.addToWishlist = addToWishlist;
+window.openCart = openCart;
+window.openWishlist = openWishlist;
+window.kritDetailWishlist = kritDetailWishlist;
+window.kritOpenCheckout = kritOpenCheckout;
+window.kritCloseDrawer = kritCloseDrawer;
+
+document.addEventListener("DOMContentLoaded", kritUpdateBadges);
+setTimeout(kritUpdateBadges, 300);
+</script>
+<script>
+window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
+  siteUrl: window.location.protocol === "file:" ? "https://kritsleep.in" : window.location.origin,
+  instagramUrl: "https://www.instagram.com/kritsleep",
+  supportEmail: "hello@kritsleep.in",
+  supportPhone: "9611211121",
+  facebookPageUrl: "",
+  facebookPixelId: "",
+  firebase: {
+    apiKey: "AIzaSyDHDCv4zEmSAiO6vr8pz733aON7cTeYg8I",
+    authDomain: "krit-7fa79.firebaseapp.com",
+    projectId: "krit-7fa79",
+    storageBucket: "krit-7fa79.firebasestorage.app",
+    messagingSenderId: "122215309182",
+    appId: "1:122215309182:web:41ba4fe6081193d5aa5d2f",
+    measurementId: "G-GNLGKSJTTJ"
+  }
+};
+</script>
+<script src="./assets/krit-commerce.js?v=20260423a"></script>
+<script src="./assets/krit-ui.js?v=20260416b"></script>
+<script src="./assets/krit-pages.js?v=20260416b"></script>
+<script src="./assets/krit-enhancements.js?v=20260421d"></script>
+<script src="./assets/krit-storefix.js?v=20260423a"></script>
+<script src="./assets/krit-tracking.js?v=20260421a"></script>
+</body>
+</html>
