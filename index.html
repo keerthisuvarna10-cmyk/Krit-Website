@@ -1548,7 +1548,7 @@ button, .bp, .bs, .nc {
   <a href="#testi" onclick="closeDrw()">Reviews</a>
   <a href="#blog" onclick="closeDrw()">Blog</a>
   <a href="#buy" onclick="closeDrw()">Shop Now</a>
-  <a href="#" onclick="closeDrw();openTrackModal()">Track Order</a>
+  <a href="javascript:void(0)" onclick="closeDrw();setTimeout(function(){openTrackModal();},200)">Track Order</a>
   <div style="display:flex;gap:16px;padding:16px 0;border-top:1px solid rgba(47,93,168,.15);margin-top:8px">
     <button onclick="closeDrw();openAuthModal()" style="flex:1;padding:10px;background:rgba(47,93,168,.15);border:1px solid rgba(47,93,168,.25);border-radius:8px;color:#8899BB;font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -3172,6 +3172,68 @@ function openInfoModal(id){ document.getElementById(id).classList.add('open'); d
 function closeInfoModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
 window.openInfoModal = openInfoModal;
 window.closeInfoModal = closeInfoModal;
+
+/* ── Track Order modal helpers ── */
+function closeTrackModal(){
+  var ov = document.getElementById('track-overlay');
+  if(ov) ov.classList.remove('open');
+  document.body.style.overflow = '';
+  var res = document.getElementById('track-result');
+  if(res) res.innerHTML = '';
+}
+window.closeTrackModal = closeTrackModal;
+
+var COURIER_TRACK_URLS = {
+  shiprocket:  'https://shiprocket.co/tracking/',
+  delhivery:   'https://www.delhivery.com/track/package/',
+  dtdc:        'https://www.dtdc.in/tracking.asp?strCnno=',
+  bluedart:    'https://www.bluedart.com/tracking?tracknumbers=',
+  ecom:        'https://ecomexpress.in/tracking/?awb_field=',
+  xpressbees:  'https://www.xpressbees.com/shipment/tracking?awbNo=',
+  indiapost:   'https://www.indiapost.gov.in/vas/pages/trackconsignment.aspx?consNo=',
+  amazon:      'https://www.amazon.in/progress-tracker/package/?orderId=',
+  ekart:       'https://ekartlogistics.com/shipmenttrack/',
+  shadowfax:   'https://tracker.shadowfax.in/?awb='
+};
+
+function doTrack(){
+  var awb = (document.getElementById('track-awb') || {}).value || '';
+  var courier = (document.getElementById('track-courier') || {}).value || '';
+  var res = document.getElementById('track-result');
+  awb = awb.trim();
+  if(!awb){ if(res) res.innerHTML = '<p style="color:#c0392b;font-size:.9rem;margin:8px 0">Please enter your Order ID or AWB number.</p>'; return; }
+
+  /* If it looks like a KRIT order ID → try account order tracker */
+  if(awb.toUpperCase().startsWith('KRIT') && typeof window.openAccountOrderTracker === 'function'){
+    closeTrackModal();
+    window.openAccountOrderTracker(awb.toUpperCase());
+    return;
+  }
+
+  /* Courier AWB → open courier tracking page */
+  var baseUrl = courier && COURIER_TRACK_URLS[courier] ? COURIER_TRACK_URLS[courier] : null;
+  if(baseUrl){
+    window.open(baseUrl + encodeURIComponent(awb), '_blank');
+    if(res) res.innerHTML = '<p style="color:#2e7d32;font-size:.9rem;margin:8px 0">Opening courier tracking in a new tab…</p>';
+    return;
+  }
+
+  /* Generic — try Shiprocket as fallback */
+  if(res) res.innerHTML = '<p style="color:#1a4a8a;font-size:.9rem;margin:8px 0">Searching for <strong>' + awb + '</strong>…<br><a href="https://shiprocket.co/tracking/' + encodeURIComponent(awb) + '" target="_blank" style="color:#2F5DA8">Open on Shiprocket →</a></p>';
+}
+window.doTrack = doTrack;
+
+/* Allow Enter key in track AWB input */
+document.addEventListener('DOMContentLoaded', function(){
+  var inp = document.getElementById('track-awb');
+  if(inp) inp.addEventListener('keydown', function(e){ if(e.key === 'Enter') doTrack(); });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      var ov = document.getElementById('track-overlay');
+      if(ov && ov.classList.contains('open')) closeTrackModal();
+    }
+  });
+});
 </script>
 
 <!-- ════ PILLOW PICKER QUIZ ════ -->
