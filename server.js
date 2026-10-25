@@ -3,6 +3,7 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const crypto = require('crypto');
+const { priceOrder, findProduct } = require('./pricing');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -523,8 +524,44 @@ app.post('/api/erp/customer', requireAuth, async (req, res) => {
   res.status(result.status).json(result.body);
 });
 
+/* Replace item prices and totals sent by the browser with the real ones, so
+   the ERP (and the COD amount the courier collects) can't be lowered by
+   editing the page. Handles both order shapes the site sends:
+   checkout.html  → items[{ id, name, qty, price }] + subtotal/discount/total
+   krit-commerce  → items[{ product_id, description, qty, rate, amount }]
+   If an item isn't in the price list the order is passed through as-is. */
+function repriceOrderForErp(order) {
+  if (!order || !Array.isArray(order.items) || !order.items.length) return order;
+  const usesRate = order.items.some((item) => item && item.rate !== undefined);
+
+  if (usesRate) {
+    if (!order.items.every((item) => findProduct(item))) return order;
+    return {
+      ...order,
+      items: order.items.map((item) => {
+        const product = findProduct(item);
+        const qty = Math.max(1, Math.floor(Number(item.qty || 1)));
+        return { ...item, qty, rate: product.price, amount: product.price * qty };
+      })
+    };
+  }
+
+  const priced = priceOrder({ items: order.items, couponCode: order.couponCode, paymentMode: order.paymentMode });
+  if (!priced.ok) return order;
+  return {
+    ...order,
+    items: order.items.map((item, i) => ({ ...item, id: priced.lines[i].id, qty: priced.lines[i].qty, price: priced.lines[i].price })),
+    subtotal: priced.subtotal,
+    discount: priced.discount,
+    couponCode: priced.couponCode,
+    paymentAdjust: priced.paymentAdjust,
+    shipping: priced.shipping,
+    total: priced.total
+  };
+}
+
 app.post('/api/erp/order', requireAuth, async (req, res) => {
-  const result = await postToErp('/api/webhook/order', req.body);
+  const result = await postToErp('/api/webhook/order', repriceOrderForErp(req.body));
   res.status(result.status).json(result.body);
 });
 
@@ -547,10 +584,23 @@ app.post('/api/razorpay/order', requireAuth, async (req, res) => {
   if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
     return res.status(503).json({ error: 'Payment gateway is not configured. Please try again shortly.' });
   }
-  const amount = Number(req.body && req.body.amount);
   const receipt = String(req.body && req.body.receipt || '').slice(0, 40);
-  if (!amount || amount <= 0 || !receipt) {
-    return res.status(400).json({ error: 'Invalid amount or receipt.' });
+  if (!receipt) {
+    return res.status(400).json({ error: 'Invalid receipt.' });
+  }
+  // The amount is calculated here from product ids + quantities. Any amount
+  // the browser sends is ignored, so it can't be edited to pay less.
+  const priced = priceOrder({
+    items: req.body && req.body.items,
+    couponCode: req.body && req.body.couponCode,
+    paymentMode: 'online'
+  });
+  if (!priced.ok) {
+    return res.status(400).json({ error: priced.error });
+  }
+  const amount = priced.total;
+  if (amount <= 0) {
+    return res.status(400).json({ error: 'Invalid order amount.' });
   }
   try {
     const auth = Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString('base64');
@@ -580,7 +630,8 @@ app.post('/api/razorpay/order', requireAuth, async (req, res) => {
       amount: body.amount,
       currency: body.currency,
       receipt: body.receipt,
-      key_id: RAZORPAY_KEY_ID
+      key_id: RAZORPAY_KEY_ID,
+      pricing: priced
     });
   } catch (error) {
     return res.status(502).json({ error: error.message || 'Payment gateway request failed.' });

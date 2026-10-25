@@ -1148,12 +1148,17 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     }
   }
 
-  async function createRazorpayOrder(amount, receipt){
+  // The server works out the amount from the items; we only send ids + qty.
+  async function createRazorpayOrder(payload){
     try {
       var r = await fetch('/api/razorpay/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: amount, receipt: receipt })
+        body: JSON.stringify({
+          receipt: payload.id,
+          couponCode: payload.couponCode || '',
+          items: payload.items.map(function(i){ return { id: i.id, name: i.name, qty: i.qty }; })
+        })
       });
       var body = {};
       try { body = await r.json(); } catch(e){ body = {}; }
@@ -1249,7 +1254,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       return;
     }
 
-    var rzp = await createRazorpayOrder(payload.total, payload.id);
+    var rzp = await createRazorpayOrder(payload);
     if(!rzp.ok){
       var errMsg = rzp.error || 'Could not start payment. Please try again.';
       // If Razorpay isn't configured yet, steer user to COD
@@ -1264,6 +1269,20 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       state.placing = false;
       btn.disabled = false;
       btn.innerHTML = originalLabel;
+      return;
+    }
+
+    // If the server's total differs from what the page showed (e.g. an old
+    // price saved in the cart), show the customer the correct total first.
+    var priced = rzp.order.pricing;
+    if(priced && priced.total !== payload.total){
+      priced.lines.forEach(function(line, idx){
+        if(state.items[idx]){ state.items[idx].price = line.price; state.items[idx].id = line.id; }
+      });
+      state.placing = false;
+      btn.disabled = false;
+      renderTotals(); // also refreshes the button label with the new total
+      showToast('Prices have been updated. Please check the new total and place your order again.');
       return;
     }
 
