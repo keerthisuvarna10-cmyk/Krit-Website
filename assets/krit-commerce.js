@@ -1101,27 +1101,21 @@
     openAccountOrderDetails(order);
   }
 
+  /* Every "Track Order" button opens the Track Order page, which shows the
+     live status from the ERP (order ID + mobile number). The latest order
+     placed on this device is filled in automatically. */
   async function openTrackModal(){
-    // Always use the compact dark-themed track overlay — never open full account dashboard
-    var orders = mergeTransientOrders(Array.isArray(window._kritAccountOrders) ? window._kritAccountOrders.slice() : []);
-    window._kritAccountOrders = orders;
-
-    var legacyTrackOverlay = document.getElementById('track-overlay');
-    if(legacyTrackOverlay){
-      legacyTrackOverlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
-      var trackInput = document.getElementById('track-awb');
-      if(trackInput){
-        // Pre-fill latest order ID if user has one
-        if(orders.length && !trackInput.value){
-          trackInput.value = orders[0].id || '';
+    var url = '/track.html';
+    try {
+      var last = JSON.parse(localStorage.getItem('krit_track_last') || 'null');
+      if(!last){
+        var local = JSON.parse(localStorage.getItem('krit_orders') || '[]');
+        if(local && local[0] && local[0].id){
+          localStorage.setItem('krit_track_last', JSON.stringify({ id: local[0].id, phone: (local[0].customer && local[0].customer.phone) || '' }));
         }
-        setTimeout(function(){ trackInput.focus(); }, 60);
       }
-      return;
-    }
-
-    if(window.kritToast) window.kritToast('Track order is not available on this page. Please visit the main site.');
+    } catch(e){}
+    window.location.href = url;
   }
 
   function buildOrderTrackingTimeline(order){

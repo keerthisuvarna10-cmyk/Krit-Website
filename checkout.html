@@ -619,7 +619,7 @@
 
       <!-- CTAs -->
       <div class="co-success-cta">
-        <a href="/account.html#orders" class="primary" id="coSuccessTrack">Track my order</a>
+        <a href="/track.html" class="primary" id="coSuccessTrack">Track my order</a>
         <a href="/account.html">View all orders</a>
         <a href="/">Continue shopping</a>
       </div>
@@ -1133,9 +1133,11 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     setText('coSuccessContactEmail', c.email || '—');
     setText('coSuccessContactPhone', c.phone ? ('+91 ' + c.phone) : '—');
 
-    // Track link — pass order id via hash
+    // Track link opens the Track Order page with this order filled in
+    // (the phone is remembered on this device only, not put in the link).
     var track = document.getElementById('coSuccessTrack');
-    if(track && order.id){ track.href = '/account.html#order-' + encodeURIComponent(order.id); }
+    if(track && order.id){ track.href = '/track.html?id=' + encodeURIComponent(order.id); }
+    try { localStorage.setItem('krit_track_last', JSON.stringify({ id: order.id, phone: c.phone || '' })); } catch(e){}
   }
 
   function isBuyNowSource(){

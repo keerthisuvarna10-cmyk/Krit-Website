@@ -776,6 +776,25 @@ app.post('/api/razorpay/verify', requireAuth, (req, res) => {
   return res.json({ ok: true, razorpay_order_id: orderId, razorpay_payment_id: paymentId });
 });
 
+/* ── Track Order ──
+   Anyone with the order ID AND the mobile number on the order can see its
+   status (no login needed, so COD/guest customers can track too). Limited
+   per visitor so IDs can't be guessed by trying many. */
+const tooManyTrackLookups = rateLimiter(30, 60 * 60 * 1000);
+app.post('/api/track-order', requireAuth, async (req, res) => {
+  if (tooManyTrackLookups(req)) {
+    return res.status(429).json({ error: 'Too many tries. Please wait a while, or message us on WhatsApp for help.' });
+  }
+  const id = String((req.body && req.body.orderId) || '').trim().replace(/^#/, '').toUpperCase();
+  const phone = String((req.body && req.body.phone) || '').replace(/\D/g, '').slice(-10);
+  if (!ORDER_ID_PATTERN.test(id)) return res.status(400).json({ error: 'Please enter your order ID (it starts with KRIT).' });
+  if (phone.length !== 10) return res.status(400).json({ error: 'Please enter the 10-digit mobile number used for the order.' });
+  const result = await postToErp('/api/webhook/track-order', { id, phone });
+  if (result.status === 404) return res.status(404).json({ error: 'We could not find an order with that ID and mobile number. Please check both.' });
+  if (!result.ok) return res.status(502).json({ error: 'Tracking is unavailable right now. Please try again in a few minutes.' });
+  res.json(result.body);
+});
+
 // Order alerts are now sent by /api/erp/order once an order is saved, so this
 // can no longer be used to send messages to arbitrary numbers or emails.
 // Kept so older pages that still call it don't show an error.
@@ -789,6 +808,8 @@ app.get('/index.html', requireAuth, sendProtectedPage('index.html'));
 app.get('/product.html', requireAuth, sendProtectedPage('product.html'));
 app.get('/account.html', requireAuth, sendProtectedPage('account.html'));
 app.get('/checkout.html', requireAuth, sendProtectedPage('checkout.html'));
+app.get('/track.html', requireAuth, sendProtectedPage('track.html'));
+app.get('/track', (_req, res) => res.redirect(301, '/track.html'));
 app.get('/KRIT_website_final%20(53).html', requireAuth, (_req, res) => res.redirect('/index.html'));
 app.get('/KRIT_website_final (53).html', requireAuth, (_req, res) => res.redirect('/index.html'));
 
