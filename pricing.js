@@ -1,24 +1,35 @@
 'use strict';
 
 /*
- * Server-side price list for kritsleep.in.
+ * Server-side pricing for kritsleep.in.
  *
  * The server uses this to work out what a customer actually owes, so the
  * amount charged on Razorpay never comes from the browser.
  *
- * WHEN YOU CHANGE A PRICE, COUPON OR FEE: update it here AND in the pages
- * (KRIT_PRODUCTS in index.html / product.html / account.html, and the
- * constants at the top of the checkout script in checkout.html). If the
- * two disagree, this file wins and the customer is shown the corrected
- * total before paying.
+ * PRODUCT PRICES come from assets/krit-products.js — the same file the
+ * pages use — so change prices there only.
+ *
+ * COUPONS AND FEES below must match the constants at the top of the
+ * checkout script in checkout.html. If they ever disagree, this file wins
+ * and the customer is shown the corrected total before paying.
  */
 
-const PRODUCTS = [
-  { id: 'contour-3', name: 'Contour Pillow', price: 1999 },
-  { id: 'half-3', name: 'Half Pillow 3 in', price: 1699 },
-  { id: 'half-2', name: 'Half Pillow 2 in', price: 1499 },
-  { id: 'soap-2', name: 'Soap Shape Pillow', price: 1899 }
-];
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+
+function loadProducts() {
+  const source = fs.readFileSync(path.join(__dirname, 'assets', 'krit-products.js'), 'utf8');
+  const sandbox = {};
+  vm.runInNewContext(source + '\n;this.list = KRIT_PRODUCTS;', sandbox, { timeout: 1000 });
+  const list = (sandbox.list || []).map((p) => ({ id: String(p.id), name: String(p.name), price: Number(p.price) }));
+  if (!list.length || list.some((p) => !p.id || !p.name || !(p.price > 0))) {
+    throw new Error('assets/krit-products.js has a product without an id, name or price.');
+  }
+  return list;
+}
+
+const PRODUCTS = loadProducts();
 
 const COUPONS = [
   { code: 'FLAT200', kind: 'flat', value: 200, min: 1499 },

@@ -1,6 +1,6 @@
 ﻿(function(){
   var CONFIG = window.KRIT_ECOMMERCE || {
-    siteUrl: 'https://kritsleep.in',
+    siteUrl: 'https://www.kritsleep.in',
     instagramUrl: 'https://www.instagram.com/kritsleep',
     facebookPageUrl: 'https://www.facebook.com/',
     facebookPixelId: '',
@@ -816,12 +816,36 @@
     }
   }
 
+  /* Proof of the current Firebase login, checked by the server with Google.
+     Without it the server won't read or change a customer's details. */
+  async function getFirebaseIdToken(){
+    try {
+      var fb = await ensureFirebase();
+      if(!fb || !fb.auth) return '';
+      var auth = fb.auth();
+      var user = auth.currentUser;
+      if(!user){
+        // Right after a page load Firebase is still restoring the login.
+        user = await new Promise(function(resolve){
+          var done = false;
+          var stop = auth.onAuthStateChanged(function(u){ if(!done){ done = true; stop(); resolve(u); } });
+          setTimeout(function(){ if(!done){ done = true; stop(); resolve(auth.currentUser); } }, 4000);
+        });
+      }
+      return user ? await user.getIdToken() : '';
+    } catch(e){
+      return '';
+    }
+  }
+
   async function syncCustomerToERP(profile, source){
     if(!profile || (!profile.email && !profile.phone)) return false;
+    var idToken = await getFirebaseIdToken();
+    if(!idToken) return false;
     try {
       var response = await fetch('/api/erp/customer', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
         body: JSON.stringify({
           name: profile.name || 'KRIT Customer',
           phone: profile.phone || '',
@@ -977,9 +1001,11 @@
 
   async function fetchCustomerOrdersFromERP(account){
     if(!account || (!account.email && !account.phone)) return [];
+    var idToken = await getFirebaseIdToken();
+    if(!idToken) return [];
     var response = await fetch('/api/erp/customer-orders', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
       body: JSON.stringify({
         email: account.email || '',
         phone: account.phone || ''

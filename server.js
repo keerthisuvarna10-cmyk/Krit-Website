@@ -3,7 +3,8 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const crypto = require('crypto');
-const { priceOrder, findProduct } = require('./pricing');
+const { priceOrder } = require('./pricing');
+const { verifyFirebaseUser, bearerToken, verifyRazorpayPayment, rateLimiter, escapeHtml } = require('./security');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -139,9 +140,9 @@ async function sendSmtpOrderEmails(order) {
       text: message.customerText,
       html: `<div style="font-family:Arial,sans-serif;line-height:1.7;color:#122033">
         <h2 style="margin:0 0 12px;color:#1e7a46">Your KRIT order has been received</h2>
-        <p>Hi ${message.customerName},</p>
-        <p>Your order <strong>${order.id}</strong> has been received successfully.</p>
-        <p><strong>Item:</strong> ${message.firstItem}<br><strong>Payment:</strong> ${message.paymentLabel}<br><strong>Total:</strong> Rs ${message.total}</p>
+        <p>Hi ${escapeHtml(message.customerName)},</p>
+        <p>Your order <strong>${escapeHtml(order.id)}</strong> has been received successfully.</p>
+        <p><strong>Item:</strong> ${escapeHtml(message.firstItem)}<br><strong>Payment:</strong> ${escapeHtml(message.paymentLabel)}<br><strong>Total:</strong> Rs ${escapeHtml(message.total)}</p>
         <p>You can track your order anytime from your KRIT account.</p>
         <p>Team KRIT</p>
       </div>`
@@ -519,55 +520,169 @@ app.use((req, res, next) => {
   return requireAuth(req, res, next);
 });
 
+/* ── Customer accounts ──
+   Both calls need a real Firebase login. The phone number / email used to
+   find the customer come from that login (checked with Google), never from
+   what the browser sends, so nobody can read or overwrite someone else's
+   details by typing in their number. */
 app.post('/api/erp/customer', requireAuth, async (req, res) => {
-  const result = await postToErp('/api/webhook/customer', req.body);
-  res.status(result.status).json(result.body);
-});
-
-/* Replace item prices and totals sent by the browser with the real ones, so
-   the ERP (and the COD amount the courier collects) can't be lowered by
-   editing the page. Handles both order shapes the site sends:
-   checkout.html  → items[{ id, name, qty, price }] + subtotal/discount/total
-   krit-commerce  → items[{ product_id, description, qty, rate, amount }]
-   If an item isn't in the price list the order is passed through as-is. */
-function repriceOrderForErp(order) {
-  if (!order || !Array.isArray(order.items) || !order.items.length) return order;
-  const usesRate = order.items.some((item) => item && item.rate !== undefined);
-
-  if (usesRate) {
-    if (!order.items.every((item) => findProduct(item))) return order;
-    return {
-      ...order,
-      items: order.items.map((item) => {
-        const product = findProduct(item);
-        const qty = Math.max(1, Math.floor(Number(item.qty || 1)));
-        return { ...item, qty, rate: product.price, amount: product.price * qty };
-      })
-    };
-  }
-
-  const priced = priceOrder({ items: order.items, couponCode: order.couponCode, paymentMode: order.paymentMode });
-  if (!priced.ok) return order;
-  return {
-    ...order,
-    items: order.items.map((item, i) => ({ ...item, id: priced.lines[i].id, qty: priced.lines[i].qty, price: priced.lines[i].price })),
-    subtotal: priced.subtotal,
-    discount: priced.discount,
-    couponCode: priced.couponCode,
-    paymentAdjust: priced.paymentAdjust,
-    shipping: priced.shipping,
-    total: priced.total
-  };
-}
-
-app.post('/api/erp/order', requireAuth, async (req, res) => {
-  const result = await postToErp('/api/webhook/order', repriceOrderForErp(req.body));
+  const user = await verifyFirebaseUser(bearerToken(req));
+  if (!user) return res.status(401).json({ error: 'Please log in again.' });
+  const body = req.body || {};
+  const result = await postToErp('/api/webhook/customer', {
+    ...body,
+    phone: user.phone,
+    email: user.email || (user.phone ? '' : body.email || '')
+  });
   res.status(result.status).json(result.body);
 });
 
 app.post('/api/erp/customer-orders', requireAuth, async (req, res) => {
-  const result = await postToErp('/api/webhook/customer-orders', req.body);
+  const user = await verifyFirebaseUser(bearerToken(req));
+  if (!user) return res.status(401).json({ error: 'Please log in again to see your orders.' });
+  const result = await postToErp('/api/webhook/customer-orders', { phone: user.phone, email: user.email });
   res.status(result.status).json(result.body);
+});
+
+/* ── Orders ──
+   The server rebuilds every order from product ids + quantities using the
+   price list in pricing.js, checks the customer details, and for online
+   orders confirms with Razorpay that the exact amount was paid. Only then is
+   the order sent to the ERP and the order alerts sent. */
+const ORDER_ID_PATTERN = /^[A-Za-z0-9_-]{4,40}$/;
+const tooManyOrders = rateLimiter(15, 60 * 60 * 1000); // 15 per visitor per hour
+
+function cleanText(value, max) {
+  return String(value == null ? '' : value).replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max);
+}
+
+/* Older pages sent { customer_name, items:[{ product_id, description, rate }] };
+   checkout.html sends { customer:{...}, items:[{ id, name, price }] }. */
+function toCheckoutShape(body) {
+  if (body.customer || !body.customer_name) return body;
+  const mode = String(body.payment_mode || '').toLowerCase();
+  return {
+    ...body,
+    paymentMode: mode.includes('cod') || mode.includes('cash') ? 'cod' : 'online',
+    items: (body.items || []).map((i) => ({ id: i.product_id || i.sku, name: i.description, qty: i.qty })),
+    customer: {
+      name: body.customer_name, phone: body.customer_phone, email: body.customer_email,
+      address: body.customer_address, city: body.customer_city, state: body.customer_state,
+      pincode: body.customer_pincode
+    }
+  };
+}
+
+function buildServerOrder(rawBody) {
+  const body = toCheckoutShape(rawBody || {});
+  const id = String(body.id || '');
+  if (!ORDER_ID_PATTERN.test(id)) return { ok: false, error: 'Invalid order id.' };
+
+  const isCod = String(body.paymentMode || '').toLowerCase() === 'cod';
+  const priced = priceOrder({ items: body.items, couponCode: body.couponCode, paymentMode: isCod ? 'cod' : 'online' });
+  if (!priced.ok) return { ok: false, error: priced.error };
+
+  const c = body.customer || {};
+  const customer = {
+    name: cleanText(c.name, 100),
+    email: cleanText(c.email, 160),
+    phone: String(c.phone || '').replace(/\D/g, '').slice(-10),
+    address: cleanText(c.address, 400),
+    landmark: cleanText(c.landmark, 150),
+    city: cleanText(c.city, 80),
+    state: cleanText(c.state, 80),
+    pincode: String(c.pincode || '').replace(/\D/g, '').slice(0, 6),
+    notes: cleanText(c.notes, 300)
+  };
+  if (!customer.name) return { ok: false, error: 'Please enter your name.' };
+  if (!/^[6-9]\d{9}$/.test(customer.phone)) return { ok: false, error: 'Please enter a valid 10-digit mobile number.' };
+  if (!customer.address) return { ok: false, error: 'Please enter your delivery address.' };
+  if (!/^\d{6}$/.test(customer.pincode)) return { ok: false, error: 'Please enter a valid 6-digit PIN code.' };
+  if (customer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) customer.email = '';
+
+  const items = priced.lines.map((line, i) => ({
+    id: line.id,
+    name: cleanText((body.items[i] && body.items[i].name) || line.id, 120),
+    qty: line.qty,
+    price: line.price
+  }));
+
+  return {
+    ok: true,
+    isCod,
+    order: {
+      id,
+      createdAt: new Date().toISOString(),
+      channel: 'website',
+      items,
+      subtotal: priced.subtotal,
+      discount: priced.discount,
+      couponCode: priced.couponCode,
+      paymentMode: isCod ? 'cod' : 'online',
+      paymentLabel: isCod ? 'Cash on Delivery' : 'Online Payment',
+      paymentAdjust: priced.paymentAdjust,
+      shipping: priced.shipping,
+      total: priced.total,
+      status: isCod ? 'confirmed' : 'payment_pending',
+      paymentVerified: false,
+      razorpayOrderId: cleanText(body.razorpayOrderId, 60),
+      razorpayPaymentId: cleanText(body.razorpayPaymentId, 60),
+      customer
+    },
+    signature: String(body.razorpaySignature || '')
+  };
+}
+
+app.post('/api/erp/order', requireAuth, async (req, res) => {
+  if (tooManyOrders(req)) {
+    return res.status(429).json({ error: 'Too many orders from this device. Please try again later or contact us on WhatsApp.' });
+  }
+  const built = buildServerOrder(req.body);
+  if (!built.ok) return res.status(400).json({ error: built.error });
+  const order = built.order;
+
+  if (!built.isCod) {
+    const payment = await verifyRazorpayPayment({
+      keyId: RAZORPAY_KEY_ID,
+      keySecret: RAZORPAY_KEY_SECRET,
+      razorpayOrderId: order.razorpayOrderId,
+      razorpayPaymentId: order.razorpayPaymentId,
+      signature: built.signature,
+      expectedAmount: order.total,
+      receipt: order.id
+    });
+    if (!payment.ok) {
+      console.warn('Order rejected, payment not confirmed:', order.id, payment.error);
+      return res.status(402).json({ error: payment.error });
+    }
+    order.paymentVerified = true;
+    order.status = 'paid';
+  }
+
+  const result = await postToErp('/api/webhook/order', order);
+  if (!result.ok) {
+    console.error('ERP did not save order', order.id, result.status, JSON.stringify(result.body).slice(0, 200));
+    if (order.paymentVerified) {
+      // The customer has paid. Keep the full order in the Railway logs so it
+      // can be re-entered by hand, and still alert the owner.
+      console.error('PAID ORDER NOT IN ERP — full details:', JSON.stringify(order));
+      notifyOrderStakeholders(order).catch(() => {});
+    }
+    return res.status(502).json({ error: 'We could not save your order. Please try again.', paid: order.paymentVerified });
+  }
+
+  // Order alerts go out from here, only for orders that were really placed.
+  // A retry of the same order (duplicate) does not send them again.
+  if (!(result.body && result.body.duplicate)) {
+    notifyOrderStakeholders(order)
+      .then((channels) => {
+        const failed = channels.filter((ch) => ch && !ch.ok && !ch.skipped);
+        if (failed.length) console.warn('Order alert failures for', order.id, JSON.stringify(failed).slice(0, 300));
+      })
+      .catch((error) => console.warn('Order alerts failed for', order.id, error.message));
+  }
+
+  res.json({ ok: true, id: order.id, total: order.total, paymentVerified: order.paymentVerified });
 });
 
 app.post('/api/erp/visit', requireAuth, async (req, res) => {
@@ -661,29 +776,11 @@ app.post('/api/razorpay/verify', requireAuth, (req, res) => {
   return res.json({ ok: true, razorpay_order_id: orderId, razorpay_payment_id: paymentId });
 });
 
-app.post('/api/notify/order', requireAuth, async (req, res) => {
-  const order = req.body || {};
-  if (!order.id) {
-    return res.status(400).json({ error: 'Order ID is required for notifications.' });
-  }
-
-  try {
-    const channels = await notifyOrderStakeholders(order);
-    const delivered = channels.filter((item) => item && item.ok).map((item) => item.channel);
-    const failed = channels.filter((item) => item && !item.ok && !item.skipped);
-    const skipped = channels.filter((item) => item && item.skipped);
-    return res.status(failed.length ? 207 : 200).json({
-      ok: failed.length === 0,
-      delivered,
-      failed,
-      skipped
-    });
-  } catch (error) {
-    return res.status(500).json({
-      ok: false,
-      error: error && error.message ? error.message : 'Order notifications failed.'
-    });
-  }
+// Order alerts are now sent by /api/erp/order once an order is saved, so this
+// can no longer be used to send messages to arbitrary numbers or emails.
+// Kept so older pages that still call it don't show an error.
+app.post('/api/notify/order', requireAuth, (_req, res) => {
+  res.json({ ok: true, skipped: true, reason: 'Order alerts are sent automatically when the order is saved.' });
 });
 
 app.use('/assets', requireAuth, express.static(path.join(__dirname, 'assets')));
@@ -697,7 +794,18 @@ app.get('/KRIT_website_final (53).html', requireAuth, (_req, res) => res.redirec
 
 // ── Clean URLs ──
 app.get('/home', (_req, res) => res.redirect(301, '/'));
-app.get('/product/:id', requireAuth, (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+// Product links serve the homepage, which opens that product. Each gets its
+// own canonical URL so Google treats them as separate product pages.
+const PRODUCT_IDS = new Set(require('./pricing').PRODUCTS.map((p) => p.id));
+app.get('/product/:id', requireAuth, (req, res) => {
+  if (!PRODUCT_IDS.has(req.params.id)) return res.redirect(302, '/#buy');
+  const fs = require('fs');
+  const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8').replace(
+    '<link rel="canonical" href="https://www.kritsleep.in/">',
+    `<link rel="canonical" href="https://www.kritsleep.in/product/${req.params.id}">`
+  );
+  res.type('html').send(html);
+});
 
 
 // ── SEO: robots.txt ──

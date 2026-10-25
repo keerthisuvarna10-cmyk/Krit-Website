@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Secure Checkout | KRIT</title>
+<!-- Google Analytics: needed here so completed purchases are recorded -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HH8J1E6G44"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-HH8J1E6G44', { page_title: document.title, page_location: window.location.href });
+</script>
 <link rel="icon" type="image/png" href="https://res.cloudinary.com/djicyjlid/image/upload/v1774021620/ChatGPT_Image_Mar_20_2026_09_16_47_PM_byvdhf.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -627,7 +635,7 @@
 
 <script>
 window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
-  siteUrl: window.location.protocol === "file:" ? "https://kritsleep.in" : window.location.origin,
+  siteUrl: window.location.protocol === "file:" ? "https://www.kritsleep.in" : window.location.origin,
   instagramUrl: "https://www.instagram.com/kritsleep",
   supportEmail: "hello@kritsleep.in",
   supportPhone: "9611211121",
@@ -985,30 +993,28 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     state.reviewConfirmed = false;
   }
 
+  // Sends the order to the server, which checks prices (and payment for
+  // online orders), saves it in the ERP and sends the order alerts.
+  // Network hiccups and ERP errors are retried; a rejected order is not.
   async function postErpOrder(order){
-    try {
-      var r = await fetch('/api/erp/order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(order)
-      });
-      return { ok: r.ok, status: r.status };
-    } catch(e){
-      return { ok: false, status: 0, error: e && e.message };
+    var last = { ok: false, status: 0, error: 'Could not reach KRIT. Please check your connection.' };
+    for(var attempt = 0; attempt < 3; attempt++){
+      if(attempt) await new Promise(function(r){ setTimeout(r, 1500 * attempt); });
+      try {
+        var r = await fetch('/api/erp/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(order)
+        });
+        var body = {};
+        try { body = await r.json(); } catch(e){}
+        last = { ok: r.ok, status: r.status, body: body, error: body.error };
+        if(r.ok || (r.status >= 400 && r.status < 500)) return last;
+      } catch(e){
+        last = { ok: false, status: 0, error: 'Could not reach KRIT. Please check your connection.' };
+      }
     }
-  }
-
-  async function postNotify(order){
-    try {
-      var r = await fetch('/api/notify/order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(order)
-      });
-      return { ok: r.ok || r.status === 207, status: r.status };
-    } catch(e){
-      return { ok: false, status: 0, error: e && e.message };
-    }
+    return last;
   }
 
   function storeOrderLocally(order){
@@ -1188,11 +1194,19 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     }
   }
 
-  // Runs the post-payment flow: store locally, push to ERP, notify, show success.
+  // Saves the order (server → ERP) and shows the thank-you screen.
+  // Returns false if a COD order could not be placed, so the customer can retry.
   async function finalizeOrder(payload, wasBuyNow){
-    storeOrderLocally(payload);
     var erp = await postErpOrder(payload);
-    postNotify(payload);
+    var paidOnline = payload.status === 'paid';
+
+    if(!erp.ok && !paidOnline){
+      showToast(erp.error || 'We could not place your order. Please try again.');
+      return false;
+    }
+    if(erp.ok && erp.body && erp.body.total) payload.total = erp.body.total;
+
+    storeOrderLocally(payload);
     clearCheckoutCart(wasBuyNow);
     renderSuccess(payload);
     $('coSuccess').classList.add('show');
@@ -1201,12 +1215,17 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       if(window.gtag) window.gtag('event', 'purchase', {
         transaction_id: payload.id,
         value: payload.total,
-        currency: 'INR'
+        currency: 'INR',
+        payment_type: payload.paymentMode === 'cod' ? 'cod' : 'online'
       });
     } catch(e){}
     if(!erp.ok){
-      try { console.warn('KRIT: ERP order sync failed', erp); } catch(e){}
+      // Money was taken but saving failed even after retries. The payment is
+      // safe in Razorpay; tell the customer we'll confirm with them.
+      try { console.warn('KRIT: order save failed after payment', erp); } catch(e){}
+      showToast('Payment received for order ' + payload.id + '. We are confirming your order and will contact you shortly.');
     }
+    return true;
   }
 
   async function placeOrder(){
@@ -1454,6 +1473,6 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
 </footer>
 
 
-<script src="./assets/krit-tracking.js?v=20260421a"></script>
+<script src="/assets/krit-tracking.js?v=20260421a"></script>
 </body>
 </html>
