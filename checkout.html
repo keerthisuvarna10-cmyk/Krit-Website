@@ -1437,8 +1437,9 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
           preferences: { show_default_blocks: true }
         }
       },
-      // UPI: allow both Collect (enter VPA) and Intent (open UPI app on mobile).
-      upi: { flow: 'collect' },
+      // UPI: paying by typing a UPI ID ("collect") was discontinued by NPCI on
+      // 28 Feb 2026. Razorpay now shows a QR code on computers and the UPI app
+      // buttons (GPay, PhonePe, Paytm…) on phones, so no UPI setting is needed here.
       retry: { enabled: true, max_count: 2 },
       modal: {
         confirm_close: true,
