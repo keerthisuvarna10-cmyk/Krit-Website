@@ -1,0 +1,40 @@
+/* KRIT layout & logo fixes — loaded last on every storefront page so these
+   win over older rules in the pages and other stylesheets. */
+
+/* ── Logos ──
+   Logo images use Cloudinary's e_trim (no empty padding around the
+   artwork), so these heights are the real visible logo size. */
+.fb-logo-img{height:30px!important;width:auto!important;object-fit:contain}
+.krit-auth-logo img,
+.krit-auth-side .krit-auth-logo img{height:40px!important;width:auto!important}
+.krit-brand-mini{height:24px!important;width:auto!important}
+@media (max-width:560px){
+  .fb-logo-img{height:26px!important}
+  .krit-auth-logo img,.krit-auth-side .krit-auth-logo img{height:32px!important}
+}
+
+/* Account panel: the "Your KRIT account" heading was dark on a dark panel */
+body .krit-auth-card .krit-auth-side .krit-auth-title{color:#F0F4FF!important}
+body .krit-auth-card .krit-auth-side .krit-auth-sub{color:#B8C7E0!important}
+
+/* ── Shop section ──
+   Filters were a tall left sidebar that left a big empty column next to
+   only 4 products. On desktop they become one bar above a 4-across row. */
+@media (min-width:961px){
+  #krit-market-grid{grid-template-columns:minmax(0,1fr)!important}
+  #krit-shop-sidebar{position:static!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:flex-end!important;gap:14px 20px!important;height:auto!important;width:auto!important}
+  #krit-shop-sidebar > div{flex:1 1 200px!important;width:auto!important;margin:0!important}
+  #krit-shop-sidebar > div:nth-child(3){flex:3 1 460px!important}
+  #krit-shop-sidebar > div:nth-child(4){display:none!important} /* cart summary — the cart icon in the header does this */
+  #krit-shop-sidebar input,#krit-shop-sidebar select{width:100%!important}
+  #krit-filter-bar{flex-wrap:wrap!important;height:auto!important}
+  #krit-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  /* Product detail: photos stay in view while the details scroll */
+  #krit-detail-layout{align-items:start!important}
+  #krit-detail-stage{position:sticky!important;top:100px!important}
+}
+
+/* ── "How to verify natural latex": 6 tips, 3 per row (was 4 + 2 with gaps) ── */
+#authenticity .rv{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+@media (max-width:900px){#authenticity .rv{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media (max-width:560px){#authenticity .rv{grid-template-columns:1fr!important}}

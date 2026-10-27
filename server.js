@@ -356,6 +356,7 @@ function renderLogin(errorText = '') {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>KRIT Access</title>
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/djicyjlid/image/upload/e_trim/c_crop,w_0.44,h_1.0,g_west/e_trim/c_pad,w_512,h_512,b_transparent/f_png/v1776879169/ChatGPT_Image_Apr_22_2026_11_02_34_PM_bossql.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -365,7 +366,7 @@ function renderLogin(errorText = '') {
     body{display:flex;align-items:center;justify-content:center;padding:14px}
     .shell{width:min(720px,100%);display:grid;grid-template-columns:minmax(240px,.9fr) minmax(300px,1.1fr);background:linear-gradient(180deg,var(--panel) 0%, #08111f 100%);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.4)}
     .side{padding:22px 22px;background:radial-gradient(circle at top left, rgba(249,213,72,.14), transparent 38%),radial-gradient(circle at bottom right, rgba(43,125,233,.14), transparent 38%),linear-gradient(180deg,var(--panel2),#08111f)}
-    .logo{width:78px;display:block;margin-bottom:10px}
+    .logo{height:30px;width:auto;display:block;margin-bottom:14px}
     .eyebrow{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:#9fc0ff;margin-bottom:8px}
     h1{font-family:'Playfair Display',serif;font-size:1.35rem;line-height:1.18;margin:0 0 8px}
     .copy{font-size:.78rem;line-height:1.5;color:#bfd0eb;max-width:34ch}
@@ -387,7 +388,7 @@ function renderLogin(errorText = '') {
 <body>
   <div class="shell">
     <div class="side">
-      <img class="logo" src="https://res.cloudinary.com/djicyjlid/image/upload/v1774021620/ChatGPT_Image_Mar_20_2026_09_16_47_PM_byvdhf.png" alt="KRIT">
+      <img class="logo" src="https://res.cloudinary.com/djicyjlid/image/upload/e_trim/h_120/f_auto,q_auto/v1776879169/ChatGPT_Image_Apr_22_2026_11_02_34_PM_bossql.png" alt="KRIT">
       <div class="eyebrow">Private KRIT access</div>
       <h1>Enter the KRIT website</h1>
       <div class="copy">This live build is protected behind a login gate. Only approved visitors can open the storefront.</div>
