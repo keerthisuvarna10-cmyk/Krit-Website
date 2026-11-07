@@ -4,6 +4,7 @@ const session = require('express-session');
 const path = require('path');
 const crypto = require('crypto');
 const { priceOrder } = require('./pricing');
+const { createStock } = require('./stock');
 const { verifyFirebaseUser, bearerToken, verifyRazorpayPayment, rateLimiter, escapeHtml } = require('./security');
 
 const app = express();
@@ -17,6 +18,7 @@ const ACCESS_GATE_ENABLED = String(process.env.ACCESS_GATE_ENABLED || 'false').t
 const ERP_BASE_URL = String(process.env.ERP_BASE_URL || '').replace(/\/$/, '');
 const ERP_WEBHOOK_SECRET = process.env.ERP_WEBHOOK_SECRET || '';
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
+const stock = createStock({ baseUrl: ERP_BASE_URL, webhookSecret: ERP_WEBHOOK_SECRET });
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
 const ORDER_ALERT_EMAIL = process.env.ORDER_ALERT_EMAIL || 'hello@kritsleep.in';
 const ORDER_ALERT_PHONE = normalizeIndianPhone(process.env.ORDER_ALERT_PHONE || '9611211121');
@@ -521,6 +523,15 @@ app.use((req, res, next) => {
   return requireAuth(req, res, next);
 });
 
+/* ── Live stock ──
+   The pages read this to show "Only 3 left" / "Out of stock". Numbers come
+   from the ERP (Available = On hand − Reserved) and refresh every ~15s. */
+app.get('/api/stock', requireAuth, async (_req, res) => {
+  const all = await stock.getAll();
+  res.set('Cache-Control', 'no-store');
+  res.json({ ok: !!all, products: all || {} });
+});
+
 /* ── Customer accounts ──
    Both calls need a real Firebase login. The phone number / email used to
    find the customer come from that login (checked with Google), never from
@@ -642,6 +653,13 @@ app.post('/api/erp/order', requireAuth, async (req, res) => {
   if (!built.ok) return res.status(400).json({ error: built.error });
   const order = built.order;
 
+  // Online orders were checked before payment (/api/razorpay/order) and are
+  // already paid, so they always go through. COD orders are checked here.
+  if (built.isCod) {
+    const inStock = await stock.checkLines(order.items);
+    if (!inStock.ok) return res.status(409).json({ error: inStock.error, outOfStock: inStock.problems });
+  }
+
   if (!built.isCod) {
     const payment = await verifyRazorpayPayment({
       keyId: RAZORPAY_KEY_ID,
@@ -717,6 +735,11 @@ app.post('/api/razorpay/order', requireAuth, async (req, res) => {
   const amount = priced.total;
   if (amount <= 0) {
     return res.status(400).json({ error: 'Invalid order amount.' });
+  }
+  // Don't take money for pillows we don't have.
+  const inStock = await stock.checkLines(priced.lines);
+  if (!inStock.ok) {
+    return res.status(409).json({ error: inStock.error, outOfStock: inStock.problems });
   }
   try {
     const auth = Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString('base64');
