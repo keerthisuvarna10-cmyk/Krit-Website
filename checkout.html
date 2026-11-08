@@ -649,7 +649,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
   facebookPixelId: "",
   firebase: {
     apiKey: "AIzaSyDHDCv4zEmSAiO6vr8pz733aON7cTeYg8I",
-    authDomain: "krit-7fa79.firebaseapp.com",
+    authDomain: (/(^|\.)kritsleep\.in$/.test(location.hostname) ? location.hostname : "krit-7fa79.firebaseapp.com"),
     projectId: "krit-7fa79",
     storageBucket: "krit-7fa79.firebasestorage.app",
     messagingSenderId: "122215309182",

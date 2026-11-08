@@ -1720,7 +1720,43 @@
     if(welcome && welcome.querySelector('.krit-auth-sub')) welcome.querySelector('.krit-auth-sub').textContent = 'Your orders and saved details in one place.';
   }
 
+  /* Top-right account menu: shows the shopper's name when signed in (any
+     method: Google, OTP or email) and Login / Create Account otherwise. */
+  function syncNavAccount(){
+    var a = window._kritAccount;
+    var signedIn = !!(a && (a.email || a.phone || a.uid));
+    var realName = a && a.name && a.name !== 'KRIT Customer' ? a.name : '';
+    var inBox = document.getElementById('nad-loggedin');
+    var outBox = document.getElementById('nad-loggedout');
+    var nameEl = document.getElementById('nad-user-name');
+    var subEl = document.getElementById('nad-user-email');
+    var label = document.getElementById('nav-account-label');
+    var btn = document.getElementById('nav-account-icon-btn');
+    if(inBox) inBox.style.display = signedIn ? 'block' : 'none';
+    if(outBox) outBox.style.display = signedIn ? 'none' : 'block';
+    if(signedIn){
+      if(nameEl) nameEl.textContent = realName ? 'Hi, ' + realName.split(' ')[0] : 'Your KRIT account';
+      if(subEl) subEl.textContent = a.email || (a.phone ? '+91 ' + a.phone : '');
+    }
+    if(label) label.textContent = signedIn && realName ? realName.split(' ')[0] : '';
+    if(btn){
+      btn.classList.toggle('krit-signed-in', signedIn);
+      btn.title = signedIn ? (realName ? realName + ' — your account' : 'Your account') : 'Sign in';
+    }
+    if(!document.getElementById('krit-nav-account-css')){
+      var st = document.createElement('style');
+      st.id = 'krit-nav-account-css';
+      st.textContent = '#nav-account-label{font-size:.8rem;font-weight:600;letter-spacing:.02em;max-width:9ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+        + '#nav-account-label:empty{display:none}'
+        + '.nav-account-btn.krit-signed-in{width:auto !important;gap:6px;padding:0 12px 0 10px !important;display:inline-flex;align-items:center;color:#C9A84C}'
+        + '@media(max-width:700px){#nav-account-label{display:none}.nav-account-btn.krit-signed-in{padding:0 !important}}';
+      document.head.appendChild(st);
+    }
+  }
+  window.kritSyncNavAccount = syncNavAccount;
+
   function updateAuthUI(){
+    syncNavAccount();
     var formWrap = document.getElementById('krit-auth-form-wrap');
     var accountWrap = document.getElementById('krit-auth-account');
     var welcome = document.getElementById('auth-welcome');

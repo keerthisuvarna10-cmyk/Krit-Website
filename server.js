@@ -76,6 +76,41 @@ app.use((req, res, next) => {
   next();
 });
 
+/* ── Google / Firebase sign-in through our own domain ──
+   Firebase runs the Google sign-in step on its "auth domain". By passing
+   /__/auth/* and /__/firebase/* through to krit-7fa79.firebaseapp.com, the
+   auth domain can be www.kritsleep.in, so Google's screen names our site
+   instead of krit-7fa79.firebaseapp.com. (Firebase's documented proxy setup;
+   https://www.kritsleep.in/__/auth/handler must be an authorized redirect
+   URI on the OAuth client.) Not behind the access gate: it only relays
+   Firebase's own pages. */
+const FIREBASE_AUTH_HOST = 'https://krit-7fa79.firebaseapp.com';
+app.all(/^\/__\/(auth|firebase)\//, async (req, res) => {
+  try {
+    const headers = {};
+    ['accept', 'accept-language', 'user-agent', 'content-type', 'cookie'].forEach((h) => {
+      if (req.headers[h]) headers[h] = req.headers[h];
+    });
+    let body;
+    if (!['GET', 'HEAD'].includes(req.method)) {
+      const type = String(req.headers['content-type'] || '');
+      body = type.includes('application/json') ? JSON.stringify(req.body || {}) : new URLSearchParams(req.body || {}).toString();
+    }
+    const upstream = await fetch(FIREBASE_AUTH_HOST + req.originalUrl, { method: req.method, headers, body, redirect: 'manual' });
+    res.status(upstream.status);
+    ['content-type', 'cache-control', 'location', 'content-security-policy', 'x-frame-options'].forEach((h) => {
+      const v = upstream.headers.get(h);
+      if (v) res.setHeader(h, h === 'location' ? v.replace(FIREBASE_AUTH_HOST, '') : v);
+    });
+    const cookies = typeof upstream.headers.getSetCookie === 'function' ? upstream.headers.getSetCookie() : [];
+    if (cookies.length) res.setHeader('set-cookie', cookies);
+    res.send(Buffer.from(await upstream.arrayBuffer()));
+  } catch (error) {
+    console.error('Firebase auth relay failed:', error.message);
+    res.status(502).send('Sign-in is unavailable right now. Please try again.');
+  }
+});
+
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.setHeader('Pragma', 'no-cache');
