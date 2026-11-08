@@ -948,8 +948,8 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
         if(!d.serviceable){ el.className = 'co-eta bad'; el.textContent = d.error || 'Delivery is not available at this PIN code.'; return; }
         var when = etaDate(d.date);
         el.className = 'co-eta ok';
-        var m = $('coEtaMethod'); if(m) m.textContent = 'arrives by ' + fmtDate(when);
-        el.innerHTML = '🚚 Delivered by <strong>' + escapeHtml(fmtDate(when)) + '</strong>'
+        var m = $('coEtaMethod'); if(m) m.textContent = 'estimated delivery ' + fmtDate(when);
+        el.innerHTML = '🚚 Estimated delivery: <strong>' + escapeHtml(fmtDate(when)) + '</strong>'
           + (d.dispatchToday ? ' <span>· ships today</span>' : '');
         try { localStorage.setItem('krit_pin', pin); } catch(e){}
       })

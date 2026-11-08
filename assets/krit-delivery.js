@@ -5,7 +5,7 @@
 (function(){
   'use strict';
   var KEY = 'krit_pin';
-  var CSS = '.krit-eta{margin:14px 0 4px;padding:12px 14px;border:1px solid rgba(47,93,168,.22);border-radius:12px;background:rgba(6,14,28,.55)}'
+  var CSS = '.krit-eta{margin:12px 0;padding:12px 14px;border:1px solid rgba(47,93,168,.22);border-radius:12px;background:rgba(6,14,28,.55)}'
     + '.krit-eta label{display:block;font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#8899BB;margin-bottom:8px}'
     + '.krit-eta-row{display:flex;gap:8px}'
     + '.krit-eta input{flex:1;min-width:0;padding:10px 12px;border-radius:9px;border:1px solid rgba(47,93,168,.3);background:rgba(3,8,15,.8);color:#F0F4FF;font-size:.9rem;letter-spacing:.08em}'
@@ -43,22 +43,41 @@
       if(!d.serviceable){ out.className = 'krit-eta-out bad'; out.textContent = d.error || 'Delivery is not available at this PIN code yet.'; return; }
       save(pin);
       out.className = 'krit-eta-out';
-      out.innerHTML = '🚚 Delivered by <strong>' + esc(fmt(d.date)) + '</strong> to ' + esc(pin)
-        + (d.dispatchToday ? ' · order before 2 PM to ship today' : '') + ' · Free delivery';
+      out.innerHTML = '🚚 Estimated delivery: <strong>' + esc(fmt(d.date)) + '</strong> to ' + esc(pin)
+        + (d.dispatchToday ? '<br>Order before 2 PM to ship today' : '') + '<br>Free delivery';
     }).catch(function(){ out.className = 'krit-eta-out bad'; out.textContent = 'Could not check right now. Please try again.'; });
   }
 
-  function attach(){
+  // Right under the price card ("Free shipping · COD available …"), so it's
+  // seen before Add to Cart; falls back to below the buttons.
+  function anchor(){
     var btn = document.querySelector('button[onclick*="kritDetailAddToCart"],button[onclick*="kritDetailBuyNow"]');
-    if(!btn || !btn.parentElement || !btn.parentElement.parentNode) return;
-    var group = btn.parentElement;
-    if(group.parentNode.querySelector('.krit-eta')) return;
+    if(!btn) return null;
+    var panel = btn.closest('#krit-detail') || btn.parentElement.parentNode;
+    var cands = panel.querySelectorAll('div,p,span');
+    for(var i = 0; i < cands.length; i++){
+      var el = cands[i];
+      if(el.children.length === 0 && /^Free shipping/i.test((el.textContent || '').trim())){
+        var card = el.parentElement;
+        if(card && card.parentNode && !card.contains(btn)) return { parent: card.parentNode, after: card };
+      }
+    }
+    return btn.parentElement && btn.parentElement.parentNode ? { parent: btn.parentElement.parentNode, after: btn.parentElement } : null;
+  }
+
+  function attach(){
+    var spot = anchor();
+    if(!spot) return;
+    var existing = document.querySelector('.krit-eta');
+    if(existing && existing.previousElementSibling === spot.after) return;
+    if(existing) existing.remove();
+    var group = spot.after;
     var box = document.createElement('div');
     box.className = 'krit-eta';
     box.innerHTML = '<label for="krit-eta-pin">Check delivery date</label>'
       + '<div class="krit-eta-row"><input id="krit-eta-pin" type="text" inputmode="numeric" maxlength="6" autocomplete="postal-code" placeholder="Enter PIN code">'
       + '<button type="button">Check</button></div><div class="krit-eta-out" aria-live="polite"></div>';
-    group.parentNode.insertBefore(box, group.nextSibling);
+    spot.parent.insertBefore(box, group.nextSibling);
     var input = box.querySelector('input');
     box.querySelector('button').addEventListener('click', function(){ check(box); });
     input.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); check(box); } });
