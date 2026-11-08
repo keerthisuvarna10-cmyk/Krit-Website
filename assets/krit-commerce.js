@@ -650,11 +650,8 @@
     if(!holder){
       holder = document.createElement('div');
       holder.id = 'krit-phone-recaptcha';
-      holder.style.position = 'absolute';
-      holder.style.left = '-9999px';
-      holder.style.width = '1px';
-      holder.style.height = '1px';
-      document.body.appendChild(holder);
+      var otpBox = document.getElementById('krit-otp-login-wrap');
+      (otpBox || document.body).appendChild(holder);
     }
     phoneRecaptchaVerifier = new fb.auth.RecaptchaVerifier('krit-phone-recaptcha', {
       size: 'invisible'
@@ -686,43 +683,30 @@
     }, 1000);
   }
 
+  /* Messages shoppers see when sign-in fails. Setup problems (domain, billing,
+     provider switched off) get one plain message; the Firebase code is added
+     as "ref:" so the shop owner can tell what to fix. */
   function firebaseAuthErrorMessage(error, flow){
     var code = (error && error.code) || '';
-    var host = window.location && window.location.hostname ? window.location.hostname : 'this domain';
-    if(code === 'auth/unauthorized-domain'){
-      return 'Firebase has not authorized ' + host + ' yet. Open Firebase Console (krit-7fa79) > Authentication > Settings > Authorized domains, then add ' + host + ' and kritsleep.in.';
+    var ref = code ? ' (ref: ' + code.replace('auth/', '') + ')' : '';
+    var otpOff = 'Mobile OTP sign-in isn\'t available right now. Please continue with Google or email instead.';
+    if(code === 'auth/popup-blocked') return 'Your browser blocked the Google sign-in window. Allow pop-ups for kritsleep.in and try again.';
+    if(code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return 'Google sign-in was closed before it finished. Please try again.';
+    if(code === 'auth/invalid-phone-number') return 'Please enter a valid 10-digit mobile number.';
+    if(code === 'auth/invalid-verification-code') return 'That code isn\'t right. Check the SMS and try again.';
+    if(code === 'auth/code-expired') return 'That code has expired. Tap Resend OTP to get a new one.';
+    if(code === 'auth/too-many-requests') return 'Too many attempts from this device. Please wait a few minutes and try again.';
+    if(code === 'auth/network-request-failed') return 'Couldn\'t connect. Check your internet and try again.';
+    if(code === 'auth/captcha-check-failed') return 'The security check didn\'t complete. Refresh the page and try again.' + ref;
+    if(code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'auth/invalid-login-credentials') return 'Email or password is incorrect.';
+    if(code === 'auth/user-not-found') return 'No account with that email. Tap Create Account to make one.';
+    if(code === 'auth/email-already-in-use') return 'An account with this email already exists. Log in instead.';
+    if(code === 'auth/weak-password') return 'Choose a password with at least 6 characters.';
+    if(code === 'auth/account-exists-with-different-credential') return 'This email already uses another sign-in method. Try that method first.';
+    if(['auth/billing-not-enabled','auth/operation-not-allowed','auth/quota-exceeded','auth/invalid-app-credential','auth/unauthorized-domain','auth/missing-client-identifier','auth/internal-error'].indexOf(code) !== -1){
+      return (flow === 'otp' ? otpOff : 'This sign-in option isn\'t available right now. Please try another.') + ref;
     }
-    if(code === 'auth/popup-blocked'){
-      return 'Google sign-in popup was blocked by the browser. Allow popups and try again.';
-    }
-    if(code === 'auth/popup-closed-by-user'){
-      return 'Google sign-in was closed before it finished. Please try again.';
-    }
-    if(code === 'auth/operation-not-allowed'){
-      return flow === 'otp'
-        ? 'Phone OTP sign-in is not enabled in Firebase yet. Enable "Phone" under Authentication > Sign-in method in the Firebase console (project krit-7fa79), then retry.'
-        : 'This sign-in method is not enabled in Firebase yet.';
-    }
-    if(code === 'auth/captcha-check-failed'){
-      return 'OTP verification could not start. Refresh the page and try again.';
-    }
-    if(code === 'auth/invalid-phone-number'){
-      return 'Please enter a valid 10-digit mobile number.';
-    }
-    if(code === 'auth/quota-exceeded' || code === 'auth/too-many-requests'){
-      return flow === 'otp'
-        ? 'Firebase SMS quota is currently exhausted. Please use email or Google login for now.'
-        : 'Too many attempts were made. Please wait a moment and try again.';
-    }
-    if(code === 'auth/invalid-app-credential'){
-      return 'OTP could not be started from this domain yet. Please use kritsleep.in after adding it in Firebase authorized domains.';
-    }
-    if(code === 'auth/account-exists-with-different-credential'){
-      return 'This email is already linked with another sign-in method. Try logging in with that method first.';
-    }
-    return flow === 'otp'
-      ? 'OTP could not be sent right now. Please try again in a moment.'
-      : 'Sign-in could not be completed right now. Please try again in a moment.';
+    return (flow === 'otp' ? 'We couldn\'t send the OTP. Please try again in a moment.' : 'Sign-in didn\'t complete. Please try again in a moment.') + ref;
   }
 
   async function sendOtpLogin(){
@@ -1375,6 +1359,7 @@
     if(subtitleNode) subtitleNode.textContent = 'Track all your orders, payment states, delivery progress, and saved customer details in one place.';
     await renderCustomerOrders(account);
     switchAccountPanel('orders');
+    tidyAccountView();
   }
 
   function premiumizeAuthMarkup(){
@@ -1561,6 +1546,7 @@
     card.appendChild(side);
     card.appendChild(main);
     ensureAuthFormEnhancements();
+    tidyAuthLayout();
   }
 
   function ensureAuthFormEnhancements(){
@@ -1634,6 +1620,104 @@
       note.textContent = 'Use Google for one-tap sign-in, use mobile OTP, or create an email account with a secure password.';
       form.appendChild(note);
     }
+  }
+
+  /* One clean sign-in flow: mobile OTP, then Google, then email/password
+     behind a link. The builders above add their pieces in several passes;
+     this puts them in order once and drops the duplicate dividers. */
+  function tidyAuthLayout(){
+    var wrap = document.getElementById('krit-auth-form-wrap');
+    var form = document.getElementById('krit-auth-form');
+    var otp = document.getElementById('krit-otp-login-wrap');
+    var google = document.getElementById('krit-google-btn');
+    if(!wrap || !form || !otp || !google || wrap.dataset.kritTidy === '1') return;
+    wrap.dataset.kritTidy = '1';
+    var oldGoogle = document.getElementById('auth-google-btn');
+    if(oldGoogle){
+      var next = oldGoogle.nextElementSibling;
+      if(next && /or use email/i.test(next.textContent)) next.remove();
+      oldGoogle.remove();
+    }
+    wrap.querySelectorAll('.krit-or').forEach(function(d){ d.remove(); });
+    var title = otp.querySelector('.krit-auth-otp-title');
+    var copy = otp.querySelector('.krit-auth-otp-copy');
+    if(title) title.textContent = 'Sign in with your mobile number';
+    if(copy) copy.textContent = 'We\'ll text you a 6-digit code. No password needed.';
+    var tabs = wrap.querySelector('.krit-tabs');
+    var emailBox = document.createElement('div');
+    emailBox.id = 'krit-email-box';
+    emailBox.hidden = true;
+    if(tabs) emailBox.appendChild(tabs);
+    emailBox.appendChild(form);
+    var or = document.createElement('div');
+    or.className = 'krit-or krit-or-clean';
+    or.innerHTML = '<span>or</span>';
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.id = 'krit-email-toggle';
+    toggle.className = 'krit-email-toggle';
+    toggle.textContent = 'Use email and password instead';
+    toggle.onclick = function(){
+      emailBox.hidden = !emailBox.hidden;
+      toggle.textContent = emailBox.hidden ? 'Use email and password instead' : 'Hide email sign-in';
+      if(!emailBox.hidden){ var e = document.getElementById('auth-email'); if(e) e.focus(); }
+    };
+    while(wrap.firstChild) wrap.removeChild(wrap.firstChild);
+    [otp, or, google, toggle, emailBox].forEach(function(n){ wrap.appendChild(n); });
+    var phone = document.getElementById('auth-otp-phone');
+    if(phone && !phone.dataset.kritEnter){
+      phone.dataset.kritEnter = '1';
+      phone.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); window.kritSendOtpLogin && window.kritSendOtpLogin(); } });
+    }
+    var code = document.getElementById('krit-otp-code');
+    if(code && !code.dataset.kritEnter){
+      code.dataset.kritEnter = '1';
+      code.setAttribute('autocomplete', 'one-time-code');
+      code.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); window.kritVerifyOtpLogin && window.kritVerifyOtpLogin(); } });
+    }
+    if(!document.getElementById('krit-auth-tidy-css')){
+      var st = document.createElement('style');
+      st.id = 'krit-auth-tidy-css';
+      st.textContent = [
+        '#krit-auth-form-wrap{display:flex;flex-direction:column;gap:14px}',
+        '#krit-auth-form-wrap .krit-auth-inline-note{display:none}',
+        '.krit-or-clean{display:flex;align-items:center;gap:12px;color:#8FA7CE;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}',
+        '.krit-or-clean::before,.krit-or-clean::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.1)}',
+        '.krit-email-toggle{align-self:center;background:none;border:none;color:#C9A84C;font-size:.84rem;text-decoration:underline;cursor:pointer;padding:4px}',
+        '#krit-email-box{display:flex;flex-direction:column;gap:12px;padding-top:4px}',
+        '#krit-email-box[hidden]{display:none}',
+        '#krit-phone-recaptcha{grid-column:1/-1}',
+        /* signed-in view: one Logout, no placeholder lines */
+        '.krit-account-profile-head > button{display:none !important}',
+        '.krit-auth-card.krit-auth-premium.krit-account-mode .krit-side-logout{display:none !important}',
+        '.krit-account-provider{display:none}',
+        '.krit-auth-account-meta.krit-empty{display:none}',
+        '.krit-auth-card.krit-account-mode #krit-auth-message{display:none !important}',
+        /* phones: keep the sign-in box on the first screen */
+        '@media (max-width:700px){.krit-auth-benefits{display:none !important}.krit-auth-side{padding:14px 16px !important;gap:6px !important}.krit-auth-side .krit-auth-sub{font-size:.85rem !important;line-height:1.4 !important}.krit-auth-side .krit-auth-title{font-size:1.35rem !important}.krit-auth-otp-title{font-size:.72rem !important}}'
+      ].join('');
+      document.head.appendChild(st);
+    }
+  }
+
+  function tidyAccountView(){
+    var a = window._kritAccount || {};
+    var realName = a.name && a.name !== 'KRIT Customer' ? a.name : '';
+    var who = realName || (a.phone ? '+91 ' + a.phone : '') || a.email || 'Your account';
+    var greet = document.getElementById('krit-account-greeting');
+    var title = document.getElementById('auth-account-name');
+    var avatar = document.querySelector('.krit-account-avatar');
+    if(greet) greet.textContent = realName ? 'Hello, ' + realName.split(' ')[0] : 'Welcome back';
+    if(title) title.textContent = who;
+    if(avatar) avatar.textContent = (realName || 'K').charAt(0).toUpperCase();
+    var emailVal = document.getElementById('auth-account-email');
+    if(emailVal && emailVal.parentNode) emailVal.parentNode.classList.toggle('krit-empty', !a.email);
+    var phoneVal = document.getElementById('auth-account-phone');
+    if(phoneVal && phoneVal.parentNode) phoneVal.parentNode.classList.toggle('krit-empty', !a.phone);
+    var sub = document.getElementById('krit-account-subtitle');
+    if(sub) sub.textContent = 'Your orders, newest first.';
+    var welcome = document.getElementById('auth-welcome');
+    if(welcome && welcome.querySelector('.krit-auth-sub')) welcome.querySelector('.krit-auth-sub').textContent = 'Your orders and saved details in one place.';
   }
 
   function updateAuthUI(){
@@ -2047,6 +2131,7 @@
       var phoneEl = document.getElementById('auth-phone');
       var passwordEl = document.getElementById('auth-password');
       ensureAuthFormEnhancements();
+      tidyAuthLayout();
       if(!window._kritAccount){
         switchAuthTab(window._kritAuthTab || 'login');
         if(nameEl) nameEl.value = '';
@@ -2060,7 +2145,7 @@
       overlay.scrollTop = 0;
       overlay.style.overflowY = 'auto';
       document.body.style.overflow = 'hidden';
-      authMessage('Create an account, continue with Google, or use mobile OTP to unlock checkout.', 'info');
+      authMessage('Sign in to see your orders and check out faster.', 'info');
     };
     window.closeAuthModal = function(){
       var overlay = document.getElementById('krit-auth-overlay');
