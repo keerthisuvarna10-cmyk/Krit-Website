@@ -1413,6 +1413,11 @@ button, .bp, .bs, .nc {
   #krit-market-grid{grid-template-columns:1fr !important}
   #krit-cart-checkout-grid{grid-template-columns:1fr !important}
 }
+/* Shop: with four pillows, go straight to them. Search, sort, filters,
+   cart summary and the results bar are hidden (kept in the page so they can
+   come back). Cart and wishlist stay in the top menu. */
+#krit-shop-sidebar,#krit-shop-tools{display:none !important}
+#krit-market-grid{grid-template-columns:1fr !important}
 #about,#testi,#blog{position:relative;overflow:hidden}
 #about::before,#testi::before,#blog::before{
   content:"";
