@@ -84,7 +84,11 @@
         'cursor:pointer;white-space:nowrap}',
       '#krit-cookie-banner .kcb-accept:hover{filter:brightness(1.08)}',
       '#krit-cookie-banner .kcb-decline:hover{background:rgba(255,255,255,.1);color:#D8E4F8}',
-      '@media(max-width:520px){#krit-cookie-banner{bottom:0;left:0;right:0;transform:none;width:100%;border-radius:18px 18px 0 0;}}'
+      /* Phones: full-width sheet at the bottom. It needs its own slide-up
+         animation: the desktop one keeps translateX(-50%) after it ends,
+         which pushed half the banner (and its Accept button) off-screen. */
+      '@keyframes krit-slide-up-m{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}',
+      '@media(max-width:520px){#krit-cookie-banner{bottom:0;left:0;right:0;transform:none;width:100%;border-radius:18px 18px 0 0;animation-name:krit-slide-up-m;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));}}'
     ].join('');
     document.head.appendChild(style);
 
@@ -99,7 +103,7 @@
         '<div class="kcb-title">We use cookies</div>',
         '<p class="kcb-text">',
           'KRIT uses cookies to personalise your experience, remember your cart, and understand how visitors use our site. ',
-          'Read our <a href="#" onclick="return false">Privacy Policy</a> for details.',
+          'Read our <a href="#" onclick="if(window.openInfoModal){openInfoModal(\'privacy-modal\');}return false">Privacy Policy</a> for details.',
         '</p>',
         '<div class="kcb-actions">',
           '<button class="kcb-accept" id="krit-cookie-accept">Accept cookies</button>',

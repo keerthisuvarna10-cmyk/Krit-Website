@@ -49,7 +49,30 @@
     img.__kritSwipe = true;
   }
 
+  /* Swipe left/right on the main product photo to see the next one (phones).
+     Only clearly sideways swipes count, so scrolling the page still works. */
+  function hookDetailSwipe(){
+    var stage = document.getElementById('krit-detail-stage');
+    if(!stage || stage.__kritSwipe) return;
+    var sx = 0, sy = 0;
+    stage.addEventListener('touchstart', function(e){
+      sx = e.changedTouches[0].clientX; sy = e.changedTouches[0].clientY;
+    }, {passive:true});
+    stage.addEventListener('touchend', function(e){
+      var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+      if(Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      if(typeof window.kritStepDetailImage === 'function') window.kritStepDetailImage(dx < 0 ? 1 : -1);
+      stage.__kritSwiped = Date.now();
+    }, {passive:true});
+    // A swipe shouldn't also count as a tap that opens the full-screen view.
+    stage.addEventListener('click', function(e){
+      if(stage.__kritSwiped && Date.now() - stage.__kritSwiped < 400){ e.stopPropagation(); e.preventDefault(); }
+    }, true);
+    stage.__kritSwipe = true;
+  }
+
   function enhance(){
+    hookDetailSwipe();
     hookDetailScroll();
     hookLightboxBackdrop();
     hookLightboxSwipe();
