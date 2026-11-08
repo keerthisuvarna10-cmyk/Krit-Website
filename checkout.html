@@ -390,7 +390,7 @@
       <div class="co-section-head">
         <div class="co-section-title"><span class="co-step">2</span> Shipping address</div>
       </div>
-      <div class="co-section-sub">We deliver across India in 4 to 7 business days. Free shipping on all prepaid orders.</div>
+      <div class="co-section-sub">We deliver across India in 4 to 7 business days. Free shipping on every order.</div>
       <div class="co-row">
         <div class="co-field">
           <label for="coName">Full name</label>
@@ -439,7 +439,7 @@
       </div>
       <div class="co-delivery">
         <svg class="truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7"/><circle cx="6" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg>
-        <div>Standard delivery &mdash; <strong>4 to 7 business days</strong>, free on all prepaid orders.</div>
+        <div>Standard delivery &mdash; <strong>4 to 7 business days</strong>, free on every order.</div>
       </div>
     </div>
 
@@ -448,20 +448,20 @@
       <div class="co-section-head">
         <div class="co-section-title"><span class="co-step">4</span> Payment</div>
       </div>
-      <div class="co-section-sub">Prepaid orders get an instant discount and are dispatched first.</div>
+      <div class="co-section-sub">Pay online or cash on delivery. Same price either way.</div>
       <div class="co-pay-list" id="coPayList">
         <label class="co-pay" data-pay="online">
           <input type="radio" name="co-pay" value="online" checked>
           <div class="co-pay-body">
-            <div class="co-pay-title"><span class="t">Pay Online</span><span class="tag save">Save Rs 50</span></div>
+            <div class="co-pay-title"><span class="t">Pay Online</span></div>
             <div class="co-pay-desc">UPI, Cards, Netbanking, Wallets &amp; more — choose your method in the next step via Razorpay.</div>
           </div>
         </label>
         <label class="co-pay" data-pay="cod">
           <input type="radio" name="co-pay" value="cod">
           <div class="co-pay-body">
-            <div class="co-pay-title"><span class="t">Cash on Delivery</span><span class="tag fee">+ Rs 49 fee</span></div>
-            <div class="co-pay-desc">Pay at the door on delivery. A small service fee helps cover handling.</div>
+            <div class="co-pay-title"><span class="t">Cash on Delivery</span></div>
+            <div class="co-pay-desc">Pay in cash when your order arrives.</div>
           </div>
         </label>
       </div>
@@ -655,8 +655,8 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
 
 <script>
 (function(){
-  var PREPAID_DISCOUNT = 50;
-  var COD_FEE = 49;
+  var PREPAID_DISCOUNT = 0;
+  var COD_FEE = 0;
   var FREE_SHIP_OVER = 0;
   var SHIP_STANDARD = 0;
 
@@ -807,7 +807,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     var rows = [];
     rows.push(row('Subtotal', formatINR(sub)));
     if(disc > 0) rows.push(row('Coupon (' + state.coupon.code + ')', '- ' + formatINR(disc), 'pos'));
-    rows.push(row(pay.label, (pay.isAdd ? '+ ' : '- ') + formatINR(pay.amount), pay.isAdd ? '' : 'pos'));
+    if(pay.amount > 0) rows.push(row(pay.label, (pay.isAdd ? '+ ' : '- ') + formatINR(pay.amount), pay.isAdd ? '' : 'pos'));
     rows.push(row('Shipping', ship ? formatINR(ship) : 'Free'));
     rows.push('<div class="co-totals-row big"><span>Total</span><span class="amt">' + formatINR(total) + '</span></div>');
     $('coTotals').innerHTML = rows.join('');
@@ -965,7 +965,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       + '<div class="co-review-box"><div class="co-review-label">Final total</div><div class="co-review-total">'
       +   reviewTotalRow('Subtotal', formatINR(payload.subtotal))
       +   (payload.discount > 0 ? reviewTotalRow('Coupon ' + payload.couponCode, '- ' + formatINR(payload.discount)) : '')
-      +   reviewTotalRow(payload.paymentAdjust > 0 ? 'COD handling fee' : 'Online payment discount', (payload.paymentAdjust > 0 ? '+ ' : '- ') + formatINR(Math.abs(payload.paymentAdjust)))
+      +   (payload.paymentAdjust ? reviewTotalRow(payload.paymentAdjust > 0 ? 'COD handling fee' : 'Online payment discount', (payload.paymentAdjust > 0 ? '+ ' : '- ') + formatINR(Math.abs(payload.paymentAdjust))) : '')
       +   reviewTotalRow('Shipping', payload.shipping ? formatINR(payload.shipping) : 'Free')
       +   reviewTotalRow('Total payable', '<strong>' + formatINR(payload.total) + '</strong>', 'grand')
       + '</div></div>';

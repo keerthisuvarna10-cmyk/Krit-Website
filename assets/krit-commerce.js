@@ -1843,7 +1843,7 @@
     var wrap = document.createElement('div');
     wrap.id = 'krit-detail-share-wrap';
     wrap.innerHTML = [
-      '<div class="krit-share-note">Share this product or open the KRIT social pages to spotlight it in your Facebook or Instagram journey.</div>',
+      '<div class="krit-share-note">Know someone who\'d sleep better on this? Share it with them.</div>',
       '<div id="krit-detail-share">',
         '<button type="button" class="krit-share-btn" data-action="native">Share</button>',
         '<button type="button" class="krit-share-btn facebook" data-action="facebook">Facebook</button>',

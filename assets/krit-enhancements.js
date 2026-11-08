@@ -52,7 +52,7 @@
       +   '<article class="krit-storyband-card krit-storyband-stat">'
       +     '<div class="krit-storyband-stat-label">Pay Your Way</div>'
       +     '<div class="krit-storyband-stat-value">COD</div>'
-      +     '<p class="krit-storyband-stat-copy">Pay online and save \u20b950, or pay cash when it arrives. Free shipping, with tracking on every order.</p>'
+      +     '<p class="krit-storyband-stat-copy">Pay online or in cash when it arrives. Free shipping, with tracking on every order.</p>'
       +   '</article>'
       + '</div>';
     target.parentNode.insertBefore(section, target.nextSibling);

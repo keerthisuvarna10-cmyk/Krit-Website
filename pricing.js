@@ -36,8 +36,8 @@ const COUPONS = [
   { code: 'SLEEP500', kind: 'flat', value: 500, min: 3999 }
 ];
 
-const PREPAID_DISCOUNT = 50; // Rs off for paying online
-const COD_FEE = 49;          // Rs added for cash on delivery
+const PREPAID_DISCOUNT = 0;  // same price online or cash on delivery
+const COD_FEE = 0;           // no extra charge for cash on delivery
 const SHIPPING = 0;          // Rs, currently free
 const MAX_QTY_PER_LINE = 20;
 

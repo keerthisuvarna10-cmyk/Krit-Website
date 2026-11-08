@@ -218,7 +218,7 @@
             + '<div style="padding:14px 0;border-bottom:1px solid rgba(47,93,168,.1);display:flex;justify-content:space-between;gap:12px;align-items:center">'
             +   '<div><div style="font-size:.92rem;color:#F0F4FF;font-weight:600;line-height:1.5">' + String(item.name || '') + '</div><div style="font-size:.78rem;color:#C9A84C;margin-top:4px">' + formatINR(item.price) + '</div></div>'
             +   '<div style="display:flex;gap:8px">'
-            +     '<button type="button" onclick="window.addToCart(\'' + safeName + '\',' + Number(item.price || 0) + ',1,\'' + String(item.id || '').replace(/'/g, "\\'") + '\');window.openWishlist();" style="padding:10px 12px;border:none;border-radius:10px;background:#2F5DA8;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer">Add</button>'
+            +     '<button type="button" onclick="window.__kritWishlistToCart(\'' + safeName + '\',' + Number(item.price || 0) + ',\'' + String(item.id || '').replace(/'/g, "\\'") + '\')" style="padding:10px 12px;border:none;border-radius:10px;background:#2F5DA8;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer">Add</button>'
             +     '<button type="button" onclick="window.__kritStorefixRemoveWishlistItem(\'' + safeName + '\')" style="padding:10px 12px;border:none;border-radius:10px;background:rgba(255,255,255,.06);color:#A9B8D4;font-size:.72rem;font-weight:700;cursor:pointer">Remove</button>'
             +   '</div>'
             + '</div>';
@@ -323,6 +323,26 @@
     window.__kritStorefixRemoveCartItem = removeCartItem;
     window.__kritStorefixUpdateCartItem = updateCartItem;
     window.__kritStorefixRemoveWishlistItem = removeWishlistItem;
+
+    /* Wishlist "Add": move the pillow into the cart and show the cart, so the
+       shopper can see it worked (before, the wishlist just stayed open). */
+    window.__kritWishlistToCart = function(name, price, productId){
+      function qtyOf(){
+        var list;
+        try { list = JSON.parse(localStorage.getItem('krit_cart') || '[]') || []; } catch(_e){ list = getCart(); }
+        return list.reduce(function(n, i){ return n + (String(i.id || i.name) === String(productId || name) || i.name === name ? Number(i.qty || 0) : 0); }, 0);
+      }
+      var before = qtyOf();
+      if(typeof window.addToCart === 'function') window.addToCart(name, price, 1, productId);
+      // Some add-to-cart wrappers save a moment later, so check after a beat.
+      setTimeout(function(){
+        if(qtyOf() <= before) return;       // not added (e.g. out of stock) — leave the wishlist as it is
+        window._wishlist = null;            // re-read the saved wishlist
+        window._wishlist = getWishlist().filter(function(item){ return item && item.name !== name; });
+        saveWishlist();
+        window.openCart();
+      }, 150);
+    };
 
     /* Direct cart checkout — bypasses all wrapper chains, always reads fresh cart */
     window.__kritCartCheckout = function(){

@@ -3510,7 +3510,7 @@ var _wishlist = JSON.parse(localStorage.getItem("krit_wishlist") || "[]");
 var _kritOrders = JSON.parse(localStorage.getItem("krit_orders") || "[]");
 var _kritCheckoutItems = [];
 var _kritSelectedPaymentMode = "upi";
-var KRIT_PAYMENT_OFFERS = { prepaidDiscount: 50, codFee: 49 };
+var KRIT_PAYMENT_OFFERS = { prepaidDiscount: 0, codFee: 0 }; // same price online or COD
 
 function kritSaveOrders(){
   localStorage.setItem("krit_orders", JSON.stringify(_kritOrders));
@@ -3594,7 +3594,7 @@ function kritPaymentMeta(mode){
       title: "Pay on delivery",
       orderLabel: "Pay on delivery",
       cta: "Confirm pay on delivery",
-      note: "Pay when your order arrives. A small service fee applies and confirmation can take a little longer.",
+      note: "Pay in cash when your order arrives.",
       highlight: "Alternative option"
     };
   }
@@ -3645,6 +3645,9 @@ function kritSelectPaymentMode(mode){
   var noteEl = document.getElementById("krit-payment-note");
   var badgeEl = document.getElementById("krit-payment-badge");
   if(adjustLabel && adjustValue){
+    // No online discount or COD fee: hide the line when it would be zero.
+    var adjustAmount = mode === "cod" ? pricing.codFee : pricing.discount;
+    if(adjustLabel.parentNode) adjustLabel.parentNode.style.display = adjustAmount > 0 ? "" : "none";
     if(mode === "cod"){
       adjustLabel.textContent = "Pay on delivery service fee";
       adjustValue.textContent = kritFormatINR(pricing.codFee);
@@ -3705,6 +3708,8 @@ function kritRazorpayDisplayConfig(mode){
 }
 
 function kritShowCodNudge(customer){
+  // No online discount any more, so don't nudge — go straight on with COD.
+  if(!(KRIT_PAYMENT_OFFERS.prepaidDiscount > 0)) return kritContinueCodFlow();
   var savings = kritFormatINR(KRIT_PAYMENT_OFFERS.prepaidDiscount);
   var existing = document.getElementById("krit-cod-nudge-overlay");
   if(existing) existing.remove();
@@ -4048,10 +4053,10 @@ function kritOpenCheckout(items){
     +           '<div id="krit-payment-badge" style="padding:7px 12px;border-radius:999px;border:1px solid rgba(74,222,128,.28);background:rgba(74,222,128,.08);color:#7EE39D;font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Recommended</div>'
     +         '</div>'
     +         '<div style="display:grid;gap:10px">'
-    +           '<button type="button" id="krit-pay-upi" data-krit-pay-option="upi" onclick="kritSelectPaymentMode(\'upi\')" style="text-align:left;padding:16px 16px;border-radius:16px;border:1px solid rgba(47,93,168,.18);background:rgba(6,16,29,.8);color:#F0F4FF;cursor:pointer;transition:all .2s"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div style="font-size:.94rem;font-weight:700">UPI / QR Scan</div><div style="font-size:.78rem;color:#AFC0DE;line-height:1.6;margin-top:5px">GPay, PhonePe, Paytm, QR scan, and UPI details if supported by Razorpay on the device.</div></div><div style="font-size:.72rem;color:#7EE39D;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Save ' + kritFormatINR(KRIT_PAYMENT_OFFERS.prepaidDiscount) + '</div></div></button>'
-    +           '<button type="button" id="krit-pay-card" data-krit-pay-option="card" onclick="kritSelectPaymentMode(\'card\')" style="text-align:left;padding:16px 16px;border-radius:16px;border:1px solid rgba(47,93,168,.18);background:rgba(6,16,29,.8);color:#F0F4FF;cursor:pointer;transition:all .2s"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div style="font-size:.94rem;font-weight:700">Credit / Debit Cards</div><div style="font-size:.78rem;color:#AFC0DE;line-height:1.6;margin-top:5px">Visa, Mastercard, RuPay and supported debit or credit cards through secure checkout.</div></div><div style="font-size:.72rem;color:#7EE39D;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Save ' + kritFormatINR(KRIT_PAYMENT_OFFERS.prepaidDiscount) + '</div></div></button>'
-    +           '<button type="button" id="krit-pay-netbanking" data-krit-pay-option="netbanking" onclick="kritSelectPaymentMode(\'netbanking\')" style="text-align:left;padding:16px 16px;border-radius:16px;border:1px solid rgba(47,93,168,.18);background:rgba(6,16,29,.8);color:#F0F4FF;cursor:pointer;transition:all .2s"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div style="font-size:.94rem;font-weight:700">Internet Banking</div><div style="font-size:.78rem;color:#AFC0DE;line-height:1.6;margin-top:5px">Choose your bank inside Razorpay secure checkout and complete the payment from your internet banking account.</div></div><div style="font-size:.72rem;color:#7EE39D;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Save ' + kritFormatINR(KRIT_PAYMENT_OFFERS.prepaidDiscount) + '</div></div></button>'
-    +           '<button type="button" id="krit-pay-cod" data-krit-pay-option="cod" onclick="kritSelectPaymentMode(\'cod\')" style="text-align:left;padding:16px 16px;border-radius:16px;border:1px solid rgba(47,93,168,.18);background:rgba(6,16,29,.8);color:#F0F4FF;cursor:pointer;transition:all .2s"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div style="font-size:.94rem;font-weight:700">Pay On Delivery</div><div style="font-size:.78rem;color:#AFC0DE;line-height:1.6;margin-top:5px">Choose this if you prefer to pay at delivery. A small service fee applies.</div></div><div style="font-size:.72rem;color:#F9D548;font-weight:700;letter-spacing:.12em;text-transform:uppercase">+' + kritFormatINR(KRIT_PAYMENT_OFFERS.codFee) + ' fee</div></div></button>'
+    +           '<button type="button" id="krit-pay-upi" data-krit-pay-option="upi" onclick="kritSelectPaymentMode(\'upi\')" style="text-align:left;padding:16px 16px;border-radius:16px;border:1px solid rgba(47,93,168,.18);background:rgba(6,16,29,.8);color:#F0F4FF;cursor:pointer;transition:all .2s"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div style="font-size:.94rem;font-weight:700">UPI / QR Scan</div><div style="font-size:.78rem;color:#AFC0DE;line-height:1.6;margin-top:5px">GPay, PhonePe, Paytm, QR scan, and UPI details if supported by Razorpay on the device.</div></div></div></button>'
+    +           '<button type="button" id="krit-pay-card" data-krit-pay-option="card" onclick="kritSelectPaymentMode(\'card\')" style="text-align:left;padding:16px 16px;border-radius:16px;border:1px solid rgba(47,93,168,.18);background:rgba(6,16,29,.8);color:#F0F4FF;cursor:pointer;transition:all .2s"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div style="font-size:.94rem;font-weight:700">Credit / Debit Cards</div><div style="font-size:.78rem;color:#AFC0DE;line-height:1.6;margin-top:5px">Visa, Mastercard, RuPay and supported debit or credit cards through secure checkout.</div></div></div></button>'
+    +           '<button type="button" id="krit-pay-netbanking" data-krit-pay-option="netbanking" onclick="kritSelectPaymentMode(\'netbanking\')" style="text-align:left;padding:16px 16px;border-radius:16px;border:1px solid rgba(47,93,168,.18);background:rgba(6,16,29,.8);color:#F0F4FF;cursor:pointer;transition:all .2s"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div style="font-size:.94rem;font-weight:700">Internet Banking</div><div style="font-size:.78rem;color:#AFC0DE;line-height:1.6;margin-top:5px">Choose your bank inside Razorpay secure checkout and complete the payment from your internet banking account.</div></div></div></button>'
+    +           '<button type="button" id="krit-pay-cod" data-krit-pay-option="cod" onclick="kritSelectPaymentMode(\'cod\')" style="text-align:left;padding:16px 16px;border-radius:16px;border:1px solid rgba(47,93,168,.18);background:rgba(6,16,29,.8);color:#F0F4FF;cursor:pointer;transition:all .2s"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><div style="font-size:.94rem;font-weight:700">Pay On Delivery</div><div style="font-size:.78rem;color:#AFC0DE;line-height:1.6;margin-top:5px">Pay in cash when your order arrives.</div></div></div></button>'
     +         '</div>'
     +         '<div id="krit-payment-note" style="margin-top:12px;padding:14px;border-radius:12px;background:rgba(8,18,34,.78);border:1px solid rgba(47,93,168,.14);font-size:.8rem;line-height:1.7;color:#AFC0DE"></div>'
     +         '<button type="button" id="krit-checkout-submit" onclick="kritProceedCheckout()" style="width:100%;margin-top:16px;padding:15px 18px;border:none;border-radius:12px;background:#F9D548;color:#1B2340;font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer">Pay Online Securely</button>'
@@ -4064,7 +4069,6 @@ function kritOpenCheckout(items){
     +       '<div style="display:flex;justify-content:space-between;padding-top:14px;margin-top:12px;border-top:1px solid rgba(47,93,168,.14);color:#D8E4F8"><span>Subtotal</span><span id="krit-checkout-subtotal">' + kritFormatINR(subtotal) + '</span></div>'
     +       '<div style="display:flex;justify-content:space-between;padding-top:10px;color:#D8E4F8"><span id="krit-checkout-adjust-label">Online payment discount</span><span id="krit-checkout-adjust-value" style="color:#7EE39D">-' + kritFormatINR(KRIT_PAYMENT_OFFERS.prepaidDiscount) + '</span></div>'
     +       '<div style="display:flex;justify-content:space-between;padding-top:14px;margin-top:12px;border-top:1px solid rgba(47,93,168,.14)"><span style="color:#F0F4FF;font-weight:700">Total payable</span><span id="krit-checkout-total" style="font-family:\'Playfair Display\',serif;font-size:1.35rem;color:#F0F4FF;font-weight:700">' + kritFormatINR(Math.max(0, subtotal - KRIT_PAYMENT_OFFERS.prepaidDiscount)) + '</span></div>'
-    +       '<div style="margin-top:18px;padding:16px;border-radius:14px;background:rgba(8,18,34,.78);border:1px solid rgba(47,93,168,.14)"><div style="font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:#C9A84C;margin-bottom:8px">Why prepaid works better</div><div style="font-size:.8rem;line-height:1.8;color:#AFC0DE">Online payments get instant confirmation, prepaid savings, and faster dispatch. Pay on delivery is still available if you need it.</div></div>'
     +     '</div>'
     +   '</div>'
     + '</div>';
@@ -4230,11 +4234,11 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
   }
 };
 </script>
-<script src="/assets/krit-commerce.js?v=20261025a"></script>
+<script src="/assets/krit-commerce.js?v=20261108b"></script>
 <script src="/assets/krit-ui.js?v=20260416b"></script>
 <script src="/assets/krit-pages.js?v=20260416b"></script>
-<script src="/assets/krit-enhancements.js?v=20260421d"></script>
-<script src="/assets/krit-storefix.js?v=20261025a"></script>
+<script src="/assets/krit-enhancements.js?v=20261108b"></script>
+<script src="/assets/krit-storefix.js?v=20261108b"></script>
 <script src="/assets/krit-tracking.js?v=20260421a"></script>
 </body>
 </html>

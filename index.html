@@ -3790,7 +3790,7 @@ var _wishlist = JSON.parse(localStorage.getItem("krit_wishlist") || "[]");
 var _kritOrders = JSON.parse(localStorage.getItem("krit_orders") || "[]");
 var _kritCheckoutItems = [];
 var _kritSelectedPaymentMode = "upi";
-var KRIT_PAYMENT_OFFERS = { prepaidDiscount: 50, codFee: 49 };
+var KRIT_PAYMENT_OFFERS = { prepaidDiscount: 0, codFee: 0 }; // same price online or COD
 
 function kritSaveOrders(){
   localStorage.setItem("krit_orders", JSON.stringify(_kritOrders));
@@ -3874,7 +3874,7 @@ function kritPaymentMeta(mode){
       title: "Pay on delivery",
       orderLabel: "Pay on delivery",
       cta: "Confirm pay on delivery",
-      note: "Pay when your order arrives. A small service fee applies and confirmation can take a little longer.",
+      note: "Pay in cash when your order arrives.",
       highlight: "Alternative option"
     };
   }
@@ -3925,6 +3925,9 @@ function kritSelectPaymentMode(mode){
   var noteEl = document.getElementById("krit-payment-note");
   var badgeEl = document.getElementById("krit-payment-badge");
   if(adjustLabel && adjustValue){
+    // No online discount or COD fee: hide the line when it would be zero.
+    var adjustAmount = mode === "cod" ? pricing.codFee : pricing.discount;
+    if(adjustLabel.parentNode) adjustLabel.parentNode.style.display = adjustAmount > 0 ? "" : "none";
     if(mode === "cod"){
       adjustLabel.textContent = "Pay on delivery service fee";
       adjustValue.textContent = kritFormatINR(pricing.codFee);
@@ -4376,10 +4379,6 @@ function kritOpenCheckout(items){
   +'<button onclick="kritCloseOverlay(\'krit-checkout-overlay\')" style="width:32px;height:32px;border-radius:50%;border:1px solid #e0e0e0;background:#f8f8f8;color:#666;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>'
   +'</div>'
 
-  /* ── prepaid banner ── */
-  +'<div style="margin:12px 20px 0;padding:10px 14px;border-radius:10px;background:#fffbe6;border:1px solid #ffe082;font-size:.78rem;color:#7a5c00;font-weight:600">'
-  +'⭐ Get flat ₹50 off on all Prepaid Orders'
-  +'</div>'
 
   /* ── progress bar ── */
   +'<div class="km-progress" style="padding:14px 20px 0">'
@@ -4942,11 +4941,11 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
   }
 };
 </script>
-<script src="/assets/krit-commerce.js?v=20261025a"></script>
+<script src="/assets/krit-commerce.js?v=20261108b"></script>
 <script src="/assets/krit-ui.js?v=20260416b"></script>
 <script src="/assets/krit-pages.js?v=20260416b"></script>
-<script src="/assets/krit-enhancements.js?v=20260421d"></script>
-<script src="/assets/krit-storefix.js?v=20261025a"></script>
+<script src="/assets/krit-enhancements.js?v=20261108b"></script>
+<script src="/assets/krit-storefix.js?v=20261108b"></script>
 <script src="/assets/krit-tracking.js?v=20260421a"></script>
 </body>
 </html>
