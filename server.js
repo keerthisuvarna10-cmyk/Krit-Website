@@ -196,6 +196,31 @@ async function sendSmtpOrderEmails(order) {
   return { channel: 'email', ok: true };
 }
 
+/*
+ * Order SMS on the DLT-approved short KRITSL templates (1 SMS each).
+ * Railway variables = MSG91 template IDs (MSG91 → SMS → Templates):
+ *   MSG91_TPL_ORDER_CONFIRMED  Hi ##var1##, your KRIT order ##var2## of Rs ##var3## is confirmed…
+ *   MSG91_TPL_COD_CONFIRMED    Hi ##var1##, your KRIT COD order ##var2## of Rs ##var3## is confirmed…
+ *   MSG91_TPL_OWNER_ALERT      New KRIT order ##var1##: ##var2##, Rs ##var3##, Ph ##var4##…
+ * Status updates (packed, shipped, delivered…) are sent by the ERP.
+ */
+const MSG91_TPL_ORDER_CONFIRMED = process.env.MSG91_TPL_ORDER_CONFIRMED || '';
+const MSG91_TPL_COD_CONFIRMED = process.env.MSG91_TPL_COD_CONFIRMED || '';
+const MSG91_TPL_OWNER_ALERT = process.env.MSG91_TPL_OWNER_ALERT || '';
+
+async function msg91Template(templateId, mobile, vars) {
+  const recipient = { mobiles: mobile.length === 10 ? `91${mobile}` : mobile };
+  vars.forEach((v, i) => { recipient[`var${i + 1}`] = String(v == null ? '' : v); });
+  const response = await fetch('https://control.msg91.com/api/v5/flow', {
+    method: 'POST',
+    headers: { accept: 'application/json', 'content-type': 'application/json', authkey: MSG91_AUTH_KEY },
+    body: JSON.stringify({ template_id: templateId, short_url: '0', recipients: [recipient] })
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok || body.type !== 'success') throw new Error(`MSG91 ${response.status}: ${JSON.stringify(body).slice(0, 200)}`);
+  return true;
+}
+
 async function sendMsg91OrderSms(order) {
   if (!MSG91_AUTH_KEY) {
     return { channel: 'sms', ok: false, skipped: true, reason: 'MSG91 is not configured.' };
@@ -203,6 +228,19 @@ async function sendMsg91OrderSms(order) {
   const customerMobile = normalizeIndianPhone(order.customer && order.customer.phone);
   const message = buildOrderMessageText(order);
   const tasks = [];
+  const isCod = String(order.paymentMode || '').toLowerCase() === 'cod';
+  const firstName = String(message.customerName || '').trim().split(/\s+/)[0].slice(0, 20) || 'Customer';
+  const amount = String(Math.round(Number(order.total || 0)));
+  const customerTpl = isCod ? MSG91_TPL_COD_CONFIRMED : MSG91_TPL_ORDER_CONFIRMED;
+  if (customerTpl || MSG91_TPL_OWNER_ALERT) {
+    if (customerMobile && customerTpl) tasks.push(msg91Template(customerTpl, customerMobile, [firstName, order.id, amount]));
+    if (ORDER_ALERT_PHONE && MSG91_TPL_OWNER_ALERT) {
+      tasks.push(msg91Template(MSG91_TPL_OWNER_ALERT, ORDER_ALERT_PHONE, [order.id, String(message.customerName).slice(0, 25), amount, customerMobile ? customerMobile.slice(-10) : 'NA']));
+    }
+    await Promise.all(tasks);
+    return { channel: 'sms', ok: true };
+  }
+  // Older flow-based setup (kept until the template IDs above are set).
   async function callMsg91(flowId, mobile, extra) {
     if (!flowId || !mobile) return null;
     const response = await fetch('https://control.msg91.com/api/v5/flow/', {
