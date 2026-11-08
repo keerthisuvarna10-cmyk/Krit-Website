@@ -693,7 +693,7 @@
     if(code === 'auth/popup-blocked') return 'Your browser blocked the Google sign-in window. Allow pop-ups for kritsleep.in and try again.';
     if(code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return 'Google sign-in was closed before it finished. Please try again.';
     if(code === 'auth/invalid-phone-number') return 'Please enter a valid 10-digit mobile number.';
-    if(code === 'auth/invalid-verification-code') return 'That code isn\'t right. Check the SMS and try again.';
+    if(code === 'auth/invalid-verification-code') return 'That code isn\'t right. If you asked for more than one code, use the newest SMS.';
     if(code === 'auth/code-expired') return 'That code has expired. Tap Resend OTP to get a new one.';
     if(code === 'auth/too-many-requests') return 'Too many attempts from this device. Please wait a few minutes and try again.';
     if(code === 'auth/network-request-failed') return 'Couldn\'t connect. Check your internet and try again.';
@@ -721,34 +721,85 @@
       authMessage('Please enter a valid 10-digit Indian mobile number for OTP login.', 'err');
       return;
     }
-    var cfg = CONFIG.firebase || {};
-    if(!cfg.apiKey || !cfg.projectId){
-      authMessage('Phone login is not configured yet. Please use Google or email for now.', 'err');
-      return;
-    }
-    var fb = await ensureFirebase();
-    if(!fb || !fb.auth){
-      authMessage('Could not reach Firebase. Check your internet connection and try again.', 'err');
-      return;
-    }
+    if(otpSending) return;               // one request at a time: a second one cancels the first code
+    otpSending = true;
+    var sendBtn = document.getElementById('krit-send-otp-btn');
+    if(sendBtn){ sendBtn.disabled = true; if(!sendBtn.dataset.kritLabel) sendBtn.dataset.kritLabel = sendBtn.textContent; sendBtn.textContent = 'Sending…'; }
+    var sentOk = false;
     try {
-      authMessage('Sending OTP to +91 ' + phone + '...', 'info');
-      var verifier = await ensurePhoneRecaptcha(fb);
-      phoneConfirmationResult = await fb.auth().signInWithPhoneNumber('+91' + phone, verifier);
+      authMessage('Sending a code to +91 ' + phone + '…', 'info');
+      var provider = await otpProvider();
+      if(provider === 'msg91'){
+        phoneConfirmationResult = await sendOtpViaServer(phone);
+      } else {
+        var cfg = CONFIG.firebase || {};
+        if(!cfg.apiKey || !cfg.projectId){ authMessage('Mobile OTP sign-in isn\'t available right now. Please continue with Google or email instead.', 'err'); return; }
+        var fb = await ensureFirebase();
+        if(!fb || !fb.auth){ authMessage('Couldn\'t connect. Check your internet and try again.', 'err'); return; }
+        var verifier = await ensurePhoneRecaptcha(fb);
+        phoneConfirmationResult = await fb.auth().signInWithPhoneNumber('+91' + phone, verifier);
+      }
+      sentOk = true;
       var wrap = document.getElementById('krit-otp-verify-wrap');
       var codeEl = document.getElementById('krit-otp-code');
       if(wrap) wrap.style.display = 'grid';
       if(codeEl){ codeEl.value = ''; setTimeout(function(){ codeEl.focus(); }, 50); }
       track('login', { method: 'phone_otp_requested' });
-      authMessage('OTP sent successfully. Enter the 6-digit code below.', 'ok');
+      authMessage('Code sent to +91 ' + phone + '. It can take up to a minute to arrive. If you ask for a new code, use the newest SMS.', 'ok');
       startPhoneResendCooldown(30);
     } catch(error) {
       phoneConfirmationResult = null;
       resetPhoneRecaptcha();
       try { console.warn('KRIT OTP send failed:', error && error.code, error && error.message); } catch(e){}
       authMessage(firebaseAuthErrorMessage(error, 'otp'), 'err');
+    } finally {
+      otpSending = false;
+      if(sendBtn && !sentOk){ sendBtn.disabled = false; sendBtn.textContent = sendBtn.dataset.kritLabel || 'Send OTP'; }
     }
   }
+
+  /* Which service sends the login OTP. The server says "msg91" once MSG91 and
+     the DLT-approved OTP template are configured; until then Firebase does. */
+  var otpSending = false;
+  var otpProviderCache = null;
+  async function otpProvider(){
+    if(otpProviderCache) return otpProviderCache;
+    try {
+      var r = await fetch('/api/otp/config', { credentials: 'same-origin' });
+      var d = r.ok ? await r.json() : null;
+      otpProviderCache = d && d.provider === 'msg91' ? 'msg91' : 'firebase';
+    } catch(e){ otpProviderCache = 'firebase'; }
+    return otpProviderCache;
+  }
+  function otpError(code, message){ var e = new Error(message || code); e.code = code; return e; }
+  // MSG91 OTP: our server sends and checks the code, then hands back a Firebase
+  // sign-in token, so the shopper ends up signed in exactly as with Firebase OTP.
+  async function sendOtpViaServer(phone){
+    var r = await fetch('/api/otp/send', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: phone }) });
+    var d = await r.json().catch(function(){ return {}; });
+    if(!r.ok || !d.ok) throw otpError(d.code || 'auth/internal-error', d.error);
+    return {
+      confirm: async function(code){
+        var v = await fetch('/api/otp/verify', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: phone, otp: code }) });
+        var vd = await v.json().catch(function(){ return {}; });
+        if(!v.ok || !vd.ok) throw otpError(vd.code || 'auth/invalid-verification-code', vd.error);
+        var fb = await ensureFirebase();
+        if(!fb || !fb.auth) throw otpError('auth/network-request-failed');
+        return fb.auth().signInWithCustomToken(vd.token);
+      }
+    };
+  }
+  // Load Firebase and the security check as soon as the shopper starts typing
+  // their number, so tapping Send OTP doesn't wait for them.
+  function warmUpOtp(){
+    if(warmUpOtp.done) return;
+    warmUpOtp.done = true;
+    otpProvider().then(function(p){
+      if(p !== 'firebase') return ensureFirebase();
+      return ensureFirebase().then(function(fb){ if(fb && fb.auth) return ensurePhoneRecaptcha(fb); });
+    }).catch(function(){ warmUpOtp.done = false; });
+  }
+  window.kritWarmUpOtp = warmUpOtp;
 
   async function verifyOtpLogin(){
     clearAuthMessage();
@@ -1667,6 +1718,8 @@
     var phone = document.getElementById('auth-otp-phone');
     if(phone && !phone.dataset.kritEnter){
       phone.dataset.kritEnter = '1';
+      phone.addEventListener('focus', warmUpOtp);
+      phone.addEventListener('input', warmUpOtp);
       phone.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); window.kritSendOtpLogin && window.kritSendOtpLogin(); } });
     }
     var code = document.getElementById('krit-otp-code');

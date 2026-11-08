@@ -5,6 +5,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { priceOrder } = require('./pricing');
 const { createStock } = require('./stock');
+const { createOtp } = require('./otp');
 const { verifyFirebaseUser, bearerToken, verifyRazorpayPayment, rateLimiter, escapeHtml } = require('./security');
 
 const app = express();
@@ -758,6 +759,15 @@ app.post('/api/erp/visit', requireAuth, async (req, res) => {
 // then opens Razorpay Checkout with the returned order_id. After payment
 // the client POSTs back to /api/razorpay/verify where we HMAC-verify the
 // signature before marking the order paid.
+/* ── Login OTP (MSG91 once configured; otherwise the site uses Firebase) ── */
+const otp = createOtp({
+  authKey: MSG91_AUTH_KEY,
+  templateId: process.env.MSG91_OTP_TEMPLATE_ID || '',
+  serviceAccount: process.env.FIREBASE_SERVICE_ACCOUNT || ''
+});
+otp.routes(app, requireAuth);
+console.log('Login OTP provider:', otp.enabled ? 'MSG91' : 'Firebase');
+
 app.post('/api/razorpay/order', requireAuth, async (req, res) => {
   if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
     return res.status(503).json({ error: 'Payment gateway is not configured. Please try again shortly.' });
