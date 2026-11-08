@@ -1370,7 +1370,6 @@ button, .bp, .bs, .nc {
     <div class="marquee-item"><span class="marquee-icon">💵</span><span class="marquee-text">Cash on Delivery</span><span class="marquee-sub">Available</span></div>
     <div class="marquee-item"><span class="marquee-icon">🌬️</span><span class="marquee-text">Dunlop Process</span><span class="marquee-sub">Breathable &amp; hypoallergenic</span></div>
     <div class="marquee-item"><span class="marquee-icon">↩️</span><span class="marquee-text">7-Day Easy Returns</span><span class="marquee-sub">No questions asked</span></div>
-    <div class="marquee-item"><span class="marquee-icon">⭐</span><span class="marquee-text">4.8/5 Rating</span><span class="marquee-sub">127+ customers</span></div>
     <div class="marquee-item"><img src="https://res.cloudinary.com/djicyjlid/image/upload/v1773595112/make_in_india_i5koo9.png" alt="Make in India" style="height:18px;width:auto;object-fit:contain;opacity:.8" loading="lazy"><span class="marquee-text" style="color:#F47920">Made in India</span></div>
     <div class="marquee-item"><span class="marquee-icon">🔒</span><span class="marquee-text">Secure Checkout</span><span class="marquee-sub">100% safe</span></div>
     <!-- Duplicate for seamless loop -->
@@ -1380,7 +1379,6 @@ button, .bp, .bs, .nc {
     <div class="marquee-item"><span class="marquee-icon">💵</span><span class="marquee-text">Cash on Delivery</span><span class="marquee-sub">Available</span></div>
     <div class="marquee-item"><span class="marquee-icon">🌬️</span><span class="marquee-text">Dunlop Process</span><span class="marquee-sub">Breathable &amp; hypoallergenic</span></div>
     <div class="marquee-item"><span class="marquee-icon">↩️</span><span class="marquee-text">7-Day Easy Returns</span><span class="marquee-sub">No questions asked</span></div>
-    <div class="marquee-item"><span class="marquee-icon">⭐</span><span class="marquee-text">4.8/5 Rating</span><span class="marquee-sub">127+ customers</span></div>
     <div class="marquee-item"><img src="https://res.cloudinary.com/djicyjlid/image/upload/v1773595112/make_in_india_i5koo9.png" alt="Make in India" style="height:18px;width:auto;object-fit:contain;opacity:.8" loading="lazy"><span class="marquee-text" style="color:#F47920">Made in India</span></div>
     <div class="marquee-item"><span class="marquee-icon">🔒</span><span class="marquee-text">Secure Checkout</span><span class="marquee-sub">100% safe</span></div>
   </div>
@@ -1592,8 +1590,7 @@ button, .bp, .bs, .nc {
               <h3 id="detail-name" style="font-family:'Playfair Display',serif;font-size:1.8rem;color:#F0F4FF;font-weight:700;margin:0 0 6px"></h3>
               <div id="detail-sku" style="font-size:.72rem;font-family:monospace;color:#8B9FBE;margin-bottom:14px"></div>
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-                <span style="color:#C9A84C;font-size:14px">★★★★★</span>
-                <span id="detail-rating" style="font-size:.82rem;color:#A8BAD8"></span>
+                <span id="detail-rating" style="display:none"></span>
                 <span style="padding:3px 8px;border-radius:999px;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.18);font-size:.66rem;color:#61d88e">In stock</span>
               </div>
               <div style="padding:15px 16px;border-radius:12px;background:rgba(47,93,168,.08);border:1px solid rgba(47,93,168,.16);margin-bottom:16px">
@@ -1792,7 +1789,7 @@ function kritOpenDetail(productId, skipScroll){
   document.getElementById("detail-badge").style.background = product.badgeColor;
   document.getElementById("detail-name").textContent = product.name;
   document.getElementById("detail-sku").textContent = "";  // SKU hidden from customer UI
-  document.getElementById("detail-rating").textContent = product.rating + " / 5 rating";
+  /* No star rating until real reviews come in */
   document.getElementById("detail-price").textContent = kritFormatINR(product.price);
   document.getElementById("detail-desc").textContent = product.desc;
   document.getElementById("detail-qty").textContent = "1";
@@ -2226,17 +2223,17 @@ setTimeout(_kritInit, 600);
       </div>
     </div>
     <div class="blg">
-      <div class="bpost rv" onclick="openArticle('a1')" style="cursor:pointer">
+      <div class="bpost rv" onclick="location.href='/blog/natural-latex-vs-memory-foam'" role="link" tabindex="0" onkeydown="if(event.key==='Enter')location.href='/blog/natural-latex-vs-memory-foam'" style="cursor:pointer">
         <div class="bth"><img loading="lazy" src="https://res.cloudinary.com/djicyjlid/image/upload/f_auto,q_auto/ChatGPT_Image_Mar_7_2026_02_19_53_PM_djrwnp.png" alt="Latex vs memory foam"></div>
-        <div class="bct"><div class="bca">Sleep Science</div><div class="bti">Why Natural Latex Beats Memory Foam for Deep Sleep</div><div class="bex">Memory foam traps heat and off-gasses chemicals. Discover why latex is the scientifically superior choice for restorative, healthy sleep.</div><div class="brd">Read Article →</div></div>
+        <div class="bct"><div class="bca">Sleep Science</div><div class="bti"><a href="/blog/natural-latex-vs-memory-foam" style="color:inherit;text-decoration:none">Why Natural Latex Beats Memory Foam for Deep Sleep</a></div><div class="bex">Memory foam traps heat and off-gasses chemicals. Discover why latex is the scientifically superior choice for restorative, healthy sleep.</div><div class="brd">Read Article →</div></div>
       </div>
-      <div class="bpost rv" data-d="1" onclick="openArticle('a2')" style="cursor:pointer">
-        <div class="bth"><img loading="lazy" src="https://res.cloudinary.com/djicyjlid/image/upload/f_auto,q_auto/v1776620159/ChatGPT_Image_Mar_7_2026_02_38_27_PM_mqm4ey.png" alt="Children sleep health"></div>
-        <div class="bct"><div class="bca">Family Health</div><div class="bti">How the Right Pillow Transforms Your Child's Sleep</div><div class="bex">Growing children need proper spinal alignment during sleep. The right pillow now shapes their posture and health for life.</div><div class="brd">Read Article →</div></div>
+      <div class="bpost rv" data-d="1" onclick="location.href='/blog/right-pillow-height'" role="link" tabindex="0" onkeydown="if(event.key==='Enter')location.href='/blog/right-pillow-height'" style="cursor:pointer">
+        <div class="bth"><img loading="lazy" src="https://res.cloudinary.com/djicyjlid/image/upload/f_auto,q_auto/v1776620159/ChatGPT_Image_Mar_7_2026_02_38_27_PM_mqm4ey.png" alt="Choosing the right pillow height"></div>
+        <div class="bct"><div class="bca">Sleep Health</div><div class="bti"><a href="/blog/right-pillow-height" style="color:inherit;text-decoration:none">How the Right Pillow Height Changes Everything</a></div><div class="bex">Back, side or stomach sleeper? The right pillow height keeps your neck aligned and stops morning stiffness.</div><div class="brd">Read Article →</div></div>
       </div>
-      <div class="bpost rv" data-d="2" onclick="openArticle('a3')" style="cursor:pointer">
+      <div class="bpost rv" data-d="2" onclick="location.href='/blog/sleep-environment-bedroom'" role="link" tabindex="0" onkeydown="if(event.key==='Enter')location.href='/blog/sleep-environment-bedroom'" style="cursor:pointer">
         <div class="bth"><img loading="lazy" src="https://res.cloudinary.com/djicyjlid/image/upload/f_auto,q_auto/blog-plants-sleep-bedroom_mzdlb2.png" alt="Sleep environment"></div>
-        <div class="bct"><div class="bca">Wellness</div><div class="bti">The Sleep Environment: Plants, Air &amp; Your Bedroom</div><div class="bex">Air quality in your bedroom directly impacts sleep quality. Combine the right plants with a natural latex pillow for the ultimate sleep sanctuary.</div><div class="brd">Read Article →</div></div>
+        <div class="bct"><div class="bca">Wellness</div><div class="bti"><a href="/blog/sleep-environment-bedroom" style="color:inherit;text-decoration:none">The Sleep Environment: Plants, Air &amp; Your Bedroom</a></div><div class="bex">Air quality in your bedroom directly impacts sleep quality. Combine the right plants with a natural latex pillow for the ultimate sleep sanctuary.</div><div class="brd">Read Article →</div></div>
       </div>
     </div>
   </div>

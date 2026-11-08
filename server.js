@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const { priceOrder } = require('./pricing');
 const { createStock } = require('./stock');
 const { createDeliveryEstimates } = require('./delivery');
+const { blogRoutes, blogSitemapUrls } = require('./blog');
 const { createOtp } = require('./otp');
 const { verifyFirebaseUser, bearerToken, verifyRazorpayPayment, rateLimiter, escapeHtml } = require('./security');
 
@@ -962,6 +963,9 @@ Object.keys(LEGAL_PAGES).forEach((route) => {
   app.get(route, (_req, res) => res.sendFile(path.join(__dirname, 'legal', LEGAL_PAGES[route])));
 });
 
+// ── Blog articles as their own pages (/blog, /blog/<slug>) ──
+blogRoutes(app, requireAuth);
+
 // ── SEO: robots.txt ──
 app.get('/robots.txt', (_req, res) => {
   res.type('text/plain');
@@ -986,7 +990,9 @@ app.get('/sitemap.xml', (_req, res) => {
     { loc: base + '/product/half-3',      priority: '0.9', freq: 'weekly'  },
     { loc: base + '/product/half-2',      priority: '0.8', freq: 'weekly'  },
     { loc: base + '/product/soap-2',      priority: '0.8', freq: 'weekly'  },
-    { loc: base + '/account.html',        priority: '0.5', freq: 'monthly' },
+    { loc: base + '/privacy',             priority: '0.3', freq: 'yearly'  },
+    { loc: base + '/terms',               priority: '0.3', freq: 'yearly'  },
+    ...blogSitemapUrls(),
   ];
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',
