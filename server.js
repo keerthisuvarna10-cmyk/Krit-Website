@@ -54,6 +54,9 @@ function normalizeIndianPhone(value) {
 }
 
 app.set('trust proxy', 1);
+// Gzip pages, scripts and JSON (the homepage is ~300 KB raw, ~60 KB gzipped)
+app.use(require('compression')());
+
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(session({
@@ -932,7 +935,14 @@ app.post('/api/notify/order', requireAuth, (_req, res) => {
   res.json({ ok: true, skipped: true, reason: 'Order alerts are sent automatically when the order is saved.' });
 });
 
-app.use('/assets', requireAuth, express.static(path.join(__dirname, 'assets')));
+// Scripts and styles: versioned (?v=…) files never change, so browsers keep them.
+app.use('/assets', requireAuth, express.static(path.join(__dirname, 'assets'), {
+  setHeaders(res) {
+    res.setHeader('Cache-Control', res.req && /[?&]v=/.test(res.req.originalUrl) ? 'public, max-age=31536000, immutable' : 'public, max-age=3600');
+    res.removeHeader('Pragma');
+    res.removeHeader('Expires');
+  }
+}));
 app.get('/site', requireAuth, (_req, res) => res.redirect('/'));
 app.get('/index.html', requireAuth, sendProtectedPage('index.html'));
 app.get('/product.html', requireAuth, sendProtectedPage('product.html'));
