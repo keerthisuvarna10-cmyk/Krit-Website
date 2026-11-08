@@ -5,6 +5,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { priceOrder } = require('./pricing');
 const { createStock } = require('./stock');
+const { createDeliveryEstimates } = require('./delivery');
 const { createOtp } = require('./otp');
 const { verifyFirebaseUser, bearerToken, verifyRazorpayPayment, rateLimiter, escapeHtml } = require('./security');
 
@@ -20,6 +21,7 @@ const ERP_BASE_URL = String(process.env.ERP_BASE_URL || '').replace(/\/$/, '');
 const ERP_WEBHOOK_SECRET = process.env.ERP_WEBHOOK_SECRET || '';
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
 const stock = createStock({ baseUrl: ERP_BASE_URL, webhookSecret: ERP_WEBHOOK_SECRET });
+const deliveryEstimates = createDeliveryEstimates({ baseUrl: ERP_BASE_URL });
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
 const ORDER_ALERT_EMAIL = process.env.ORDER_ALERT_EMAIL || 'hello@kritsleep.in';
 const ORDER_ALERT_PHONE = normalizeIndianPhone(process.env.ORDER_ALERT_PHONE || '9611211121');
@@ -604,6 +606,17 @@ app.get('/health', (_req, res) => {
 app.use((req, res, next) => {
   if (isPublicPath(req)) return next();
   return requireAuth(req, res, next);
+});
+
+/* ── Delivery date for a PIN code (Kudlu warehouse → customer, via Shiprocket) ── */
+app.get('/api/delivery-estimate', requireAuth, async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  try {
+    const cod = /^(1|true|cod)$/i.test(String(req.query.cod || ''));
+    res.json(await deliveryEstimates.estimate(req.query.pincode, cod));
+  } catch (e) {
+    res.status(500).json({ ok: false, error: 'Could not work out a delivery date.' });
+  }
 });
 
 /* ── Live stock ──

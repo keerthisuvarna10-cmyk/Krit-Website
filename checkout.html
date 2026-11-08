@@ -351,6 +351,9 @@
     .co-success-topbar img{height:48px}
     .co-success-topbar-back{padding:6px 10px;font-size:.66rem}
   }
+.co-eta{font-size:.82rem;margin-top:6px;min-height:1em;color:#6b7280}
+.co-eta.ok{color:#1e7a46}.co-eta.ok strong{color:#14532d}.co-eta.ok span{color:#6b7280}
+.co-eta.bad{color:#b42318}
 </style>
 </head>
 <body>
@@ -396,7 +399,7 @@
       <div class="co-section-head">
         <div class="co-section-title"><span class="co-step">2</span> Shipping address</div>
       </div>
-      <div class="co-section-sub">We deliver across India in 4 to 7 business days. Free shipping on every order.</div>
+      <div class="co-section-sub">Free shipping across India. Enter your PIN code to see your exact delivery date.</div>
       <div class="co-row">
         <div class="co-field">
           <label for="coName">Full name</label>
@@ -407,6 +410,7 @@
           <label for="coPincode">Pincode</label>
           <input id="coPincode" class="co-input" type="text" inputmode="numeric" maxlength="6" autocomplete="postal-code" placeholder="6-digit pincode">
           <div class="co-err" id="errPincode">Please enter a valid 6-digit pincode.</div>
+          <div class="co-eta" id="coEta" aria-live="polite"></div>
         </div>
       </div>
       <div class="co-row full" style="margin-top:12px">
@@ -445,7 +449,7 @@
       </div>
       <div class="co-delivery">
         <svg class="truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7"/><circle cx="6" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg>
-        <div>Standard delivery &mdash; <strong>4 to 7 business days</strong>, free on every order.</div>
+        <div>Standard delivery &mdash; <strong id="coEtaMethod">enter your PIN code to see the date</strong>, free on every order.</div>
       </div>
     </div>
 
@@ -922,7 +926,42 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       if(radio) radio.checked = match;
     }
     renderTotals();
+    if(window.__coCheckEta) window.__coCheckEta();
   }
+
+  /* ── Delivery date for the PIN code (Kudlu warehouse → customer, via Shiprocket) ── */
+  var etaSeq = 0;
+  function etaDate(ymd){ var p = String(ymd||'').split('-'); return p.length === 3 ? new Date(+p[0], +p[1]-1, +p[2]) : null; }
+  function checkEta(){
+    var el = $('coEta'), pinEl = $('coPincode');
+    if(!el || !pinEl) return;
+    var pin = pinEl.value.replace(/\D/g,'');
+    if(pin.length !== 6){ el.textContent = ''; el.className = 'co-eta'; state.eta = null; return; }
+    var seq = ++etaSeq;
+    el.className = 'co-eta'; el.textContent = 'Checking delivery date…';
+    fetch('/api/delivery-estimate?pincode=' + pin + '&cod=' + (state.payment === 'cod' ? '1' : '0'), { credentials: 'same-origin', cache: 'no-store' })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(seq !== etaSeq) return;
+        state.eta = d;
+        if(!d || !d.ok){ el.className = 'co-eta bad'; el.textContent = (d && d.error) || ''; return; }
+        if(!d.serviceable){ el.className = 'co-eta bad'; el.textContent = d.error || 'Delivery is not available at this PIN code.'; return; }
+        var when = etaDate(d.date);
+        el.className = 'co-eta ok';
+        var m = $('coEtaMethod'); if(m) m.textContent = 'arrives by ' + fmtDate(when);
+        el.innerHTML = '🚚 Delivered by <strong>' + escapeHtml(fmtDate(when)) + '</strong>'
+          + (d.dispatchToday ? ' <span>· ships today</span>' : '');
+        try { localStorage.setItem('krit_pin', pin); } catch(e){}
+      })
+      .catch(function(){ if(seq === etaSeq){ el.textContent = ''; state.eta = null; } });
+  }
+  window.__coCheckEta = checkEta;
+  document.addEventListener('input', function(e){ if(e.target && e.target.id === 'coPincode') checkEta(); });
+  setTimeout(function(){
+    var pinEl = $('coPincode');
+    try { if(pinEl && !pinEl.value && localStorage.getItem('krit_pin')) pinEl.value = localStorage.getItem('krit_pin'); } catch(e){}
+    checkEta();
+  }, 600);
 
   function validateInput(id, re, errId, transform){
     var el = $(id);
@@ -967,6 +1006,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       shipping: shipping(sub),
       total: totalAmount,
       status: state.payment === 'cod' ? 'confirmed' : 'payment_pending',
+      eta: (state.eta && state.eta.ok && state.eta.serviceable) ? { date: state.eta.date, dispatchDate: state.eta.dispatchDate, courier: state.eta.courier || '', source: state.eta.source || '' } : null,
       customer: {
         name: $('coName').value.trim(),
         email: $('coEmail').value.trim(),
@@ -1118,6 +1158,11 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
     var shipDate = addBusinessDays(created, 2);
     var outDate = addBusinessDays(created, 5);
     var delivered = addBusinessDays(created, 6);
+    var etaD = order.eta && order.eta.date ? etaDate(order.eta.date) : null;
+    if(etaD){
+      delivered = etaD; outDate = etaD;
+      shipDate = (order.eta.dispatchDate && etaDate(order.eta.dispatchDate)) || shipDate;
+    }
 
     setText('coSuccessId', order.id || '');
     setText('coSuccessEta', fmtDate(delivered));
