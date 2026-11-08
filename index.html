@@ -1557,7 +1557,7 @@ button, .bp, .bs, .nc {
   <a href="#home" onclick="closeDrw()">Home</a>
   <a href="#buy" onclick="closeDrw()">Pillows</a>
   <a href="#about" onclick="closeDrw()">Lifestyle</a>
-  <a href="#our-story" onclick="closeDrw()">Our Story</a>
+  <a href="#about" onclick="closeDrw()">Our Story</a>
   <a href="#about" onclick="closeDrw()">About</a>
   <a href="#testi" onclick="closeDrw()">Reviews</a>
   <a href="#blog" onclick="closeDrw()">Blog</a>
@@ -2000,7 +2000,6 @@ function kritRenderGrid(){
       +       '<img src="' + product.images[0] + '" alt="' + kritEscapeHtml(product.name) + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease" onmouseenter="this.style.transform=\'scale(1.08)\'" onmouseleave="this.style.transform=\'scale(1)\'">'
       +       '<div style="position:absolute;top:12px;left:12px;padding:4px 10px;border-radius:999px;background:' + product.badgeColor + ';color:#fff;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase">' + kritEscapeHtml(product.badge) + '</div>'
       +       '<div style="position:absolute;top:12px;right:12px;padding:8px 10px;border-radius:10px;background:rgba(3,8,15,.84);border:1px solid rgba(47,93,168,.25);color:#fff;font-size:.8rem;font-weight:700">' + kritEscapeHtml(product.height) + '</div>'
-      +       '<div style="position:absolute;left:12px;bottom:12px;padding:6px 10px;border-radius:999px;background:rgba(3,8,15,.84);border:1px solid rgba(255,255,255,.08);color:#F0F4FF;font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase">' + product.images.length + ' views</div>'
       +     '</div>'
       +   '</button>'
       +   '<div style="padding:16px;display:flex;flex-direction:column;gap:10px;flex:1">'
@@ -2680,7 +2679,7 @@ setTimeout(_kritInit, 600);
       <div class="fnr-title">Join Our Email Newsletter</div>
       <div class="fnr-sub">Sleep tips, product updates, and occasional offers.</div>
     </div>
-    <form class="fnr-form" onsubmit="event.preventDefault(); window.location.href='mailto:hello@kritsleep.in?subject=' + encodeURIComponent('Newsletter signup') + '&body=' + encodeURIComponent('Please add this email to the KRIT newsletter: ' + document.getElementById('krit-newsletter-email').value); kritToast('Opening your email app for newsletter signup');">
+    <form class="fnr-form" onsubmit="event.preventDefault(); window.location.href='mailto:hello@kritsleep.in?subject=' + encodeURIComponent('Newsletter signup') + '&body=' + encodeURIComponent('Please add this email to the KRIT newsletter: ' + document.getElementById('krit-newsletter-email').value); kritToast('Thank you! Your email app is opening. Tap Send to join the KRIT newsletter.');">
       <input id="krit-newsletter-email" type="email" placeholder="Enter your email" required>
       <button type="submit">Join by Email →</button>
     </form>
