@@ -3077,6 +3077,9 @@ var exitShown = false;
 var exitTimer = null;
 
 function showExitPopup(){
+  // Turned off: its KRIT50 code doesn't exist at checkout. To bring it back,
+  // add the code to pricing.js and delete the next line.
+  return;
   // Check localStorage - only show once per week max
   var lastShown = localStorage.getItem('krit_exit_ts');
   var weekAgo = Date.now() - 7*24*60*60*1000;
