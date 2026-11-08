@@ -1418,6 +1418,8 @@ button, .bp, .bs, .nc {
    come back). Cart and wishlist stay in the top menu. */
 #krit-shop-sidebar,#krit-shop-tools{display:none !important}
 #krit-market-grid{grid-template-columns:1fr !important}
+.krit-detail-close{position:absolute;top:12px;right:12px;z-index:5;width:38px;height:38px;border-radius:50%;border:1px solid rgba(201,168,76,.35);background:rgba(6,14,28,.85);color:#F0F4FF;font-size:1.3rem;line-height:1;cursor:pointer}
+.krit-detail-close:hover{border-color:#C9A84C;color:#C9A84C}
 #about,#testi,#blog{position:relative;overflow:hidden}
 #about::before,#testi::before,#blog::before{
   content:"";
@@ -1576,7 +1578,8 @@ button, .bp, .bs, .nc {
           <div style="font-size:.9rem;color:#9CB0D0;line-height:1.7;margin-top:8px">Try a broader search or reset the filter to show everything again.</div>
         </div>
 
-        <div id="krit-detail" style="display:none;background:rgba(6,14,28,.95);border:1px solid rgba(47,93,168,.2);border-radius:18px;overflow:hidden">
+        <div id="krit-detail" style="display:none;position:relative;background:rgba(6,14,28,.95);border:1px solid rgba(47,93,168,.2);border-radius:18px;overflow:hidden">
+          <button type="button" class="krit-detail-close" onclick="kritCloseDetail()" aria-label="Close product details">&times;</button>
           <div id="krit-detail-layout" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0">
             <div id="krit-detail-stage" oncontextmenu="return false">
               <button type="button" class="krit-detail-nav prev" onclick="kritStepDetailImage(-1)" aria-label="Previous image">&#8249;</button>
@@ -1810,7 +1813,9 @@ function kritOpenDetail(productId, skipScroll){
   document.getElementById("detail-thumbs").innerHTML = product.images.map(function(image, index){
     return '<button type="button" onclick="kritSwapDetailImage(' + _kritSelected + ',' + index + ')" onmouseenter="kritSwapDetailImage(' + _kritSelected + ',' + index + ')" style="width:58px;height:58px;padding:0;border:2px solid ' + (index === 0 ? "rgba(47,93,168,.72)" : "rgba(47,93,168,.14)") + ';border-radius:8px;overflow:hidden;background:#06101d;cursor:pointer"><img src="' + image + '" alt="' + kritEscapeHtml(product.name) + '" style="width:100%;height:100%;object-fit:cover"></button>';
   }).join("");
-  panel.style.display = "block";
+  // The big panel shows only once a shopper picks a pillow (or on a
+  // /product/<id> page). Quiet calls while the page loads keep it hidden.
+  if(!skipScroll || window.__kritDetailShown){ panel.style.display = "block"; window.__kritDetailShown = true; }
   if(!skipScroll){
     setTimeout(function(){ panel.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
   }
@@ -1920,6 +1925,13 @@ function kritBuySingleNow(productId){
   }
 }
 
+function kritCloseDetail(){
+  var panel = document.getElementById("krit-detail");
+  if(panel) panel.style.display = "none";
+  window.__kritDetailShown = false;
+  var shop = document.getElementById("buy");
+  if(shop) shop.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 function kritSelectProduct(index){
   if(KRIT_PRODUCTS[index]) kritOpenDetail(KRIT_PRODUCTS[index].id);
 }
@@ -1970,7 +1982,7 @@ function _kritInit(){
     var visibleProducts = kritGetVisibleProducts();
     var urlProduct = (location.pathname.match(/^\/product\/([^\/?#]+)/) || [])[1];
     if(window.__kritDetailOpened && _kritSelected >= 0){ /* already showing a pillow: leave it, and its quantity, alone */ }
-    else if(urlProduct && kritGetProduct(decodeURIComponent(urlProduct))) kritOpenDetail(decodeURIComponent(urlProduct), true);
+    else if(urlProduct && kritGetProduct(decodeURIComponent(urlProduct))){ window.__kritDetailShown = true; kritOpenDetail(decodeURIComponent(urlProduct), true); }
     else if(visibleProducts[0]) kritOpenDetail(visibleProducts[0].id, true);
     window.__kritDetailOpened = true;
   } catch (error) {
