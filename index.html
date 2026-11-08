@@ -1383,14 +1383,16 @@ button, .bp, .bs, .nc {
 <link rel="stylesheet" href="/assets/krit-commerce.css?v=20260421e">
 <link rel="stylesheet" href="/assets/krit-enhancements.css?v=20260421d">
 <link rel="stylesheet" href="/assets/krit-layout.css?v=20261027a">
-<style>/* Homepage header logo: 3D look (same size). Slight tilt with a raised
-   edge; on hover it turns toward the visitor and glows. */
-#nav .nl{perspective:500px}
-#nav .nl-logo{transform-origin:30% 50%;transform:rotateX(10deg) rotateY(-8deg);
- filter:drop-shadow(0 1px 0 rgba(160,200,255,.45)) drop-shadow(0 1px 0 #2a4f8f) drop-shadow(0 1px 0 #1f3f75) drop-shadow(0 1px 0 #17325e) drop-shadow(0 6px 10px rgba(0,0,0,.6))!important;
- transition:transform .5s cubic-bezier(.2,.8,.2,1),filter .5s!important}
-#nav .nl:hover .nl-logo{transform:rotateX(0) rotateY(14deg) scale(1.04)!important;
- filter:drop-shadow(0 1px 0 rgba(160,200,255,.55)) drop-shadow(-1px 1px 0 #2a4f8f) drop-shadow(-1px 1px 0 #1f3f75) drop-shadow(-1px 1px 0 #17325e) drop-shadow(-4px 10px 14px rgba(0,0,0,.6)) drop-shadow(0 0 14px rgba(91,158,219,.35))!important}
+<style>/* Homepage header logo: crisp raised look with a soft blue spotlight
+   behind it. No tilt, so the edges stay sharp. Lifts slightly on hover. */
+#nav .nl{position:relative}
+#nav .nl::before{content:"";position:absolute;left:-10px;top:50%;width:140px;height:64px;transform:translateY(-58%);
+ background:radial-gradient(ellipse at 45% 50%,rgba(110,170,255,.28) 0%,rgba(70,130,230,.12) 45%,rgba(0,0,0,0) 72%);pointer-events:none;z-index:0}
+#nav .nl-logo,#nav .nl-tag{position:relative;z-index:1}
+#nav .nl-logo{filter:brightness(1.12) contrast(1.1) saturate(1.2) drop-shadow(0 1px 0 #0d1f3d) drop-shadow(0 1px 0 #0a1830) drop-shadow(0 1px 0 #071226) drop-shadow(0 5px 6px rgba(0,0,0,.55))!important;
+ transition:transform .3s ease,filter .3s ease!important}
+#nav .nl:hover .nl-logo{transform:translateY(-2px)!important;
+ filter:brightness(1.2) contrast(1.1) saturate(1.25) drop-shadow(0 1px 0 #0d1f3d) drop-shadow(0 1px 0 #0a1830) drop-shadow(0 1px 0 #071226) drop-shadow(0 9px 10px rgba(0,0,0,.55))!important}
 @media (prefers-reduced-motion:reduce){#nav .nl-logo,#nav .nl:hover .nl-logo{transition:none!important}}
 </style>
 </head>
