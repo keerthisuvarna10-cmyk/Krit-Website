@@ -1959,8 +1959,15 @@ function _kritInit(){
         if(event.key === "Enter" && !lightboxOpen) kritOpenImageLightbox();
       });
     }
+    // Show the pillow from the address (/product/half-2), otherwise the first
+    // pillow. This runs a few times while the page loads; only the first time
+    // picks the pillow, so a quantity the shopper already chose isn't reset.
     var visibleProducts = kritGetVisibleProducts();
-    if(visibleProducts[0]) kritOpenDetail(visibleProducts[0].id, true);
+    var urlProduct = (location.pathname.match(/^\/product\/([^\/?#]+)/) || [])[1];
+    if(window.__kritDetailOpened && _kritSelected >= 0){ /* already showing a pillow: leave it, and its quantity, alone */ }
+    else if(urlProduct && kritGetProduct(decodeURIComponent(urlProduct))) kritOpenDetail(decodeURIComponent(urlProduct), true);
+    else if(visibleProducts[0]) kritOpenDetail(visibleProducts[0].id, true);
+    window.__kritDetailOpened = true;
   } catch (error) {
     console.error("KRIT shop init failed", error);
   }
@@ -4411,6 +4418,6 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
 <script src="/assets/krit-enhancements.js?v=20261108b"></script>
 <script src="/assets/krit-storefix.js?v=20261108b"></script>
 <script src="/assets/krit-tracking.js?v=20260421a"></script>
-<script src="/assets/krit-stock.js?v=20261107a"></script>
+<script src="/assets/krit-stock.js?v=20261108a"></script>
 </body>
 </html>

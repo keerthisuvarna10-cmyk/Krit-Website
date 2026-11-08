@@ -45,7 +45,28 @@
     return wanted;
   }
 
+  // Cart drawer "+" buttons: don't go past what's in stock.
+  function wrapCartPlus(fnName){
+    var fn = window[fnName];
+    if(typeof fn !== 'function' || fn.__kritStock) return;
+    var guarded = function(name, delta){
+      if(Number(delta) > 0){
+        var cart = Array.isArray(window._cart) ? window._cart : [];
+        var match = cart.filter(function(i){ return i.name === name; })[0];
+        var id = (match && match.id) || idFromName(name);
+        var have = 0; cart.forEach(function(i){ if(i.name === name) have += Number(i.qty) || 0; });
+        var left = available(id);
+        if(have + 1 > left){ toast(left > 0 ? 'Only ' + left + ' ' + productName(id) + ' left in stock.' : 'Sorry, ' + productName(id) + ' is out of stock right now.'); return; }
+      }
+      return fn.apply(this, arguments);
+    };
+    guarded.__kritStock = true;
+    window[fnName] = guarded;
+  }
+
   function wrap(){
+    wrapCartPlus('__kritStorefixUpdateCartItem');
+    wrapCartPlus('kritUpdateCartItem');
     var add = window.addToCart;
     if(typeof add === 'function' && !add.__kritStock){
       var guardedAdd = function(name, price, qty, productId){

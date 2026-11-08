@@ -144,6 +144,12 @@
   .co-item-name{font-size:.88rem;color:var(--ink);font-weight:600;line-height:1.4;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
   .co-item-meta{font-size:.76rem;color:var(--muted)}
   .co-item-price{font-weight:700;color:var(--ink);font-size:.92rem}
+  .co-qty-row{display:flex;align-items:center;gap:12px;margin-top:7px}
+  .co-qty{display:inline-flex;align-items:center;border:1px solid #D8DCE6;border-radius:10px;background:#fff}
+  .co-qty button{width:30px;height:28px;border:none;background:transparent;color:var(--ink);font-size:1rem;font-weight:700;cursor:pointer;line-height:1}
+  .co-qty button:disabled{opacity:.3;cursor:not-allowed}
+  .co-qty span{min-width:24px;text-align:center;font-weight:700;font-size:.85rem;color:var(--ink)}
+  .co-item-remove{border:none;background:none;padding:0;color:var(--muted);font-size:.72rem;text-decoration:underline;cursor:pointer}
 
   .co-coupon{display:flex;gap:8px}
   .co-coupon input{flex:1;border:1.5px solid rgba(201,168,76,.3);background:#fffdf9;color:var(--ink);padding:12px 14px;border-radius:12px;outline:none;font:inherit;text-transform:uppercase;letter-spacing:.06em}
@@ -747,7 +753,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
   function renderItems(){
     var wrap = $('coItems');
     if(!wrap) return;
-    wrap.innerHTML = state.items.map(function(item){
+    wrap.innerHTML = state.items.map(function(item, index){
       var imgUrl = item.image || '';
       // Inject Cloudinary quality transforms for crisp thumbnails
       if(imgUrl && imgUrl.indexOf('cloudinary.com') !== -1 && imgUrl.indexOf('/upload/') !== -1){
@@ -761,12 +767,59 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
         +   '<div class="co-item-img">' + img + '</div>'
         +   '<div class="co-item-body">'
         +     '<div class="co-item-name">' + escapeHtml(item.name) + '</div>'
-        +     '<div class="co-item-meta">Qty ' + item.qty + ' &middot; ' + formatINR(item.price) + ' each</div>'
+        +     '<div class="co-item-meta">' + formatINR(item.price) + ' each</div>'
+        +     '<div class="co-qty-row">'
+        +       '<div class="co-qty" role="group" aria-label="Quantity">'
+        +         '<button type="button" aria-label="One less" onclick="window.__coQty(' + index + ',-1)"' + (item.qty <= 1 ? ' disabled' : '') + '>&minus;</button>'
+        +         '<span>' + item.qty + '</span>'
+        +         '<button type="button" aria-label="One more" onclick="window.__coQty(' + index + ',1)"' + (item.qty >= stockLeft(item) ? ' disabled' : '') + '>+</button>'
+        +       '</div>'
+        +       (state.items.length > 1 ? '<button type="button" class="co-item-remove" onclick="window.__coRemove(' + index + ')">Remove</button>' : '')
+        +     '</div>'
         +   '</div>'
         +   '<div class="co-item-price">' + formatINR(item.price * item.qty) + '</div>'
         + '</div>';
     }).join('');
   }
+
+  /* ── Change quantity on the checkout page ──
+     Limited to what's in stock (from the ERP via /api/stock). The server checks
+     stock again before payment, so this is only to keep shoppers informed. */
+  var STOCK = null;
+  function loadStock(){
+    fetch('/api/stock', { cache: 'no-store', credentials: 'same-origin' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){ if(d && d.products){ STOCK = d.products; renderItems(); } })
+      .catch(function(){});
+  }
+  function stockLeft(item){
+    var s = STOCK && STOCK[item.id];
+    return s ? s.available : Infinity;
+  }
+  function saveItems(){
+    try { localStorage.setItem('krit_cart', JSON.stringify(state.items)); } catch(e){}
+    try {
+      var raw = sessionStorage.getItem('krit_checkout_payload');
+      if(raw){ var p = JSON.parse(raw) || {}; p.items = state.items; sessionStorage.setItem('krit_checkout_payload', JSON.stringify(p)); }
+    } catch(e){}
+    state.reviewConfirmed = false;
+    renderItems();
+    renderTotals();
+  }
+  window.__coQty = function(index, delta){
+    var item = state.items[index]; if(!item) return;
+    var next = item.qty + delta;
+    if(next < 1) return;
+    var left = stockLeft(item);
+    if(next > left){ showToast(left > 0 ? 'Only ' + left + ' left in stock' : 'This pillow is out of stock'); return; }
+    item.qty = next;
+    saveItems();
+  };
+  window.__coRemove = function(index){
+    if(state.items.length <= 1) return;
+    state.items.splice(index, 1);
+    saveItems();
+  };
 
   function subtotal(){
     return state.items.reduce(function(s, i){ return s + i.price * i.qty; }, 0);
@@ -1443,6 +1496,7 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       return;
     }
     renderItems();
+    loadStock();
     renderCouponSuggest();
     selectPayment('online');
     wire();
