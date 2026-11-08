@@ -801,7 +801,17 @@
   }
   window.kritWarmUpOtp = warmUpOtp;
 
+  // One check at a time. A code can only be used once, so a second check of the
+  // same code (double tap, Enter + button, SMS autofill) would say "wrong OTP"
+  // even though the first one signed the shopper in.
+  var otpVerifying = false;
   async function verifyOtpLogin(){
+    if(otpVerifying) return;
+    otpVerifying = true;
+    try { return await verifyOtpLoginOnce(); }
+    finally { otpVerifying = false; }
+  }
+  async function verifyOtpLoginOnce(){
     clearAuthMessage();
     var codeEl = document.getElementById('krit-otp-code');
     var phoneEl = document.getElementById('auth-otp-phone');
@@ -816,8 +826,31 @@
       authMessage('Please enter the 6-digit OTP.', 'err');
       return;
     }
+    var verifyBtnEl = document.getElementById('krit-verify-otp-btn') || document.querySelector('[onclick*="kritVerifyOtpLogin"]');
+    var verifyLabel = verifyBtnEl ? verifyBtnEl.textContent : '';
+    if(verifyBtnEl){ verifyBtnEl.disabled = true; verifyBtnEl.textContent = 'Verifying…'; }
+    var result;
     try {
-      var result = await phoneConfirmationResult.confirm(code);
+      result = await phoneConfirmationResult.confirm(code);
+    } catch(error) {
+      if(verifyBtnEl){ verifyBtnEl.disabled = false; verifyBtnEl.textContent = verifyLabel; }
+      // Already signed in by an earlier check of this code — nothing is wrong.
+      if(signedInPhoneMatches(phone)){ finishOtpUi(); return; }
+      try { console.warn('KRIT OTP verify failed:', error && error.code, error && error.message); } catch(e){}
+      var code2 = (error && error.code) || '';
+      if(code2 === 'auth/code-expired'){
+        authMessage('This OTP has expired. Please request a new code.', 'err');
+      } else if(code2 === 'auth/invalid-verification-code'){
+        authMessage('That OTP is not correct. Please check the 6-digit code and try again.', 'err');
+      } else {
+        authMessage('The OTP was invalid or expired. Please request a new code.', 'err');
+      }
+      return;
+    }
+    if(verifyBtnEl){ verifyBtnEl.disabled = false; verifyBtnEl.textContent = verifyLabel; }
+    phoneConfirmationResult = null; // this code is used up
+    // Signed in. Anything below is saving the profile, which must not show an OTP error.
+    try {
       var user = result.user || {};
       var stored = null;
       try { stored = JSON.parse(localStorage.getItem('krit_account_profile') || 'null'); } catch(e) { stored = null; }
@@ -839,16 +872,22 @@
       if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
       continuePendingCheckout();
     } catch(error) {
-      try { console.warn('KRIT OTP verify failed:', error && error.code, error && error.message); } catch(e){}
-      var code2 = (error && error.code) || '';
-      if(code2 === 'auth/code-expired'){
-        authMessage('This OTP has expired. Please request a new code.', 'err');
-      } else if(code2 === 'auth/invalid-verification-code'){
-        authMessage('That OTP is not correct. Please check the 6-digit code and try again.', 'err');
-      } else {
-        authMessage('The OTP was invalid or expired. Please request a new code.', 'err');
-      }
+      try { console.warn('KRIT OTP sign-in follow-up failed:', error && error.message); } catch(e){}
+      finishOtpUi();
     }
+  }
+  function signedInPhoneMatches(phone){
+    try {
+      var fb = window.firebase;
+      var u = fb && fb.apps && fb.apps.length && fb.auth().currentUser;
+      if(!u || !u.phoneNumber) return false;
+      return u.phoneNumber.replace(/\D/g,'').slice(-10) === String(phone || '').replace(/\D/g,'').slice(-10);
+    } catch(e){ return false; }
+  }
+  function finishOtpUi(){
+    clearAuthMessage();
+    try { updateAuthUI(); } catch(e){}
+    if(typeof window.closeAuthModal === 'function') window.closeAuthModal();
   }
 
   /* Proof of the current Firebase login, checked by the server with Google.
