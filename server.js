@@ -461,12 +461,21 @@ function requireAuth(req, res, next) {
   return res.redirect('/');
 }
 
+/* Privacy Policy and Terms of Use stay public even while the access gate is
+   on: Google (sign-in brand verification) and payment providers must be able
+   to read them. */
+const LEGAL_PAGES = {
+  '/privacy': 'privacy.html', '/privacy.html': 'privacy.html', '/privacy-policy': 'privacy.html',
+  '/terms': 'terms.html', '/terms.html': 'terms.html', '/terms-of-use': 'terms.html'
+};
+
 function isPublicPath(req) {
   return (
     req.path === '/' ||
     req.path === '/login' ||
     req.path === '/logout' ||
-    req.path === '/health'
+    req.path === '/health' ||
+    LEGAL_PAGES[req.path] !== undefined
   );
 }
 
@@ -887,6 +896,10 @@ app.get('/product/:id', requireAuth, (req, res) => {
   res.type('html').send(html);
 });
 
+
+Object.keys(LEGAL_PAGES).forEach((route) => {
+  app.get(route, (_req, res) => res.sendFile(path.join(__dirname, 'legal', LEGAL_PAGES[route])));
+});
 
 // ── SEO: robots.txt ──
 app.get('/robots.txt', (_req, res) => {

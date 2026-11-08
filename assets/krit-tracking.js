@@ -103,7 +103,7 @@
         '<div class="kcb-title">We use cookies</div>',
         '<p class="kcb-text">',
           'KRIT uses cookies to personalise your experience, remember your cart, and understand how visitors use our site. ',
-          'Read our <a href="#" onclick="if(window.openInfoModal){openInfoModal(\'privacy-modal\');}return false">Privacy Policy</a> for details.',
+          'Read our <a href="/privacy">Privacy Policy</a> for details.',
         '</p>',
         '<div class="kcb-actions">',
           '<button class="kcb-accept" id="krit-cookie-accept">Accept cookies</button>',
