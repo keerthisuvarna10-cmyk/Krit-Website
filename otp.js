@@ -9,7 +9,9 @@
  *
  * Switched on only when all three are set in Railway:
  *   MSG91_AUTH_KEY            MSG91 → API → Auth key
- *   MSG91_OTP_TEMPLATE_ID     MSG91 → OTP → template ID (linked to the DLT-approved OTP template)
+ *   MSG91_OTP_TEMPLATE_ID     MSG91 → OTP → template ID (linked to the DLT-approved OTP template).
+ *                             Live: KRIT_S_LOGIN_OTP_V2 (sender KRITSL, 1 SMS):
+ *                             "##OTP## is your OTP to log in at www.kritsleep.in. Valid for 10 minutes. …"
  *   FIREBASE_SERVICE_ACCOUNT  Firebase → Project settings → Service accounts → Generate new
  *                             private key (paste the whole JSON, or it base64-encoded)
  * Until then the site keeps using Firebase phone sign-in.

@@ -207,7 +207,8 @@ async function sendSmtpOrderEmails(order) {
  * Railway variables = MSG91 template IDs (MSG91 → SMS → Templates):
  *   MSG91_TPL_ORDER_CONFIRMED  Hi ##var1##, your KRIT order ##var2## of Rs ##var3## is confirmed…
  *   MSG91_TPL_COD_CONFIRMED    Hi ##var1##, your KRIT COD order ##var2## of Rs ##var3## is confirmed…
- *   MSG91_TPL_OWNER_ALERT      New KRIT order ##var1##: ##var2##, Rs ##var3##, Ph ##var4##…
+ *   MSG91_TPL_OWNER_ALERT      New KRIT order ##var1## from ##var2## for Rs ##var3##. Customer phone ##var4##. - KRIT
+ *                              (sent to ORDER_ALERT_PHONE, default 9611211121)
  * Status updates (packed, shipped, delivered…) are sent by the ERP.
  */
 const MSG91_TPL_ORDER_CONFIRMED = process.env.MSG91_TPL_ORDER_CONFIRMED || '';
