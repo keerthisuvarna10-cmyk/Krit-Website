@@ -4544,14 +4544,15 @@ function kritOpenCheckout(items){
 
   /* ── pincode autofill ── */
   window.kmPinLookup = function(pin){
+    pin = String(pin||'').replace(/\D/g,'');
     if(pin.length !== 6) return;
-    fetch('https://api.postalpincode.in/pincode/'+pin)
+    fetch('/api/pincode/'+pin, { credentials:'same-origin' })
       .then(function(r){return r.json();})
-      .then(function(data){
-        if(data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice[0]){
-          var po = data[0].PostOffice[0];
-          var cityEl = document.getElementById('krit-co-city');
-          if(cityEl && !cityEl.value) cityEl.value = po.District || po.Name || '';
+      .then(function(d){
+        var cityEl = document.getElementById('krit-co-city');
+        if(d && d.ok && d.city && cityEl && (!cityEl.value || cityEl.getAttribute('data-auto') === '1')){
+          cityEl.value = d.city; cityEl.setAttribute('data-auto','1');
+          cityEl.oninput = function(){ cityEl.removeAttribute('data-auto'); };
         }
       }).catch(function(){});
   };

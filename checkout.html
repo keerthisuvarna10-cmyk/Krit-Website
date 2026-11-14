@@ -97,6 +97,7 @@
   .co-input,.co-select,.co-textarea{width:100%;border:1.5px solid #CDD1DD;background:#ffffff;color:var(--ink);border-radius:12px;padding:13px 15px;font:inherit;font-weight:500;outline:none;transition:border-color .15s,box-shadow .15s}
   .co-textarea{min-height:92px;resize:vertical;line-height:1.5}
   .co-input:focus,.co-select:focus,.co-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(201,168,76,.12)}
+  .co-input.co-autofilled{background:#FFF8E6;transition:background .8s}
   .co-input::placeholder{color:#9aaabf}
   .co-help{font-size:.74rem;color:var(--muted);line-height:1.5}
   .co-err{font-size:.76rem;color:var(--danger);line-height:1.5;margin-top:6px;display:none}
@@ -956,11 +957,49 @@ window.KRIT_ECOMMERCE = window.KRIT_ECOMMERCE || {
       .catch(function(){ if(seq === etaSeq){ el.textContent = ''; state.eta = null; } });
   }
   window.__coCheckEta = checkEta;
-  document.addEventListener('input', function(e){ if(e.target && e.target.id === 'coPincode') checkEta(); });
+
+  /* ── City and state from the PIN code ──
+     Filled in automatically, but only into a box the shopper hasn't typed in
+     themselves; they can always change it. */
+  var pinSeq = 0, lastPinLooked = '';
+  function autoFill(id, value){
+    var el = $(id);
+    if(!el || !value) return;
+    var untouched = !el.value.trim() || el.getAttribute('data-auto') === '1';
+    if(!untouched) return;
+    el.value = value;
+    el.setAttribute('data-auto', '1');
+    el.classList.add('co-autofilled');
+    setTimeout(function(){ el.classList.remove('co-autofilled'); }, 900);
+  }
+  function lookupPin(){
+    var pinEl = $('coPincode');
+    if(!pinEl) return;
+    var pin = pinEl.value.replace(/\D/g,'');
+    if(pin.length !== 6 || pin === lastPinLooked) return;
+    lastPinLooked = pin;
+    var seq = ++pinSeq;
+    fetch('/api/pincode/' + pin, { credentials: 'same-origin' })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(seq !== pinSeq || !d || !d.ok) return;
+        autoFill('coCity', d.city);
+        autoFill('coState', d.state);
+      })
+      .catch(function(){ lastPinLooked = ''; });
+  }
+  window.__coLookupPin = lookupPin;
+  document.addEventListener('input', function(e){
+    var id = e.target && e.target.id;
+    if(id === 'coPincode'){ checkEta(); lookupPin(); }
+    // Typing in City/State means the shopper's own value wins from now on.
+    if(id === 'coCity' || id === 'coState') e.target.removeAttribute('data-auto');
+  });
   setTimeout(function(){
     var pinEl = $('coPincode');
     try { if(pinEl && !pinEl.value && localStorage.getItem('krit_pin')) pinEl.value = localStorage.getItem('krit_pin'); } catch(e){}
     checkEta();
+    lookupPin();
   }, 600);
 
   function validateInput(id, re, errId, transform){

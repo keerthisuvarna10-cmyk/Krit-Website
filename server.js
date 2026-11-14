@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const { priceOrder } = require('./pricing');
 const { createStock } = require('./stock');
 const { createDeliveryEstimates } = require('./delivery');
+const { lookupPincode } = require('./pincode');
 const { blogRoutes, blogSitemapUrls } = require('./blog');
 const { createOtp } = require('./otp');
 const { verifyFirebaseUser, bearerToken, verifyRazorpayPayment, rateLimiter, escapeHtml } = require('./security');
@@ -621,6 +622,18 @@ app.get('/api/delivery-estimate', requireAuth, async (req, res) => {
     res.json(await deliveryEstimates.estimate(req.query.pincode, cod));
   } catch (e) {
     res.status(500).json({ ok: false, error: 'Could not work out a delivery date.' });
+  }
+});
+
+/* ── City and state for a PIN code (checkout address form) ── */
+const tooManyPinLookups = rateLimiter(60, 10 * 60 * 1000);
+app.get('/api/pincode/:pin', requireAuth, async (req, res) => {
+  if (tooManyPinLookups(req)) return res.status(429).json({ ok: false, error: 'Too many lookups. Please type the city and state.' });
+  try {
+    res.set('Cache-Control', 'private, max-age=86400');
+    res.json(await lookupPincode(req.params.pin));
+  } catch (e) {
+    res.json({ ok: false, error: 'Could not look up this PIN code.' });
   }
 });
 
