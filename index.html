@@ -1386,7 +1386,7 @@ button, .bp, .bs, .nc {
 <link rel="stylesheet" href="/assets/krit-mobile.css?v=20260421d">
 <link rel="stylesheet" href="/assets/krit-commerce.css?v=20260421e">
 <link rel="stylesheet" href="/assets/krit-enhancements.css?v=20260421d">
-<link rel="stylesheet" href="/assets/krit-layout.css?v=20261027a">
+<link rel="stylesheet" href="/assets/krit-layout.css?v=20261114a">
 <style>/* Homepage header logo: crisp raised look with a soft blue spotlight
    behind it. No tilt, so the edges stay sharp. Lifts slightly on hover. */
 #nav .nl{position:relative}
@@ -1525,6 +1525,12 @@ button, .bp, .bs, .nc {
         </div>
       </div>
     </div>
+
+    <!-- Track order: always visible on phones (desktop has the Track Order button) -->
+    <button class="nav-icon-btn nav-track-icon" onclick="openTrackModal()" title="Track order" aria-label="Track order">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <span class="nav-track-icon-label">Track</span>
+    </button>
 
     <!-- Wishlist icon -->
     <button class="nav-icon-btn nav-wishlist-btn" onclick="openWishlist()" title="Wishlist" style="position:relative">

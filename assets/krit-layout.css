@@ -38,3 +38,13 @@ body .krit-auth-card .krit-auth-side .krit-auth-sub{color:#B8C7E0!important}
 #authenticity .rv{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 @media (max-width:900px){#authenticity .rv{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media (max-width:560px){#authenticity .rv{grid-template-columns:1fr!important}}
+
+/* ── Phones: Track order sits in the header next to the cart, not in the menu ── */
+.nav-track-icon{display:none!important}
+@media (max-width:900px){
+  .nav-track-icon{display:inline-flex!important;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#E8C66A!important;padding:2px!important;width:44px!important;height:44px!important}
+  .nav-track-icon svg{width:21px!important;height:21px!important;min-width:21px;flex-shrink:0}
+  .nav-track-icon-label{font-size:8.5px!important;font-weight:700;letter-spacing:.06em;text-transform:uppercase;line-height:1}
+  /* Wishlist moves into the menu on phones to make room */
+  .nav-wishlist-btn{display:none!important}
+}
