@@ -48,25 +48,3 @@ body .krit-auth-card .krit-auth-side .krit-auth-sub{color:#B8C7E0!important}
   /* Wishlist moves into the menu on phones to make room */
   .nav-wishlist-btn{display:none!important}
 }
-
-/* ── Header: light grey bar, same as the order confirmation page.
-   The logo's white KRIT lettering has a soft grey 3D shadow built in that
-   only shows on a light background (it vanished on navy). ── */
-#nav,#nav.stuck{background:rgba(232,234,240,.97)!important;border-bottom:1px solid rgba(201,168,76,.25)!important;box-shadow:0 2px 12px rgba(10,16,32,.18)!important;backdrop-filter:blur(16px)}
-#nav::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,#C9A84C,#E8C66A,#2f5da8);pointer-events:none}
-#nav::before{display:none!important}
-#nav .nl{width:auto!important;background:none!important;box-shadow:none!important;padding:0!important}
-#nav .nl::before,#nav .nl::after{display:none!important}
-#nav .nl-logo,#nav.stuck .nl-logo,#nav .nl:hover .nl-logo{height:44px!important;width:auto!important;max-width:none!important;filter:none!important;transform:none!important}
-#nav .nl-tag,#nav .nl:hover .nl-tag{color:#9A7A2A!important;text-shadow:none!important;padding-left:0!important;margin-top:3px!important}
-#nav .nls a{color:#1B2340!important;text-shadow:none!important}
-#nav .nls a:hover{color:#2f5da8!important}
-#nav .nav-track-btn{color:#1B2340!important;border-color:rgba(27,35,64,.35)!important;background:transparent!important}
-#nav .nav-icons{background:rgba(27,35,64,.05)!important;border-color:rgba(27,35,64,.12)!important}
-#nav .nav-icon-btn{color:#1B2340!important}
-#nav .nav-track-icon{color:#9A7A2A!important}
-#nav .hbg span{background:#1B2340!important}
-@media (max-width:900px){
-  #nav .nl-logo,#nav.stuck .nl-logo{height:30px!important}
-  #nav .nl-tag{font-size:.5rem!important;margin-top:2px!important}
-}
